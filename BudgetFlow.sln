@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35222.181
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BudgetFlow.Application", "BudgetFlow.Application\BudgetFlow.Application.csproj", "{8CCB815E-42BC-4087-8EBC-12E200EFF717}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BudgetFlow.Application", "BudgetFlow.Application\BudgetFlow.Application.csproj", "{8CCB815E-42BC-4087-8EBC-12E200EFF717}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BudgetFlow.Domain", "BudgetFlow.Domain\BudgetFlow.Domain.csproj", "{089E6510-4A05-4A02-AD6C-F310BA4446C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BudgetFlow.Domain", "BudgetFlow.Domain\BudgetFlow.Domain.csproj", "{089E6510-4A05-4A02-AD6C-F310BA4446C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BudgetFlow.Infrastructure", "BudgetFlow.Infrastructure\BudgetFlow.Infrastructure.csproj", "{565A01AC-8E91-4D79-B45E-C7E35C232016}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BudgetFlow.Infrastructure", "BudgetFlow.Infrastructure\BudgetFlow.Infrastructure.csproj", "{565A01AC-8E91-4D79-B45E-C7E35C232016}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BudgetFlow.API", "BudgetFlow.API\BudgetFlow.API.csproj", "{48472E12-057D-4E1C-9C4E-627139C69757}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BudgetFlow.API", "BudgetFlow.API\BudgetFlow.API.csproj", "{48472E12-057D-4E1C-9C4E-627139C69757}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{965624A1-DC72-43CE-BFFC-BE8C1787A7B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{48472E12-057D-4E1C-9C4E-627139C69757}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48472E12-057D-4E1C-9C4E-627139C69757}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48472E12-057D-4E1C-9C4E-627139C69757}.Release|Any CPU.Build.0 = Release|Any CPU
+		{965624A1-DC72-43CE-BFFC-BE8C1787A7B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{965624A1-DC72-43CE-BFFC-BE8C1787A7B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{965624A1-DC72-43CE-BFFC-BE8C1787A7B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{965624A1-DC72-43CE-BFFC-BE8C1787A7B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

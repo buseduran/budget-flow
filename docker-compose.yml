@@ -1,0 +1,6 @@
+services:
+  budgetflow.api:
+    image: ${DOCKER_REGISTRY-}budgetflowapi
+    build:
+      context: .
+      dockerfile: BudgetFlow.API/Dockerfile

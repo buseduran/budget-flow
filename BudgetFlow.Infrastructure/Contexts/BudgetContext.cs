@@ -9,9 +9,9 @@ namespace BudgetFlow.Infrastructure.Contexts
         private readonly string connectionString = configuration.GetConnectionString("DbConnection");
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql(connectionString);
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Budget> Budgets { get; set; }
-        public DbSet<Log> Logs { get; set; }
-        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<UserDto> Users { get; set; }
+        public DbSet<BudgetDto> Budgets { get; set; }
+        public DbSet<LogDto> Logs { get; set; }
+        public DbSet<TransactionDto> Transactions { get; set; }
     }
 }
