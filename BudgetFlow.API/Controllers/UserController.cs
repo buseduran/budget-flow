@@ -23,7 +23,7 @@ public class UserController : ControllerBase
     [HttpPost]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IActionResult> GetAppealFiscalSealPaginationAsync([FromBody] CreateUserCommand createUserCommand)
+    public async Task<IActionResult> SignupAsync([FromBody] CreateUserCommand createUserCommand)
     {
         return Ok(await mediator.Send(createUserCommand));
     }

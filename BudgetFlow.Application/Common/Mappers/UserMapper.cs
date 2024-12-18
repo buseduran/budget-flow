@@ -6,9 +6,9 @@ using BudgetFlow.Domain.Entities;
 namespace BudgetFlow.Application.Common.Mappers;
 public class UserMapper : Profile
 {
-    protected UserMapper()
+    public UserMapper()
     {
-        CreateMap<UserModel, UserDto>().ReverseMap();
+        CreateMap<UserRegisterModel, UserDto>().ReverseMap();
         CreateMap<UserResponse, UserDto>().ReverseMap();
     }
 }

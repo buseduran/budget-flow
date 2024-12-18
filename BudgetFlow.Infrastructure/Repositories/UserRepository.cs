@@ -17,9 +17,10 @@ public class UserRepository : IUserRepository
         _mapper = mapper;
     }
 
-    public async Task<bool> CreateAsync(UserModel userModel)
+    public async Task<bool> CreateAsync(UserDto user)
     {
-        var user = _mapper.Map<UserDto>(userModel);
+        user.CreatedAt = DateTime.UtcNow;
+        user.UpdatedAt = DateTime.UtcNow;
         await _context.Users.AddAsync(user);
         return await _context.SaveChangesAsync() > 0;
     }
@@ -40,7 +41,7 @@ public class UserRepository : IUserRepository
         return response;
     }
 
-    public async Task<bool> UpdateAsync(int ID, UserModel userModel)
+    public async Task<bool> UpdateAsync(int ID, UserRegisterModel userModel)
     {
         var user = await _context.Users.FindAsync(ID);
         if (user == null) return false;

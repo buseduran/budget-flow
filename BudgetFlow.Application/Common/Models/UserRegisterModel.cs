@@ -1,5 +1,5 @@
 ﻿namespace BudgetFlow.Application.Common.Models;
-public class UserModel
+public class UserRegisterModel
 {
     public string Name { get; set; }
     public string Email { get; set; }

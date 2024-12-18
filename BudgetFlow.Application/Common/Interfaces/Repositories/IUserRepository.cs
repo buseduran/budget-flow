@@ -1,12 +1,12 @@
 ﻿using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Application.User;
+using BudgetFlow.Domain.Entities;
 
 namespace BudgetFlow.Application.Common.Interfaces.Repositories;
 public interface IUserRepository
 {
-    Task<bool> CreateAsync(UserModel entity);
+    Task<bool> CreateAsync(UserDto user);
     Task<UserResponse?> GetByIdAsync(int ID);
-    Task<bool> UpdateAsync(int ID, UserModel entity);
+    Task<bool> UpdateAsync(int ID, UserRegisterModel entity);
     Task<bool> DeleteAsync(int ID);
 }
-
