@@ -4,6 +4,7 @@ using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Application.User;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace BudgetFlow.Infrastructure.Repositories;
 
@@ -36,6 +37,14 @@ public class UserRepository : IUserRepository
     public async Task<UserResponse> GetByIdAsync(int ID)
     {
         var user = await _context.Users.FindAsync(ID);
+        if (user == null) return null;
+        var response = _mapper.Map<UserResponse>(user);
+        return response;
+    }
+
+    public async Task<UserResponse> GetByEmailAsync(string email)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
         if (user == null) return null;
         var response = _mapper.Map<UserResponse>(user);
         return response;

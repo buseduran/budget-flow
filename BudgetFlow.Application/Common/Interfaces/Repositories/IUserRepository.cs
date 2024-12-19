@@ -7,6 +7,7 @@ public interface IUserRepository
 {
     Task<bool> CreateAsync(UserDto user);
     Task<UserResponse?> GetByIdAsync(int ID);
+    Task<UserResponse> GetByEmailAsync(string email);
     Task<bool> UpdateAsync(int ID, UserRegisterModel entity);
     Task<bool> DeleteAsync(int ID);
 }

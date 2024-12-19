@@ -4,12 +4,12 @@ using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Domain.Entities;
 using MediatR;
 
-namespace BudgetFlow.Application.User.Commands.CreateUser;
-public class CreateUserCommand : IRequest<bool>
+namespace BudgetFlow.Application.User.Commands.Register;
+public class RegisterCommand : IRequest<bool>
 {
     public UserRegisterModel User { get; set; }
 
-    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, bool>
+    public class CreateUserCommandHandler : IRequestHandler<RegisterCommand, bool>
     {
         private readonly IUserRepository userRepository;
         private readonly IPasswordHasher passwordHasher;
@@ -20,7 +20,7 @@ public class CreateUserCommand : IRequest<bool>
             this.passwordHasher = passwordHasher;
         }
 
-        public async Task<bool> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
             if (request.User.Password != request.User.ConfirmPassword)
             {
