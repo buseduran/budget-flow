@@ -13,7 +13,9 @@ public static class ServiceRegistration
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-        
+
+        services.AddHttpContextAccessor();
+
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<ITokenProvider, TokenProvider>();
     }

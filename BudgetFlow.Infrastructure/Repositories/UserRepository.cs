@@ -59,5 +59,24 @@ public class UserRepository : IUserRepository
         _context.Users.Update(userDto);
         return await _context.SaveChangesAsync() > 0;
     }
+    public async Task<bool> CreateRefreshToken(RefreshToken refreshToken)
+    {
+        _context.RefreshTokens.Add(refreshToken);
+        return await _context.SaveChangesAsync() > 0;
+    }
+    public async Task<RefreshToken> GetRefreshToken(string token)
+    {
+        RefreshToken refreshToken = await _context.RefreshTokens
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.Token == token);
+        return refreshToken;
+    }
+    public async Task<bool> RevokeToken(int userID)
+    {
+        _context.RefreshTokens
+            .Where(t => t.UserID == userID)
+            .ExecuteDeleteAsync();
+        return true;
+    }
 }
 

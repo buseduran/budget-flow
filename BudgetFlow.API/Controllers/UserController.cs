@@ -1,4 +1,5 @@
 ﻿using BudgetFlow.Application.User.Commands.Login;
+using BudgetFlow.Application.User.Commands.Logout;
 using BudgetFlow.Application.User.Commands.Register;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -41,5 +42,30 @@ public class UserController : ControllerBase
     {
         return Ok(await mediator.Send(loginCommand));
     }
-}
 
+    /// <summary>
+    /// Kullanıcı Giriş (RefreshToken ile) Yapar.
+    /// </summary>
+    /// <param name="loginWRefreshTokenCommand"></param>
+    /// <returns></returns>
+    [HttpPost("LoginRefresh")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+    public async Task<IActionResult> SigninWRefreshTokenAsync([FromBody] LoginWRefreshTokenCommand loginWRefreshTokenCommand)
+    {
+        return Ok(await mediator.Send(loginWRefreshTokenCommand));
+    }
+
+    /// <summary>
+    /// Kullanıcı Çıkış Yapar.
+    /// </summary>
+    /// <param name="logoutCommand"></param>
+    /// <returns></returns>
+    [HttpPost("Logout")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+    public async Task<IActionResult> SignoutAsync([FromQuery] LogoutCommand logoutCommand)
+    {
+        return Ok(await mediator.Send(logoutCommand));
+    }
+}

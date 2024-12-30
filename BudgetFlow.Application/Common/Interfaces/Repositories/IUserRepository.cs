@@ -10,4 +10,7 @@ public interface IUserRepository
     Task<UserResponse> GetByEmailAsync(string email);
     Task<bool> UpdateAsync(int ID, UserRegisterModel entity);
     Task<bool> DeleteAsync(int ID);
+    Task<bool> CreateRefreshToken(RefreshToken refreshToken);
+    Task<RefreshToken> GetRefreshToken(string token);
+    Task<bool> RevokeToken(int userID);
 }

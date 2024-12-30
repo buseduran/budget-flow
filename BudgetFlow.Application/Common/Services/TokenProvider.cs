@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace BudgetFlow.Application.Common.Services;
@@ -23,7 +24,7 @@ public sealed class TokenProvider(IConfiguration configuration) : ITokenProvider
                 new Claim(JwtRegisteredClaimNames.Sub, user.ID.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email)
             }),
-            Expires = DateTime.UtcNow.AddHours(1),
+            Expires = DateTime.UtcNow.AddMinutes(configuration.GetValue<int>("ExpirationInMinutes")),
             SigningCredentials = credentials,
             Issuer = configuration["Jwt:Issuer"],
             Audience = configuration["Jwt:Audience"]
@@ -32,5 +33,10 @@ public sealed class TokenProvider(IConfiguration configuration) : ITokenProvider
         var handler = new JsonWebTokenHandler();
         var token = handler.CreateToken(tokenDescriptor);
         return token.ToString();
+    }
+
+    public string GenerateRefreshToken()
+    {
+        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
     }
 }

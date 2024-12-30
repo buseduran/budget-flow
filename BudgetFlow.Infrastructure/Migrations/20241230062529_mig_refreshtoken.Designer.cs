@@ -3,6 +3,7 @@ using System;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BudgetFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(BudgetContext))]
-    partial class BudgetContextModelSnapshot : ModelSnapshot
+    [Migration("20241230062529_mig_refreshtoken")]
+    partial class mig_refreshtoken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,8 +38,8 @@ namespace BudgetFlow.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("UserID")
-                        .HasColumnType("uuid");
+                    b.Property<int>("UserID")
+                        .HasColumnType("integer");
 
                     b.HasKey("ID");
 
@@ -47,9 +50,11 @@ namespace BudgetFlow.Infrastructure.Migrations
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.BudgetDto", b =>
                 {
-                    b.Property<Guid>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -66,24 +71,23 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Property<int>("UserID")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("UserID1")
-                        .HasColumnType("uuid");
-
                     b.Property<int>("Year")
                         .HasColumnType("integer");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("UserID1");
+                    b.HasIndex("UserID");
 
                     b.ToTable("Budgets");
                 });
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.LogDto", b =>
                 {
-                    b.Property<Guid>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<string>("Action")
                         .IsRequired()
@@ -101,21 +105,20 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Property<int>("UserID")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("UserID1")
-                        .HasColumnType("uuid");
-
                     b.HasKey("ID");
 
-                    b.HasIndex("UserID1");
+                    b.HasIndex("UserID");
 
                     b.ToTable("Logs");
                 });
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.TransactionDto", b =>
                 {
-                    b.Property<Guid>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<int>("Amount")
                         .HasColumnType("integer");
@@ -142,21 +145,20 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Property<int>("UserID")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("UserID1")
-                        .HasColumnType("uuid");
-
                     b.HasKey("ID");
 
-                    b.HasIndex("UserID1");
+                    b.HasIndex("UserID");
 
                     b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.UserDto", b =>
                 {
-                    b.Property<Guid>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -196,7 +198,7 @@ namespace BudgetFlow.Infrastructure.Migrations
                 {
                     b.HasOne("BudgetFlow.Domain.Entities.UserDto", "User")
                         .WithMany("Budgets")
-                        .HasForeignKey("UserID1")
+                        .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -207,7 +209,7 @@ namespace BudgetFlow.Infrastructure.Migrations
                 {
                     b.HasOne("BudgetFlow.Domain.Entities.UserDto", "User")
                         .WithMany("Logs")
-                        .HasForeignKey("UserID1")
+                        .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -218,7 +220,7 @@ namespace BudgetFlow.Infrastructure.Migrations
                 {
                     b.HasOne("BudgetFlow.Domain.Entities.UserDto", "User")
                         .WithMany("Transactions")
-                        .HasForeignKey("UserID1")
+                        .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
