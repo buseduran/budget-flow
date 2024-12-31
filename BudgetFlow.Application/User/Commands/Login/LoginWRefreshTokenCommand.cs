@@ -23,13 +23,14 @@ namespace BudgetFlow.Application.User.Commands.Login
             {
                 RefreshToken refreshToken = await userRepository.GetRefreshToken(request.RefreshToken);
 
-                if (refreshToken is null || refreshToken.Expiration < DateTime.UtcNow)
+                if (refreshToken is null || refreshToken.Expiration < DateTime.Now)
                 {
                     throw new ApplicationException("Token süresi doldu.");
                 }
                 string accessToken = tokenProvider.Create(refreshToken.User);
 
                 refreshToken.ID = Guid.NewGuid();
+
                 refreshToken.Token = tokenProvider.GenerateRefreshToken();
                 refreshToken.Expiration = DateTime.UtcNow.AddDays(7);
 

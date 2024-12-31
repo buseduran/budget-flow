@@ -4,6 +4,8 @@ using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,17 +17,26 @@ builder.Services.AddApplication();
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(j =>
+    .AddJwtBearer(options =>
     {
-        j.RequireHttpsMetadata = false;
-        j.TokenValidationParameters = new TokenValidationParameters
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"])),
-            ValidIssuer = builder.Configuration["Issuer"],
-            ValidAudience = builder.Configuration["Audience"],
-            ClockSkew = TimeSpan.Zero
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(
+                    builder.Configuration["Jwt:Secret"] ?? throw new InvalidOperationException("JWT Secret is missing"))),
+            RoleClaimType = ClaimTypes.Role,
+            NameClaimType = JwtRegisteredClaimNames.Sub // Map `sub` as the UserID
         };
     });
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o =>

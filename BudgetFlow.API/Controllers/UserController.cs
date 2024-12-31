@@ -2,6 +2,7 @@
 using BudgetFlow.Application.User.Commands.Logout;
 using BudgetFlow.Application.User.Commands.Register;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
 
@@ -64,8 +65,9 @@ public class UserController : ControllerBase
     [HttpPost("Logout")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
-    public async Task<IActionResult> SignoutAsync([FromQuery] LogoutCommand logoutCommand)
+    [Authorize]
+    public async Task<IActionResult> SignoutAsync()
     {
-        return Ok(await mediator.Send(logoutCommand));
+        return Ok(await mediator.Send(new LogoutCommand()));
     }
 }

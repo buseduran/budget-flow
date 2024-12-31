@@ -17,6 +17,7 @@ public sealed class TokenProvider(IConfiguration configuration) : ITokenProvider
 
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
+        var minutes = configuration.GetValue<int>("Jwt:ExpirationInMinutes");
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(new[]
@@ -24,7 +25,7 @@ public sealed class TokenProvider(IConfiguration configuration) : ITokenProvider
                 new Claim(JwtRegisteredClaimNames.Sub, user.ID.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email)
             }),
-            Expires = DateTime.UtcNow.AddMinutes(configuration.GetValue<int>("ExpirationInMinutes")),
+            Expires = DateTime.UtcNow.AddMinutes(minutes),
             SigningCredentials = credentials,
             Issuer = configuration["Jwt:Issuer"],
             Audience = configuration["Jwt:Audience"]

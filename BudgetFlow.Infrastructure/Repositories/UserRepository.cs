@@ -73,10 +73,17 @@ public class UserRepository : IUserRepository
     }
     public async Task<bool> RevokeToken(int userID)
     {
-        _context.RefreshTokens
-            .Where(t => t.UserID == userID)
-            .ExecuteDeleteAsync();
-        return true;
+        try
+        {
+            await _context.RefreshTokens
+                       .Where(t => t.UserID == userID)
+                       .ExecuteDeleteAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            throw new ApplicationException($"{e}");
+        }
     }
 }
 

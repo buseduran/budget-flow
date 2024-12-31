@@ -23,7 +23,6 @@ public class PasswordHasher : IPasswordHasher
 
         byte[] inputHash = Rfc2898DeriveBytes.Pbkdf2(password, salt, Iterations, HashAlgorithmName.SHA512, HashSize);
 
-        //return hash.SequenceEqual(inputHash);
         return CryptographicOperations.FixedTimeEquals(hash, inputHash);
     }
 }
