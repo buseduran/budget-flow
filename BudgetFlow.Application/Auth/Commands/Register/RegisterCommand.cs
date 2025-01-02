@@ -4,7 +4,7 @@ using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Domain.Entities;
 using MediatR;
 
-namespace BudgetFlow.Application.User.Commands.Register;
+namespace BudgetFlow.Application.Auth.Commands.Register;
 public class RegisterCommand : IRequest<bool>
 {
     public UserRegisterModel User { get; set; }

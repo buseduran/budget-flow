@@ -1,5 +1,5 @@
-﻿using BudgetFlow.Application.Common.Models;
-using BudgetFlow.Application.User;
+﻿using BudgetFlow.Application.Auth;
+using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Domain.Entities;
 
 namespace BudgetFlow.Application.Common.Interfaces.Repositories;

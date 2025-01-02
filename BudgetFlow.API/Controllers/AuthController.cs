@@ -1,6 +1,6 @@
-﻿using BudgetFlow.Application.User.Commands.Login;
-using BudgetFlow.Application.User.Commands.Logout;
-using BudgetFlow.Application.User.Commands.Register;
+﻿using BudgetFlow.Application.Auth.Commands.Login;
+using BudgetFlow.Application.Auth.Commands.Logout;
+using BudgetFlow.Application.Auth.Commands.Register;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,10 +10,10 @@ namespace BudgetFlow.API.Controllers;
 [ApiController]
 [Route("[controller]")]
 
-public class UserController : ControllerBase
+public class AuthController : ControllerBase
 {
     private readonly IMediator mediator;
-    public UserController(IMediator mediator)
+    public AuthController(IMediator mediator)
     {
         this.mediator = mediator;
     }
@@ -42,19 +42,6 @@ public class UserController : ControllerBase
     public async Task<IActionResult> SigninAsync([FromBody] LoginCommand loginCommand)
     {
         return Ok(await mediator.Send(loginCommand));
-    }
-
-    /// <summary>
-    /// Kullanıcı Giriş (RefreshToken ile) Yapar.
-    /// </summary>
-    /// <param name="loginWRefreshTokenCommand"></param>
-    /// <returns></returns>
-    [HttpPost("LoginRefresh")]
-    [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
-    public async Task<IActionResult> SigninWRefreshTokenAsync([FromBody] LoginWRefreshTokenCommand loginWRefreshTokenCommand)
-    {
-        return Ok(await mediator.Send(loginWRefreshTokenCommand));
     }
 
     /// <summary>

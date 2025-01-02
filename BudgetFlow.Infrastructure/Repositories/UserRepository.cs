@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
+using BudgetFlow.Application.Auth;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Models;
-using BudgetFlow.Application.User;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;

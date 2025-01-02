@@ -3,7 +3,7 @@ using BudgetFlow.Application.Common.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace BudgetFlow.Application.User.Commands.Logout
+namespace BudgetFlow.Application.Auth.Commands.Logout
 {
     public class LogoutCommand : IRequest<bool>
     {

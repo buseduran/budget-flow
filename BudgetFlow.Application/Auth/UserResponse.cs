@@ -1,4 +1,4 @@
-﻿namespace BudgetFlow.Application.User;
+﻿namespace BudgetFlow.Application.Auth;
 public class UserResponse
 {
     public int ID { get; set; }

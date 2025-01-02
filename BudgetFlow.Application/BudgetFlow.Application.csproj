@@ -11,7 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="User\Queries\" />
+    <Folder Include="Auth\Queries\" />
+    <Folder Include="Budget\Queries\" />
   </ItemGroup>
 
   <ItemGroup>
