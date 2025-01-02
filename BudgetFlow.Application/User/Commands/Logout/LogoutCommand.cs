@@ -21,10 +21,13 @@ namespace BudgetFlow.Application.User.Commands.Logout
             {
                 var token = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
-                if (string.IsNullOrEmpty(token))
-                {
-                    throw new ApplicationException("Token not found.");
-                }
+                var context = _httpContextAccessor.HttpContext;
+
+                // Clear user identity
+                context.User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity());
+
+                _httpContextAccessor.HttpContext.Response.Cookies.Delete("AccessToken");
+
                 GetCurrentUser getCurrentUser = new GetCurrentUser(_httpContextAccessor);
                 int userID = getCurrentUser.GetCurrentUserID();
                 if (userID == 0)
@@ -37,6 +40,7 @@ namespace BudgetFlow.Application.User.Commands.Logout
                 {
                     throw new ApplicationException("Çıkış işlemi başarısız.");
                 }
+
                 return true;
             }
         }

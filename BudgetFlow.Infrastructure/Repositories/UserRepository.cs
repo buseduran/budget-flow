@@ -71,19 +71,26 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(t => t.Token == token);
         return refreshToken;
     }
+    public async Task<RefreshToken> GetRefreshTokenByUserID(int userID)
+    {
+        RefreshToken refreshToken = await _context.RefreshTokens
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.UserID == userID);
+        return refreshToken;
+    }
     public async Task<bool> RevokeToken(int userID)
     {
-        try
+        var count = await _context.RefreshTokens
+                            .Where(t => t.UserID == userID)
+                            .CountAsync();
+        if (count == 0)
         {
-            await _context.RefreshTokens
-                       .Where(t => t.UserID == userID)
-                       .ExecuteDeleteAsync();
-            return true;
+            return false;
         }
-        catch (Exception e)
-        {
-            throw new ApplicationException($"{e}");
-        }
+        await _context.RefreshTokens
+                   .Where(t => t.UserID == userID)
+                   .ExecuteDeleteAsync();
+        return true;
     }
 }
 

@@ -21,21 +21,9 @@ namespace BudgetFlow.Application.User.Commands.Login
 
             public async Task<Response> Handle(LoginWRefreshTokenCommand request, CancellationToken cancellationToken)
             {
-                RefreshToken refreshToken = await userRepository.GetRefreshToken(request.RefreshToken);
 
-                if (refreshToken is null || refreshToken.Expiration < DateTime.Now)
-                {
-                    throw new ApplicationException("Token süresi doldu.");
-                }
-                string accessToken = tokenProvider.Create(refreshToken.User);
+                return null;
 
-                refreshToken.ID = Guid.NewGuid();
-
-                refreshToken.Token = tokenProvider.GenerateRefreshToken();
-                refreshToken.Expiration = DateTime.UtcNow.AddDays(7);
-
-                await userRepository.CreateRefreshToken(refreshToken);
-                return new Response(accessToken, refreshToken.Token);
             }
         }
     }
