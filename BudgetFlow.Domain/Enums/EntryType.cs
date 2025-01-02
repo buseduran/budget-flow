@@ -1,6 +1,6 @@
 ﻿namespace BudgetFlow.Domain.Enums
 {
-    public enum TransactionType
+    public enum EntryType
     {
         Incoming,
         Outgoing

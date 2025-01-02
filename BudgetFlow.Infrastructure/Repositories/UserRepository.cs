@@ -10,84 +10,84 @@ namespace BudgetFlow.Infrastructure.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly BudgetContext _context;
-    private readonly IMapper _mapper;
+    private readonly BudgetContext context;
+    private readonly IMapper mapper;
     public UserRepository(BudgetContext context, IMapper mapper)
     {
-        _context = context;
-        _mapper = mapper;
+        this.context = context;
+        this.mapper = mapper;
     }
 
     public async Task<bool> CreateAsync(UserDto user)
     {
         user.CreatedAt = DateTime.UtcNow;
         user.UpdatedAt = DateTime.UtcNow;
-        await _context.Users.AddAsync(user);
-        return await _context.SaveChangesAsync() > 0;
+        await context.Users.AddAsync(user);
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> DeleteAsync(int ID)
     {
-        var user = await _context.Users.FindAsync(ID);
+        var user = await context.Users.FindAsync(ID);
         if (user == null) return false;
-        _context.Users.Remove(user);
-        return await _context.SaveChangesAsync() > 0;
+        context.Users.Remove(user);
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<UserResponse> GetByIdAsync(int ID)
     {
-        var user = await _context.Users.FindAsync(ID);
+        var user = await context.Users.FindAsync(ID);
         if (user == null) return null;
-        var response = _mapper.Map<UserResponse>(user);
+        var response = mapper.Map<UserResponse>(user);
         return response;
     }
 
     public async Task<UserResponse> GetByEmailAsync(string email)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
+        var user = await context.Users.FirstOrDefaultAsync(x => x.Email == email);
         if (user == null) return null;
-        var response = _mapper.Map<UserResponse>(user);
+        var response = mapper.Map<UserResponse>(user);
         return response;
     }
 
     public async Task<bool> UpdateAsync(int ID, UserRegisterModel userModel)
     {
-        var user = await _context.Users.FindAsync(ID);
+        var user = await context.Users.FindAsync(ID);
         if (user == null) return false;
 
-        var userDto = _mapper.Map<UserDto>(userModel);
-        _context.Users.Update(userDto);
-        return await _context.SaveChangesAsync() > 0;
+        var userDto = mapper.Map<UserDto>(userModel);
+        context.Users.Update(userDto);
+        return await context.SaveChangesAsync() > 0;
     }
     public async Task<bool> CreateRefreshToken(RefreshToken refreshToken)
     {
-        _context.RefreshTokens.Add(refreshToken);
-        return await _context.SaveChangesAsync() > 0;
+        context.RefreshTokens.Add(refreshToken);
+        return await context.SaveChangesAsync() > 0;
     }
     public async Task<RefreshToken> GetRefreshToken(string token)
     {
-        RefreshToken refreshToken = await _context.RefreshTokens
+        RefreshToken refreshToken = await context.RefreshTokens
             .Include(t => t.User)
             .FirstOrDefaultAsync(t => t.Token == token);
         return refreshToken;
     }
     public async Task<RefreshToken> GetRefreshTokenByUserID(int userID)
     {
-        RefreshToken refreshToken = await _context.RefreshTokens
+        RefreshToken refreshToken = await context.RefreshTokens
             .Include(t => t.User)
             .FirstOrDefaultAsync(t => t.UserID == userID);
         return refreshToken;
     }
     public async Task<bool> RevokeToken(int userID)
     {
-        var count = await _context.RefreshTokens
+        var count = await context.RefreshTokens
                             .Where(t => t.UserID == userID)
                             .CountAsync();
         if (count == 0)
         {
             return false;
         }
-        await _context.RefreshTokens
+        await context.RefreshTokens
                    .Where(t => t.UserID == userID)
                    .ExecuteDeleteAsync();
         return true;

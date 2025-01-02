@@ -10,5 +10,6 @@ public class UserMapper : Profile
     {
         CreateMap<UserRegisterModel, UserDto>().ReverseMap();
         CreateMap<UserResponse, UserDto>().ReverseMap();
+        CreateMap<EntryModel, EntryDto>().ReverseMap();
     }
 }

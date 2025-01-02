@@ -8,7 +8,7 @@ public class TransactionDto : BaseEntity
     public int Amount { get; set; }
     public Category Category { get; set; }
     public string Description { get; set; }
-    public TransactionType Type { get; set; }
+    public EntryType Type { get; set; }
     public DateTime TransactionDate { get; set; }
 
     public int UserID { get; set; }

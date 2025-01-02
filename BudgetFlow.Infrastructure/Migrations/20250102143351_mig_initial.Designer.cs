@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BudgetFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(BudgetContext))]
-    [Migration("20241217131641_initial-migration")]
-    partial class initialmigration
+    [Migration("20250102143351_mig_initial")]
+    partial class mig_initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,30 @@ namespace BudgetFlow.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.Budget", b =>
+            modelBuilder.Entity("BudgetFlow.Application.Common.Models.RefreshToken", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Expiration")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("RefreshTokens");
+                });
+
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.BudgetDto", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -39,8 +62,14 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Property<int>("Month")
                         .HasColumnType("integer");
 
-                    b.Property<int>("TargetAmount")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("NetAmount")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("NetExpenses")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("NetIncomes")
+                        .HasColumnType("numeric");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -58,7 +87,39 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.ToTable("Budgets");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.Log", b =>
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.EntryDto", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Entries");
+                });
+
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.LogDto", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -89,7 +150,7 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.ToTable("Logs");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.Transaction", b =>
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.TransactionDto", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -129,7 +190,7 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.ToTable("Transactions");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.User", b =>
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.UserDto", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -160,9 +221,20 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.Budget", b =>
+            modelBuilder.Entity("BudgetFlow.Application.Common.Models.RefreshToken", b =>
                 {
-                    b.HasOne("BudgetFlow.Domain.Entities.User", "User")
+                    b.HasOne("BudgetFlow.Domain.Entities.UserDto", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.BudgetDto", b =>
+                {
+                    b.HasOne("BudgetFlow.Domain.Entities.UserDto", "User")
                         .WithMany("Budgets")
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -171,9 +243,9 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.Log", b =>
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.LogDto", b =>
                 {
-                    b.HasOne("BudgetFlow.Domain.Entities.User", "User")
+                    b.HasOne("BudgetFlow.Domain.Entities.UserDto", "User")
                         .WithMany("Logs")
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -182,9 +254,9 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.Transaction", b =>
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.TransactionDto", b =>
                 {
-                    b.HasOne("BudgetFlow.Domain.Entities.User", "User")
+                    b.HasOne("BudgetFlow.Domain.Entities.UserDto", "User")
                         .WithMany("Transactions")
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -193,7 +265,7 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.User", b =>
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.UserDto", b =>
                 {
                     b.Navigation("Budgets");
 
