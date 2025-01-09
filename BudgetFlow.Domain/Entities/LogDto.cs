@@ -9,4 +9,3 @@ public class LogDto : BaseEntity
     public int UserID { get; set; }
     public UserDto User { get; set; }
 }
-

@@ -19,7 +19,7 @@ namespace BudgetFlow.Application.Auth.Commands.Logout
 
             public async Task<bool> Handle(LogoutCommand request, CancellationToken cancellationToken)
             {
-                var token = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                var token = _httpContextAccessor.HttpContext?.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
 
                 var context = _httpContextAccessor.HttpContext;
 
@@ -28,7 +28,7 @@ namespace BudgetFlow.Application.Auth.Commands.Logout
 
                 _httpContextAccessor.HttpContext.Response.Cookies.Delete("AccessToken");
 
-                GetCurrentUser getCurrentUser = new GetCurrentUser(_httpContextAccessor);
+                GetCurrentUser getCurrentUser = new(_httpContextAccessor);
                 int userID = getCurrentUser.GetCurrentUserID();
                 if (userID == 0)
                 {

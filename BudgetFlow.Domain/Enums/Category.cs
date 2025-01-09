@@ -2,6 +2,8 @@
 {
     public enum Category
     {
+        //can be separated based on incoming/outgoing purposes
+        Salary,
         Food,
         Rent,
         Bills,
@@ -10,5 +12,6 @@
         Hobby,
         PersonalCare,
         Other
+        
     }
 }

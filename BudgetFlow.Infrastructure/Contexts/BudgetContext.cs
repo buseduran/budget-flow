@@ -13,7 +13,6 @@ namespace BudgetFlow.Infrastructure.Contexts
         public DbSet<UserDto> Users { get; set; }
         public DbSet<BudgetDto> Budgets { get; set; }
         public DbSet<LogDto> Logs { get; set; }
-        public DbSet<TransactionDto> Transactions { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<EntryDto> Entries { get; set; }
     }

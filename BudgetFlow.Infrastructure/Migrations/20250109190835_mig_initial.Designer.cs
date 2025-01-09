@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BudgetFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(BudgetContext))]
-    [Migration("20250105162809_mig_myinitial")]
-    partial class mig_myinitial
+    [Migration("20250109190835_mig_initial")]
+    partial class mig_initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -117,7 +117,12 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("UserID")
+                        .HasColumnType("integer");
+
                     b.HasKey("ID");
+
+                    b.HasIndex("UserID");
 
                     b.ToTable("Entries");
                 });
@@ -151,46 +156,6 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("Logs");
-                });
-
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.TransactionDto", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Category")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("TransactionDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.UserDto", b =>
@@ -246,10 +211,10 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.LogDto", b =>
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.EntryDto", b =>
                 {
                     b.HasOne("BudgetFlow.Domain.Entities.UserDto", "User")
-                        .WithMany("Logs")
+                        .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -257,10 +222,10 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.TransactionDto", b =>
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.LogDto", b =>
                 {
                     b.HasOne("BudgetFlow.Domain.Entities.UserDto", "User")
-                        .WithMany("Transactions")
+                        .WithMany("Logs")
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -273,8 +238,6 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Navigation("Budgets");
 
                     b.Navigation("Logs");
-
-                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

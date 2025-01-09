@@ -57,4 +57,6 @@ public class AuthController : ControllerBase
     {
         return Ok(await mediator.Send(new LogoutCommand()));
     }
+
+    //kullanıcı şifre güncelleme
 }

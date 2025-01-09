@@ -10,5 +10,8 @@ namespace BudgetFlow.Domain.Entities
         public EntryType Type { get; set; }
         public Category Category { get; set; }
         public DateTime Date { get; set; }
+
+        public int UserID { get; set; }
+        public UserDto User { get; set; }
     }
 }

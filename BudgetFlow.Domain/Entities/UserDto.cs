@@ -10,6 +10,5 @@ namespace BudgetFlow.Domain.Entities
 
         public IEnumerable<BudgetDto> Budgets { get; set; }
         public IEnumerable<LogDto> Logs { get; set; }
-        public IEnumerable<TransactionDto> Transactions { get; set; }
     }
 }
