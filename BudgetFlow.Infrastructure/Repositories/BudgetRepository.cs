@@ -1,8 +1,12 @@
 ﻿using AutoMapper;
+using BudgetFlow.Application.Budget;
+using BudgetFlow.Application.Budget.Queries.GetEntryPagination;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Models;
+using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace BudgetFlow.Infrastructure.Repositories
 {
@@ -37,6 +41,17 @@ namespace BudgetFlow.Infrastructure.Repositories
 
             context.Entries.Remove(entry);
             return await context.SaveChangesAsync() > 0;
+        }
+        public async Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page,int PageSize)
+        {
+            var entries = await context.Entries
+                .Skip((Page - 1) * PageSize)
+                .Take(PageSize)
+                .ToListAsync();
+
+            var count = await context.Entries.CountAsync();
+            var entriesResponse = mapper.Map<List<EntryResponse>>(entries);
+            return new PaginatedList<EntryResponse>(entriesResponse, count, Page, PageSize);
         }
     }
 }

@@ -1,6 +1,9 @@
-﻿using BudgetFlow.Application.Budget.Commands.CreateEntry;
+﻿using BudgetFlow.Application.Budget;
+using BudgetFlow.Application.Budget.Commands.CreateEntry;
 using BudgetFlow.Application.Budget.Commands.DeleteEntry;
 using BudgetFlow.Application.Budget.Commands.UpdateEntry;
+using BudgetFlow.Application.Budget.Queries.GetEntryPagination;
+using BudgetFlow.Application.Common.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +12,7 @@ using System.Net.Mime;
 namespace BudgetFlow.API.Controllers;
 [ApiController]
 [Route("[controller]")]
-[Authorize]
+//[Authorize]
 public class BudgetController : ControllerBase
 {
     private readonly IMediator mediator;
@@ -19,7 +22,7 @@ public class BudgetController : ControllerBase
     }
 
     /// <summary>
-    /// Bütçe Hareketi Kaydedilir. 
+    /// Recordes a Budget Entry. 
     /// </summary>
     /// <param name="createEntryCommand"></param>
     /// <returns></returns>
@@ -31,7 +34,7 @@ public class BudgetController : ControllerBase
         return Ok(await mediator.Send(createEntryCommand));
     }
     /// <summary>
-    /// Bütçe Hareketi Güncellenir. 
+    /// Updates a Budget Entry. 
     /// </summary>
     /// <param name="updateEntryCommand"></param>
     /// <returns></returns>
@@ -43,7 +46,7 @@ public class BudgetController : ControllerBase
         return Ok(await mediator.Send(updateEntryCommand));
     }
     /// <summary>
-    /// Bütçe Hareketi Silinir. 
+    /// Deletes a Budget Entry. 
     /// </summary>
     /// <param name="deleteEntryCommand"></param>
     /// <returns></returns>
@@ -56,16 +59,15 @@ public class BudgetController : ControllerBase
     }
 
     /// <summary>
-    /// Bütçe Hareketi Silinir. 
+    /// Pages a Budget Entry. 
     /// </summary>
-    /// <param name="deleteEntryCommand"></param>
+    /// <param name="getEntryPaginationQuery"></param>
     /// <returns></returns>
-    //[HttpGet]
-    //[Produces(MediaTypeNames.Application.Json)]
-    //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    //public async Task<IActionResult> DeleteEntryAsync([FromBody] DeleteEntryCommand deleteEntryCommand)
-    //{
-    //    return Ok(await mediator.Send(deleteEntryCommand));
-    //}
-
+    [HttpGet]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<EntryResponse>))]
+    public async Task<IActionResult> GetEntriePaginationAsync([FromQuery] GetEntryPaginationQuery getEntryPaginationQuery)
+    {
+        return Ok(await mediator.Send(getEntryPaginationQuery));
+    }
 }
