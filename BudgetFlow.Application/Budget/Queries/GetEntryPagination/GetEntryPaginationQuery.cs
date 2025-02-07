@@ -6,8 +6,8 @@ namespace BudgetFlow.Application.Budget.Queries.GetEntryPagination
 {
     public class GetEntryPaginationQuery : IRequest<PaginatedList<EntryResponse>>
     {
-        public int Page { get; set; }
-        public int PageSize { get; set; }
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 50;
         public class GetEntryPaginationQueryHandler : IRequestHandler<GetEntryPaginationQuery, PaginatedList<EntryResponse>>
         {
             private readonly IBudgetRepository _budgetRepository;

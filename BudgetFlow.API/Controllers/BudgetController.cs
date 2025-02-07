@@ -66,7 +66,7 @@ public class BudgetController : ControllerBase
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<EntryResponse>))]
-    public async Task<IActionResult> GetEntriePaginationAsync([FromQuery] GetEntryPaginationQuery getEntryPaginationQuery)
+    public async Task<IActionResult> GetEntriesPaginationAsync([FromQuery] GetEntryPaginationQuery getEntryPaginationQuery)
     {
         return Ok(await mediator.Send(getEntryPaginationQuery));
     }
