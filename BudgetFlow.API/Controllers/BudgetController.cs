@@ -11,8 +11,8 @@ using System.Net.Mime;
 
 namespace BudgetFlow.API.Controllers;
 [ApiController]
-[Route("[controller]")]
-//[Authorize]
+[Route("Entry")]
+[Authorize]
 public class BudgetController : ControllerBase
 {
     private readonly IMediator mediator;
@@ -22,7 +22,7 @@ public class BudgetController : ControllerBase
     }
 
     /// <summary>
-    /// Recordes a Budget Entry. 
+    /// Records a Budget Entry. 
     /// </summary>
     /// <param name="createEntryCommand"></param>
     /// <returns></returns>
