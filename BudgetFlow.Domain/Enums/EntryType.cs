@@ -2,7 +2,7 @@
 {
     public enum EntryType
     {
-        Incoming,
-        Outgoing
+        Income,
+        Expense
     }
 }
