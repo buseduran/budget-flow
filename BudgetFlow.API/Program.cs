@@ -43,7 +43,7 @@ builder.Services.AddSwaggerGen(o =>
 {
     o.CustomSchemaIds(id => id.FullName.Replace('+', '-'));
 
-    var securityShceme = new OpenApiSecurityScheme
+    var securityScheme = new OpenApiSecurityScheme
     {
         Name = "JWT Authentication",
         Description = "Enter your JWT token in this field",
@@ -53,7 +53,7 @@ builder.Services.AddSwaggerGen(o =>
         BearerFormat = "JWT"
     };
 
-    o.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, securityShceme);
+    o.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, securityScheme);
 
     var securityRequirements = new OpenApiSecurityRequirement
     {
@@ -77,9 +77,10 @@ builder.Services.AddEntityFrameworkNpgsql().AddDbContext<BudgetContext>();
 
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy => policy.AllowAnyOrigin()
-                      .AllowAnyMethod()
-                      .AllowAnyHeader());
+    options.AddDefaultPolicy(policy => policy
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader());
 });
 
 var app = builder.Build();
@@ -92,11 +93,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseCors();
 
 app.MapControllers();
 
