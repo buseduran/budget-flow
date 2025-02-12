@@ -9,7 +9,6 @@ using System.Net.Mime;
 namespace BudgetFlow.API.Controllers;
 [ApiController]
 [Route("[controller]")]
-
 public class AuthController : ControllerBase
 {
     private readonly IMediator mediator;

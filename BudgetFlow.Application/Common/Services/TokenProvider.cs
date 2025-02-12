@@ -1,4 +1,5 @@
-﻿using BudgetFlow.Application.Common.Interfaces.Services;
+﻿using BudgetFlow.Application.Auth;
+using BudgetFlow.Application.Common.Interfaces.Services;
 using BudgetFlow.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -24,7 +25,8 @@ public sealed class TokenProvider(IConfiguration configuration) : ITokenProvider
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.ID.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.Name, user.Name)
+                new Claim(JwtRegisteredClaimNames.Name, user.Name),
+                new Claim(JwtRegisteredClaimNames.Birthdate,user.CreatedAt.ToString()),
             }),
             Expires = DateTime.UtcNow.AddMinutes(minutes),
             SigningCredentials = credentials,
