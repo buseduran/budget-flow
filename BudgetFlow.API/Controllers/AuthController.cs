@@ -1,6 +1,7 @@
 ﻿using BudgetFlow.Application.Auth.Commands.Login;
 using BudgetFlow.Application.Auth.Commands.Logout;
 using BudgetFlow.Application.Auth.Commands.Register;
+using BudgetFlow.Application.Auth.Commands.UpdateAccount;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +19,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Kullanıcı Kayıt Olur.
+    /// User registration
     /// </summary>
     /// <param name="registerCommand"></param>
     /// <returns></returns>
@@ -31,7 +32,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Kullanıcı Giriş Yapar.
+    /// User login
     /// </summary>
     /// <param name="loginCommand"></param>
     /// <returns></returns>
@@ -44,7 +45,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Kullanıcı Çıkış Yapar.
+    /// User logout  
     /// </summary>
     /// <param name="logoutCommand"></param>
     /// <returns></returns>
@@ -52,10 +53,22 @@ public class AuthController : ControllerBase
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
     [Authorize]
-    public async Task<IActionResult> SignoutAsync()
+    public async Task<IActionResult> LogoutAsync()
     {
         return Ok(await mediator.Send(new LogoutCommand()));
     }
 
-    //kullanıcı şifre güncelleme
+    /// <summary>
+    /// User profile update  
+    /// </summary>
+    /// <param name="updateAccountCommand"></param>
+    /// <returns></returns>
+    [HttpPut]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+    [Authorize]
+    public async Task<IActionResult> UpdateAccountAsync([FromBody] UpdateAccountCommand updateAccountCommand)
+    {
+        return Ok(await mediator.Send(updateAccountCommand));
+    }
 }

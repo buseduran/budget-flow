@@ -50,12 +50,17 @@ public class UserRepository : IUserRepository
         return response;
     }
 
-    public async Task<bool> UpdateAsync(int ID, UserRegisterModel userModel)
+    public async Task<bool> UpdateAsync(string Name, string Email, string PasswordHash)
     {
-        var user = await context.Users.FindAsync(ID);
-        if (user == null) return false;
+        var user = await context.Users
+            .Where(u => u.Email == Email).FirstOrDefaultAsync();
 
-        var userDto = mapper.Map<UserDto>(userModel);
+        if (user == null) return false;
+        user.Name = Name;
+        user.Email = Email;
+        user.PasswordHash = PasswordHash;
+
+        var userDto = mapper.Map<UserDto>(user);
         context.Users.Update(userDto);
         return await context.SaveChangesAsync() > 0;
     }
