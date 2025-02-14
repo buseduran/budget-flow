@@ -7,6 +7,7 @@ namespace BudgetFlow.Application.Auth.Commands.UpdateAccount
     public class UpdateAccountCommand : IRequest<bool>
     {
         public string Name { get; set; }
+        public string OldEmail { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
 
@@ -23,11 +24,10 @@ namespace BudgetFlow.Application.Auth.Commands.UpdateAccount
             public async Task<bool> Handle(UpdateAccountCommand request, CancellationToken cancellationToken)
             {
                 request.Password = passwordHasher.Hash(request.Password);
-                var result = await userRepository.UpdateAsync(request.Name, request.Email, request.Password);
+                var result = await userRepository.UpdateAsync(request.Name, request.OldEmail, request.Email, request.Password);
 
                 return result;
             }
         }
-
     }
 }

@@ -50,10 +50,10 @@ public class UserRepository : IUserRepository
         return response;
     }
 
-    public async Task<bool> UpdateAsync(string Name, string Email, string PasswordHash)
+    public async Task<bool> UpdateAsync(string Name, string OldEmail, string Email, string PasswordHash)
     {
         var user = await context.Users
-            .Where(u => u.Email == Email).FirstOrDefaultAsync();
+            .Where(u => u.Email == OldEmail).FirstOrDefaultAsync();
 
         if (user == null) return false;
         user.Name = Name;
