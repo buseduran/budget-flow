@@ -97,4 +97,18 @@ public class UserRepository : IUserRepository
                    .ExecuteDeleteAsync();
         return true;
     }
+
+    public async Task<bool> UpdateWithoutPassword(string Name, string OldEmail, string Email)
+    {
+        var user = await context.Users
+            .Where(u => u.Email == OldEmail).FirstOrDefaultAsync();
+
+        if (user == null) return false;
+        user.Name = Name;
+        user.Email = Email;
+
+        var userDto = mapper.Map<UserDto>(user);
+        context.Users.Update(userDto);
+        return await context.SaveChangesAsync() > 0;
+    }
 }

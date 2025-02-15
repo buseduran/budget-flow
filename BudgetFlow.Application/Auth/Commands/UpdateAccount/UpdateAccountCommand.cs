@@ -23,8 +23,15 @@ namespace BudgetFlow.Application.Auth.Commands.UpdateAccount
 
             public async Task<bool> Handle(UpdateAccountCommand request, CancellationToken cancellationToken)
             {
+                bool result;
+                if (String.IsNullOrWhiteSpace(request.Password))
+                {
+                    result = await userRepository.UpdateWithoutPassword(request.Name, request.OldEmail, request.Email);
+                    return result;
+                }
+
                 request.Password = passwordHasher.Hash(request.Password);
-                var result = await userRepository.UpdateAsync(request.Name, request.OldEmail, request.Email, request.Password);
+                result = await userRepository.UpdateAsync(request.Name, request.OldEmail, request.Email, request.Password);
 
                 return result;
             }
