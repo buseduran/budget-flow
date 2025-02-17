@@ -29,10 +29,13 @@ namespace BudgetFlow.Infrastructure.Repositories
             var entry = await context.Entries.FindAsync(ID);
             if (entry is null) return false;
 
-            var entryDto = mapper.Map<EntryDto>(Entry);
-            context.Entries.Update(entryDto);
+            mapper.Map(Entry, entry);
+            entry.Date = DateTime.SpecifyKind(entry.Date, DateTimeKind.Utc);
+
             return await context.SaveChangesAsync() > 0;
         }
+
+
         public async Task<bool> DeleteEntryAsync(int ID)
         {
             var entry = await context.Entries.FindAsync(ID);
