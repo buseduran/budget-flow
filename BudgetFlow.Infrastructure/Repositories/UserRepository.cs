@@ -28,10 +28,9 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> DeleteAsync(int ID)
     {
-        var user = await context.Users.FindAsync(ID);
-        if (user == null) return false;
-        context.Users.Remove(user);
-        return await context.SaveChangesAsync() > 0;
+        return await context.Users
+            .Where(u => u.ID == ID)
+            .ExecuteDeleteAsync() > 0;
     }
 
     public async Task<UserResponse> GetByIdAsync(int ID)

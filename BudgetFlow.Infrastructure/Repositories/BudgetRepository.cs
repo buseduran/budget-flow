@@ -35,14 +35,11 @@ namespace BudgetFlow.Infrastructure.Repositories
             return await context.SaveChangesAsync() > 0;
         }
 
-
         public async Task<bool> DeleteEntryAsync(int ID)
         {
-            var entry = await context.Entries.FindAsync(ID);
-            if (entry == null) return false;
-
-            context.Entries.Remove(entry);
-            return await context.SaveChangesAsync() > 0;
+            return await context.Entries
+                    .Where(e => e.ID == ID)
+                    .ExecuteDeleteAsync() > 0;
         }
         public async Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize)
         {
