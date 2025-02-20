@@ -15,5 +15,12 @@ namespace BudgetFlow.Infrastructure.Contexts
         public DbSet<LogDto> Logs { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<EntryDto> Entries { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<UserDto>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+        }
     }
 }

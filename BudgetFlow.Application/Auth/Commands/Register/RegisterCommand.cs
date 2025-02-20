@@ -24,7 +24,7 @@ public class RegisterCommand : IRequest<bool>
         {
             if (request.User.Password != request.User.ConfirmPassword)
             {
-                throw new Exception("Şifreler uyuşmuyor.");
+                throw new Exception("Passwords do not match");
             }
             UserDto user = new UserDto()
             {
