@@ -41,11 +41,12 @@ namespace BudgetFlow.Infrastructure.Repositories
                     .Where(e => e.ID == ID)
                     .ExecuteDeleteAsync() > 0;
         }
-        public async Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize)
+        public async Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID)
         {
             var entries = await context.Entries
                 .Skip((Page - 1) * PageSize)
                 .Take(PageSize)
+                .Where(u => u.UserID == UserID)
                 .ToListAsync();
             var count = await context.Entries.CountAsync();
 
