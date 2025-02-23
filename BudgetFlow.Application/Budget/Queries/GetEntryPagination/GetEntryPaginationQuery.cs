@@ -21,12 +21,8 @@ namespace BudgetFlow.Application.Budget.Queries.GetEntryPagination
 
             public async Task<PaginatedList<EntryResponse>> Handle(GetEntryPaginationQuery request, CancellationToken cancellationToken)
             {
-                var context = _httpContextAccessor.HttpContext;
                 GetCurrentUser getCurrentUser = new(_httpContextAccessor);
                 int userID = getCurrentUser.GetCurrentUserID();
-
-
-
                 var result = await _budgetRepository.GetPaginatedAsync(request.Page, request.PageSize,userID);
 
                 return result;

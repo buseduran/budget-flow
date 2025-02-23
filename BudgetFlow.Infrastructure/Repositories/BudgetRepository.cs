@@ -4,6 +4,7 @@ using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Enums;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -53,6 +54,33 @@ namespace BudgetFlow.Infrastructure.Repositories
             var entriesResponse = mapper.Map<List<EntryResponse>>(entries);
 
             return new PaginatedList<EntryResponse>(entriesResponse, count, Page, PageSize);
+        }
+
+        public async Task<GroupedEntriesResponse> GetGroupedEntriesAsync(int userID)
+        {
+            var groupedEntries = await context.Entries
+                .Where(e => e.UserID == userID)
+                .GroupBy(e => new { e.Category, e.Type })
+                .Select(g => new
+                {
+                    g.Key.Category,
+                    Amount = g.Sum(e => e.Amount),
+                    g.Key.Type
+                })
+                .AsSplitQuery()
+                .ToListAsync();
+
+            var incomes = groupedEntries
+                .Where(e => e.Type == EntryType.Income)
+                .Select(e => new GroupedEntry { Category = e.Category, Amount = e.Amount })
+                .ToList();
+
+            var expenses = groupedEntries
+                .Where(e => e.Type == EntryType.Expense)
+                .Select(e => new GroupedEntry { Category = e.Category, Amount = e.Amount })
+                .ToList();
+
+            return new GroupedEntriesResponse { Incomes = incomes, Expenses = expenses };
         }
     }
 }

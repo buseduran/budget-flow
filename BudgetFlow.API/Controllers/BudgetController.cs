@@ -3,6 +3,7 @@ using BudgetFlow.Application.Budget.Commands.CreateEntry;
 using BudgetFlow.Application.Budget.Commands.DeleteEntry;
 using BudgetFlow.Application.Budget.Commands.UpdateEntry;
 using BudgetFlow.Application.Budget.Queries.GetEntryPagination;
+using BudgetFlow.Application.Budget.Queries.GetGroupedEntries;
 using BudgetFlow.Application.Common.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -70,4 +71,14 @@ public class BudgetController : ControllerBase
     {
         return Ok(await mediator.Send(getEntryPaginationQuery));
     }
+
+    [HttpGet]
+    [Route("Grouped")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof((List<EntryResponse> incomes, List<EntryResponse> expenses)))]
+    public async Task<IActionResult> GetGroupedEntriesAsync()
+    {
+        return Ok(await mediator.Send(new GetGroupedEntriesQuery()));
+    }
+
 }
