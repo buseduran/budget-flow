@@ -60,10 +60,27 @@ namespace BudgetFlow.Infrastructure.Repositories
             return new PaginatedList<EntryResponse>(entriesResponse, count, Page, PageSize);
         }
 
-        public async Task<GroupedEntriesResponse> GetGroupedEntriesAsync(int userID)
+        public async Task<GroupedEntriesResponse> GetGroupedEntriesAsync(int userID, string Range)
         {
+            var startDate = GetDateForRange.GetStartDateForRange(Range);
+            var endDate = DateTime.UtcNow;
+            var previousStartDate = GetDateForRange.GetPreviousStartDateForRange(Range);
+            var previousEndDate = startDate.AddDays(-1);
+
             var groupedEntries = await context.Entries
-                .Where(e => e.UserID == userID)
+                .Where(e => e.UserID == userID && e.Date >= startDate && e.Date <= endDate)
+                .GroupBy(e => new { e.Category, e.Type })
+                .Select(g => new
+                {
+                    g.Key.Category,
+                    Amount = g.Sum(e => e.Amount),
+                    g.Key.Type
+                })
+                .AsSplitQuery()
+                .ToListAsync();
+
+            var previousGroupedEntries = await context.Entries
+                .Where(e => e.UserID == userID && e.Date >= previousStartDate && e.Date <= previousEndDate)
                 .GroupBy(e => new { e.Category, e.Type })
                 .Select(g => new
                 {
@@ -84,7 +101,34 @@ namespace BudgetFlow.Infrastructure.Repositories
                 .Select(e => new GroupedEntry { Category = e.Category, Amount = e.Amount })
                 .ToList();
 
-            return new GroupedEntriesResponse { Incomes = incomes, Expenses = expenses };
+            var currentIncomeTotal = groupedEntries
+                .Where(t => t.Type == EntryType.Income)
+                .Sum(e => e.Amount);
+            var previousIncomeTotal = previousGroupedEntries
+                .Where(t => t.Type == EntryType.Income)
+                .Sum(e => e.Amount);
+
+            var currentExpenseTotal = groupedEntries
+                .Where(t => t.Type == EntryType.Expense)
+                .Sum(e => e.Amount);
+            var previousExpenseTotal = previousGroupedEntries
+                .Where(t => t.Type == EntryType.Expense)
+                .Sum(e => e.Amount);
+
+            decimal incomeTrend = 0;
+            if (previousIncomeTotal == 0 && currentIncomeTotal != 0)
+                incomeTrend = 100;
+            else
+                incomeTrend = (currentIncomeTotal - previousIncomeTotal) / previousIncomeTotal * 100;
+
+
+            decimal expenseTrend = 0;
+            if (previousExpenseTotal == 0 && currentExpenseTotal != 0)
+                expenseTrend = 100;
+            else
+                expenseTrend = (currentExpenseTotal - previousExpenseTotal) / previousExpenseTotal * 100;
+
+            return new GroupedEntriesResponse { Incomes = incomes, Expenses = expenses, IncomeTrendPercentage = incomeTrend, ExpenseTrendPercentage = expenseTrend };
         }
 
         public async Task<List<EntryResponse>> GetLastFiveEntriesAsync(int userID)

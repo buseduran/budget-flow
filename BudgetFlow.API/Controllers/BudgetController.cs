@@ -77,9 +77,9 @@ public class BudgetController : ControllerBase
     [Route("Grouped")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof((List<EntryResponse> incomes, List<EntryResponse> expenses)))]
-    public async Task<IActionResult> GetGroupedEntriesAsync()
+    public async Task<IActionResult> GetGroupedEntriesAsync([FromQuery] string Range)
     {
-        return Ok(await mediator.Send(new GetGroupedEntriesQuery()));
+        return Ok(await mediator.Send(new GetGroupedEntriesQuery(Range)));
     }
 
     [HttpGet]

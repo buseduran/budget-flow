@@ -11,5 +11,7 @@ namespace BudgetFlow.Application.Budget
     {
         public List<GroupedEntry> Incomes { get; set; } = new();
         public List<GroupedEntry> Expenses { get; set; } = new();
+        public decimal? IncomeTrendPercentage { get; set; }
+        public decimal? ExpenseTrendPercentage { get; set; }
     }
 }

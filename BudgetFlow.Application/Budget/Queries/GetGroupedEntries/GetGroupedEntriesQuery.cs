@@ -7,6 +7,11 @@ namespace BudgetFlow.Application.Budget.Queries.GetGroupedEntries
 {
     public class GetGroupedEntriesQuery : IRequest<GroupedEntriesResponse>
     {
+        public string Range { get; set; }
+        public GetGroupedEntriesQuery(string Range)
+        {
+            this.Range = Range;
+        }
         public class GetGroupedEntriesQueryHandler : IRequestHandler<GetGroupedEntriesQuery, GroupedEntriesResponse>
         {
             private readonly IBudgetRepository _budgetRepository;
@@ -21,7 +26,7 @@ namespace BudgetFlow.Application.Budget.Queries.GetGroupedEntries
                 GetCurrentUser getCurrentUser = new(_httpContextAccessor);
                 int userID = getCurrentUser.GetCurrentUserID();
 
-                return await _budgetRepository.GetGroupedEntriesAsync(userID);
+                return await _budgetRepository.GetGroupedEntriesAsync(userID, request.Range);
             }
         }
     }
