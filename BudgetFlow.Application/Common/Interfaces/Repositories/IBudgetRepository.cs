@@ -12,5 +12,6 @@ namespace BudgetFlow.Application.Common.Interfaces.Repositories
         Task<bool> DeleteEntryAsync(int ID);
         Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID);
         Task<GroupedEntriesResponse> GetGroupedEntriesAsync(int userID);
+        Task<List<EntryResponse>> GetLastFiveEntriesAsync(int userID);
     }
 }

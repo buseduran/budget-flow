@@ -21,7 +21,10 @@ namespace BudgetFlow.Infrastructure.Repositories
         }
         public async Task<bool> CreateEntryAsync(EntryDto Entry)
         {
-            Entry.Date = DateTime.UtcNow;
+            Entry.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+            Entry.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+            Entry.Date = DateTime.SpecifyKind(Entry.Date, DateTimeKind.Utc);
+
             await context.Entries.AddAsync(Entry);
             return await context.SaveChangesAsync() > 0;
         }
@@ -32,6 +35,7 @@ namespace BudgetFlow.Infrastructure.Repositories
 
             mapper.Map(Entry, entry);
             entry.Date = DateTime.SpecifyKind(entry.Date, DateTimeKind.Utc);
+            entry.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
             return await context.SaveChangesAsync() > 0;
         }
@@ -81,6 +85,16 @@ namespace BudgetFlow.Infrastructure.Repositories
                 .ToList();
 
             return new GroupedEntriesResponse { Incomes = incomes, Expenses = expenses };
+        }
+
+        public async Task<List<EntryResponse>> GetLastFiveEntriesAsync(int userID)
+        {
+            var entries = await context.Entries
+                .Where(e => e.UserID == userID)
+                .OrderByDescending(e => e.CreatedAt)
+                .Take(5)
+                .ToListAsync();
+            return mapper.Map<List<EntryResponse>>(entries);
         }
     }
 }

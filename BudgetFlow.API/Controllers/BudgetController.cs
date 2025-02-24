@@ -4,6 +4,7 @@ using BudgetFlow.Application.Budget.Commands.DeleteEntry;
 using BudgetFlow.Application.Budget.Commands.UpdateEntry;
 using BudgetFlow.Application.Budget.Queries.GetEntryPagination;
 using BudgetFlow.Application.Budget.Queries.GetGroupedEntries;
+using BudgetFlow.Application.Budget.Queries.GetLastFiveEntries;
 using BudgetFlow.Application.Common.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -81,4 +82,12 @@ public class BudgetController : ControllerBase
         return Ok(await mediator.Send(new GetGroupedEntriesQuery()));
     }
 
+    [HttpGet]
+    [Route("LastFive")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<EntryResponse>))]
+    public async Task<IActionResult> GetLastFiveEntriesAsync()
+    {
+        return Ok(await mediator.Send(new GetLastFiveEntriesQuery()));
+    }
 }
