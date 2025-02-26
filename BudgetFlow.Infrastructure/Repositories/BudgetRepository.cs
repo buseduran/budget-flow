@@ -68,67 +68,69 @@ namespace BudgetFlow.Infrastructure.Repositories
             var previousEndDate = startDate.AddDays(-1);
 
             var groupedEntries = await context.Entries
-                .Where(e => e.UserID == userID && e.Date >= startDate && e.Date <= endDate)
-                .GroupBy(e => new { e.Category, e.Type })
+                .Where(e => e.UserID == userID &&
+                           ((e.Date >= startDate && e.Date <= endDate) || (e.Date >= previousStartDate && e.Date <= previousEndDate)))
+                .GroupBy(e => new { e.Category, e.Type, Period = e.Date >= startDate ? "Current" : "Previous" })
                 .Select(g => new
                 {
                     g.Key.Category,
-                    Amount = g.Sum(e => e.Amount),
-                    g.Key.Type
+                    g.Key.Type,
+                    g.Key.Period,
+                    Amount = g.Sum(e => e.Amount)
                 })
-                .AsSplitQuery()
                 .ToListAsync();
 
-            var previousGroupedEntries = await context.Entries
-                .Where(e => e.UserID == userID && e.Date >= previousStartDate && e.Date <= previousEndDate)
+            var entryDictionary = groupedEntries
                 .GroupBy(e => new { e.Category, e.Type })
-                .Select(g => new
-                {
-                    g.Key.Category,
-                    Amount = g.Sum(e => e.Amount),
-                    g.Key.Type
-                })
-                .AsSplitQuery()
-                .ToListAsync();
+                .ToDictionary(
+                    g => g.Key,
+                    g => new
+                    {
+                        CurrentAmount = g.FirstOrDefault(e => e.Period == "Current")?.Amount ?? 0,
+                        PreviousAmount = g.FirstOrDefault(e => e.Period == "Previous")?.Amount ?? 0
+                    });
 
-            var incomes = groupedEntries
-                .Where(e => e.Type == EntryType.Income)
-                .Select(e => new GroupedEntry { Category = e.Category, Amount = e.Amount })
+            var incomes = entryDictionary
+                .Where(e => e.Key.Type == EntryType.Income)
+                .Select(e => new GroupedEntry { Category = e.Key.Category, Amount = e.Value.CurrentAmount })
                 .ToList();
 
-            var expenses = groupedEntries
-                .Where(e => e.Type == EntryType.Expense)
-                .Select(e => new GroupedEntry { Category = e.Category, Amount = e.Amount })
+            var expenses = entryDictionary
+                .Where(e => e.Key.Type == EntryType.Expense)
+                .Select(e => new GroupedEntry { Category = e.Key.Category, Amount = e.Value.CurrentAmount })
                 .ToList();
 
-            var currentIncomeTotal = groupedEntries
-                .Where(t => t.Type == EntryType.Income)
-                .Sum(e => e.Amount);
-            var previousIncomeTotal = previousGroupedEntries
-                .Where(t => t.Type == EntryType.Income)
-                .Sum(e => e.Amount);
+            #region Calculate Trending
+            var currentIncomeTotal = entryDictionary
+               .Where(e => e.Key.Type == EntryType.Income)
+               .Sum(e => e.Value.CurrentAmount);
 
-            var currentExpenseTotal = groupedEntries
-                .Where(t => t.Type == EntryType.Expense)
-                .Sum(e => e.Amount);
-            var previousExpenseTotal = previousGroupedEntries
-                .Where(t => t.Type == EntryType.Expense)
-                .Sum(e => e.Amount);
+            var previousIncomeTotal = entryDictionary
+                .Where(e => e.Key.Type == EntryType.Income)
+                .Sum(e => e.Value.PreviousAmount);
 
-            decimal incomeTrend = 0;
-            if (previousIncomeTotal == 0 && currentIncomeTotal != 0)
-                incomeTrend = 100;
-            else
-                incomeTrend = (currentIncomeTotal - previousIncomeTotal) / previousIncomeTotal * 100;
+            var currentExpenseTotal = entryDictionary
+                .Where(e => e.Key.Type == EntryType.Expense)
+                .Sum(e => e.Value.CurrentAmount);
 
+            var previousExpenseTotal = entryDictionary
+                .Where(e => e.Key.Type == EntryType.Expense)
+                .Sum(e => e.Value.PreviousAmount);
 
-            decimal expenseTrend = 0;
-            if (previousExpenseTotal == 0 && currentExpenseTotal != 0)
-                expenseTrend = 100;
-            else
-                expenseTrend = (currentExpenseTotal - previousExpenseTotal) / previousExpenseTotal * 100;
+            decimal incomeTrend = previousIncomeTotal == 0 ? (currentIncomeTotal != 0 ? 100 : 0) :
+                (currentIncomeTotal - previousIncomeTotal) / previousIncomeTotal * 100;
 
-            return new GroupedEntriesResponse { Incomes = incomes, Expenses = expenses, IncomeTrendPercentage = incomeTrend, ExpenseTrendPercentage = expenseTrend };
+            decimal expenseTrend = previousExpenseTotal == 0 ? (currentExpenseTotal != 0 ? 100 : 0) :
+                (currentExpenseTotal - previousExpenseTotal) / previousExpenseTotal * 100;
+            #endregion
+
+            return new GroupedEntriesResponse
+            {
+                Incomes = incomes,
+                Expenses = expenses,
+                IncomeTrendPercentage = incomeTrend,
+                ExpenseTrendPercentage = expenseTrend
+            };
         }
 
         public async Task<List<EntryResponse>> GetLastFiveEntriesAsync(int userID)
