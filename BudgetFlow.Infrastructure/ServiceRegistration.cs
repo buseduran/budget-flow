@@ -11,6 +11,6 @@ public static class ServiceRegistration
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IBudgetRepository, BudgetRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
     }
 }
-

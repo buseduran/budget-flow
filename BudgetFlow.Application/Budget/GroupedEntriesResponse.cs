@@ -4,7 +4,7 @@ namespace BudgetFlow.Application.Budget
 {
     public class GroupedEntry
     {
-        public Category Category { get; set; }
+        public CategoryType Category { get; set; }
         public decimal Amount { get; set; }
     }
     public class GroupedEntriesResponse

@@ -1,6 +1,6 @@
 ﻿namespace BudgetFlow.Domain.Enums
 {
-    public enum Category
+    public enum CategoryType
     {
         //can be separated based on incoming/outgoing purposes
         Salary,

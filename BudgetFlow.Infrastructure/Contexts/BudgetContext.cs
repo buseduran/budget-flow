@@ -15,6 +15,7 @@ namespace BudgetFlow.Infrastructure.Contexts
         public DbSet<LogDto> Logs { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<EntryDto> Entries { get; set; }
+        public DbSet<CategoryDto> Categories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

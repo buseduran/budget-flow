@@ -70,10 +70,10 @@ namespace BudgetFlow.Infrastructure.Repositories
             var groupedEntries = await context.Entries
                 .Where(e => e.UserID == userID &&
                            ((e.Date >= startDate && e.Date <= endDate) || (e.Date >= previousStartDate && e.Date <= previousEndDate)))
-                .GroupBy(e => new { e.Category, e.Type, Period = e.Date >= startDate ? "Current" : "Previous" })
+                .GroupBy(e => new { e.CategoryType, e.Type, Period = e.Date >= startDate ? "Current" : "Previous" })
                 .Select(g => new
                 {
-                    g.Key.Category,
+                    g.Key.CategoryType,
                     g.Key.Type,
                     g.Key.Period,
                     Amount = g.Sum(e => e.Amount)
@@ -81,7 +81,7 @@ namespace BudgetFlow.Infrastructure.Repositories
                 .ToListAsync();
 
             var entryDictionary = groupedEntries
-                .GroupBy(e => new { e.Category, e.Type })
+                .GroupBy(e => new { e.CategoryType, e.Type })
                 .ToDictionary(
                     g => g.Key,
                     g => new
@@ -92,12 +92,12 @@ namespace BudgetFlow.Infrastructure.Repositories
 
             var incomes = entryDictionary
                 .Where(e => e.Key.Type == EntryType.Income)
-                .Select(e => new GroupedEntry { Category = e.Key.Category, Amount = e.Value.CurrentAmount })
+                .Select(e => new GroupedEntry { Category = e.Key.CategoryType, Amount = e.Value.CurrentAmount })
                 .ToList();
 
             var expenses = entryDictionary
                 .Where(e => e.Key.Type == EntryType.Expense)
-                .Select(e => new GroupedEntry { Category = e.Key.Category, Amount = e.Value.CurrentAmount })
+                .Select(e => new GroupedEntry { Category = e.Key.CategoryType, Amount = e.Value.CurrentAmount })
                 .ToList();
 
             #region Calculate Trending
