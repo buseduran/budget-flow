@@ -1,9 +1,11 @@
-﻿using BudgetFlow.Domain.Entities;
+﻿using BudgetFlow.Application.Category;
+using BudgetFlow.Domain.Entities;
 
 namespace BudgetFlow.Application.Common.Interfaces.Repositories
 {
     public interface ICategoryRepository
     {
         Task<bool> CreateCategoryAsync(CategoryDto categoryDto);
+        Task<IEnumerable<CategoryResponse>> GetCategoriesAsync();
     }
 }

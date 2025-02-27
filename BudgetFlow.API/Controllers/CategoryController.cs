@@ -1,5 +1,6 @@
-﻿using BudgetFlow.Application.Budget.Commands.CreateEntry;
+﻿using BudgetFlow.Application.Category;
 using BudgetFlow.Application.Category.Commands.CreateCategory;
+using BudgetFlow.Application.Category.Queries.GetCategories;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,6 +29,18 @@ public class CategoryController : ControllerBase
     public async Task<IActionResult> CreateEntryAsync([FromBody] CreateCategoryCommand createCategoryCommand)
     {
         return Ok(await mediator.Send(createCategoryCommand));
+    }
+
+    /// <summary>
+    /// Get Categories. 
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CategoryResponse>))]
+    public async Task<IActionResult> GetCategoriesAsync()
+    {
+        return Ok(await mediator.Send(new GetCategoriesQuery()));
     }
 }
 
