@@ -30,8 +30,7 @@ namespace BudgetFlow.Application.Category.Commands.CreateCategory
                 {
                     Name = request.Name,
                     Color = request.Color,
-                    UserID = getCurrentUser.GetCurrentUserID(),
-                    Type = request.Type
+                    UserID = getCurrentUser.GetCurrentUserID()
                 };
                 var response = await categoryRepository.CreateCategoryAsync(categoryDto);
                 return response;

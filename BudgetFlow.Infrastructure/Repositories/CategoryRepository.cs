@@ -30,8 +30,7 @@ namespace BudgetFlow.Infrastructure.Repositories
                 {
                     ID = c.ID,
                     Name = c.Name,
-                    Color = c.Color,
-                    Type = c.Type
+                    Color = c.Color
                 })
                 .ToListAsync();
         }
