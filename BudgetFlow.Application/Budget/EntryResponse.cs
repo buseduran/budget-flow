@@ -9,6 +9,6 @@ namespace BudgetFlow.Application.Budget
         public decimal Amount { get; set; }
         public DateTime Date { get; set; }
         public EntryType Type { get; set; }
-        public CategoryType Category { get; set; }
+        public string CategoryID { get; set; }
     }
 }

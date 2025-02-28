@@ -1,11 +1,13 @@
-﻿using BudgetFlow.Domain.Enums;
+﻿using BudgetFlow.Domain.Entities;
 
 namespace BudgetFlow.Application.Budget
 {
     public class GroupedEntry
     {
-        public CategoryType Category { get; set; }
+        public int CategoryID { get; set; }
+        public CategoryDto Category { get; set; }
         public decimal Amount { get; set; }
+        public string Color { get; set; }
     }
     public class GroupedEntriesResponse
     {

@@ -70,34 +70,37 @@ namespace BudgetFlow.Infrastructure.Repositories
             var groupedEntries = await context.Entries
                 .Where(e => e.UserID == userID &&
                            ((e.Date >= startDate && e.Date <= endDate) || (e.Date >= previousStartDate && e.Date <= previousEndDate)))
-                .GroupBy(e => new { e.CategoryType, e.Type, Period = e.Date >= startDate ? "Current" : "Previous" })
+                .Include(c => c.Category)
+                .GroupBy(e => new { e.CategoryID, e.Category.Color, e.Type, Period = e.Date >= startDate ? "Current" : "Previous" })
                 .Select(g => new
                 {
-                    g.Key.CategoryType,
+                    g.Key.CategoryID,
+                    g.Key.Color,
                     g.Key.Type,
                     g.Key.Period,
-                    Amount = g.Sum(e => e.Amount)
+                    Amount = g.Sum(e => e.Amount),
                 })
                 .ToListAsync();
 
             var entryDictionary = groupedEntries
-                .GroupBy(e => new { e.CategoryType, e.Type })
+                .GroupBy(e => new { e.CategoryID, e.Type, e.Color })
                 .ToDictionary(
                     g => g.Key,
                     g => new
                     {
+                        Color = g.Key.Color,
                         CurrentAmount = g.FirstOrDefault(e => e.Period == "Current")?.Amount ?? 0,
                         PreviousAmount = g.FirstOrDefault(e => e.Period == "Previous")?.Amount ?? 0
                     });
 
             var incomes = entryDictionary
                 .Where(e => e.Key.Type == EntryType.Income)
-                .Select(e => new GroupedEntry { Category = e.Key.CategoryType, Amount = e.Value.CurrentAmount })
+                .Select(e => new GroupedEntry { CategoryID = e.Key.CategoryID, Color = e.Value.Color, Amount = e.Value.CurrentAmount })
                 .ToList();
 
             var expenses = entryDictionary
                 .Where(e => e.Key.Type == EntryType.Expense)
-                .Select(e => new GroupedEntry { Category = e.Key.CategoryType, Amount = e.Value.CurrentAmount })
+                .Select(e => new GroupedEntry { CategoryID = e.Key.CategoryID, Color = e.Value.Color, Amount = e.Value.CurrentAmount })
                 .ToList();
 
             #region Calculate Trending

@@ -1,9 +1,7 @@
 services:
   budgetflow.api:
     image: ${DOCKER_REGISTRY-}budgetflowapi
-    ports:
-      - "50380:8080"
-      - "50381:8081"   
     build:
       context: .
       dockerfile: BudgetFlow.API/Dockerfile
+  

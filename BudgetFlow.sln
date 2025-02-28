@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BudgetFlow.Infrastructure",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BudgetFlow.API", "BudgetFlow.API\BudgetFlow.API.csproj", "{48472E12-057D-4E1C-9C4E-627139C69757}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{965624A1-DC72-43CE-BFFC-BE8C1787A7B3}"
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,10 @@ Global
 		{48472E12-057D-4E1C-9C4E-627139C69757}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48472E12-057D-4E1C-9C4E-627139C69757}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48472E12-057D-4E1C-9C4E-627139C69757}.Release|Any CPU.Build.0 = Release|Any CPU
-		{965624A1-DC72-43CE-BFFC-BE8C1787A7B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{965624A1-DC72-43CE-BFFC-BE8C1787A7B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{965624A1-DC72-43CE-BFFC-BE8C1787A7B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{965624A1-DC72-43CE-BFFC-BE8C1787A7B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
