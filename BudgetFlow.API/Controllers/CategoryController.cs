@@ -1,5 +1,9 @@
-﻿using BudgetFlow.Application.Category;
+﻿using BudgetFlow.Application.Budget.Commands.DeleteEntry;
+using BudgetFlow.Application.Budget.Commands.UpdateEntry;
+using BudgetFlow.Application.Category;
 using BudgetFlow.Application.Category.Commands.CreateCategory;
+using BudgetFlow.Application.Category.Commands.DeleteCategory;
+using BudgetFlow.Application.Category.Commands.UpdateCategory;
 using BudgetFlow.Application.Category.Queries.GetCategories;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -41,6 +45,31 @@ public class CategoryController : ControllerBase
     public async Task<IActionResult> GetCategoriesAsync()
     {
         return Ok(await mediator.Send(new GetCategoriesQuery()));
+    }
+
+    /// <summary>
+    /// Updates a Category. 
+    /// </summary>
+    /// <param name="updateCategoryCommand"></param>
+    /// <returns></returns>
+    [HttpPut]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    public async Task<IActionResult> UpdateEntryAsync([FromBody] UpdateCategoryCommand updateCategoryCommand)
+    {
+        return Ok(await mediator.Send(updateCategoryCommand));
+    }
+    /// <summary>
+    /// Deletes a Category. 
+    /// </summary>
+    /// <param name="deleteEntdeleteCategoryCommandyCommand"></param>
+    /// <returns></returns>
+    [HttpDelete("{ID}")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    public async Task<IActionResult> DeleteEntryAsync([FromRoute] int ID)
+    {
+        return Ok(await mediator.Send(new DeleteCategoryCommand(ID)));
     }
 }
 

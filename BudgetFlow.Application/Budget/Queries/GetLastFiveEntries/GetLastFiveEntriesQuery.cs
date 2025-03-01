@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace BudgetFlow.Application.Budget.Queries.GetLastFiveEntries
 {
-    public class GetLastFiveEntriesQuery : IRequest<List<EntryResponse>>
+    public class GetLastFiveEntriesQuery : IRequest<List<LastEntryResponse>>
     {
-        public class GetLastFiveEntriesQueryHandler : IRequestHandler<GetLastFiveEntriesQuery, List<EntryResponse>>
+        public class GetLastFiveEntriesQueryHandler : IRequestHandler<GetLastFiveEntriesQuery, List<LastEntryResponse>>
         {
             private readonly IBudgetRepository _budgetRepository;
             private readonly IHttpContextAccessor _httpContextAccessor;
@@ -16,7 +16,7 @@ namespace BudgetFlow.Application.Budget.Queries.GetLastFiveEntries
                 _budgetRepository = budgetRepository;
                 _httpContextAccessor = httpContextAccessor;
             }
-            public async Task<List<EntryResponse>> Handle(GetLastFiveEntriesQuery request, CancellationToken cancellationToken)
+            public async Task<List<LastEntryResponse>> Handle(GetLastFiveEntriesQuery request, CancellationToken cancellationToken)
             {
                 GetCurrentUser getCurrentUser = new(_httpContextAccessor);
                 int userID = getCurrentUser.GetCurrentUserID();

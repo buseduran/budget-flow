@@ -85,7 +85,7 @@ public class BudgetController : ControllerBase
     [HttpGet]
     [Route("LastFive")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<EntryResponse>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<LastEntryResponse>))]
     public async Task<IActionResult> GetLastFiveEntriesAsync()
     {
         return Ok(await mediator.Send(new GetLastFiveEntriesQuery()));

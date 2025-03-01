@@ -1,4 +1,5 @@
-﻿using BudgetFlow.Application.Category;
+﻿using AutoMapper;
+using BudgetFlow.Application.Category;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure.Contexts;
@@ -26,6 +27,7 @@ namespace BudgetFlow.Infrastructure.Repositories
         public async Task<IEnumerable<CategoryResponse>> GetCategoriesAsync()
         {
             return await context.Categories
+                .OrderByDescending(c => c.CreatedAt) 
                 .Select(c => new CategoryResponse
                 {
                     ID = c.ID,
@@ -33,6 +35,24 @@ namespace BudgetFlow.Infrastructure.Repositories
                     Color = c.Color
                 })
                 .ToListAsync();
+        }
+
+        public async Task<bool> UpdateCategoryAsync(int ID, string Color)
+        {
+            var category = await context.Categories.FindAsync(ID);
+            if (category is null) return false;
+
+            category.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+            category.Color = Color;
+
+            return await context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> DeleteCategoryAsync(int ID)
+        {
+            return await context.Categories
+                    .Where(e => e.ID == ID)
+                    .ExecuteDeleteAsync() > 0;
         }
     }
 }

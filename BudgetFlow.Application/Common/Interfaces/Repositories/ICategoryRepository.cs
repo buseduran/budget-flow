@@ -7,5 +7,7 @@ namespace BudgetFlow.Application.Common.Interfaces.Repositories
     {
         Task<bool> CreateCategoryAsync(CategoryDto categoryDto);
         Task<IEnumerable<CategoryResponse>> GetCategoriesAsync();
+        Task<bool> UpdateCategoryAsync(int ID, string Color);
+        Task<bool> DeleteCategoryAsync(int ID);
     }
 }

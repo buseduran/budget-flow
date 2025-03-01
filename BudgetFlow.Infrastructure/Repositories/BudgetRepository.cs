@@ -49,6 +49,7 @@ namespace BudgetFlow.Infrastructure.Repositories
         public async Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID)
         {
             var entries = await context.Entries
+                .OrderByDescending(c => c.CreatedAt)
                 .Skip((Page - 1) * PageSize)
                 .Take(PageSize)
                 .Where(u => u.UserID == UserID)
@@ -150,14 +151,26 @@ namespace BudgetFlow.Infrastructure.Repositories
             };
         }
 
-        public async Task<List<EntryResponse>> GetLastFiveEntriesAsync(int userID)
+        public async Task<List<LastEntryResponse>> GetLastFiveEntriesAsync(int userID)
         {
             var entries = await context.Entries
                 .Where(e => e.UserID == userID)
+                .Include(e => e.Category) 
                 .OrderByDescending(e => e.CreatedAt)
                 .Take(5)
+                .Select(e => new LastEntryResponse
+                {
+                    ID = e.ID.ToString(),
+                    Name = e.Name,
+                    Amount = e.Amount,
+                    Date = e.Date,
+                    Type = e.Type,
+                    CategoryName = e.Category.Name 
+                })
                 .ToListAsync();
-            return mapper.Map<List<EntryResponse>>(entries);
+
+            return entries;
         }
+
     }
 }
