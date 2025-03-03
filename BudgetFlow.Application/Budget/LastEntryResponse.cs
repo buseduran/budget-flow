@@ -4,7 +4,7 @@ namespace BudgetFlow.Application.Budget
 {
     public class LastEntryResponse
     {
-        public string ID { get; set; }
+        public int ID { get; set; }
         public string Name { get; set; }
         public decimal Amount { get; set; }
         public DateTime Date { get; set; }

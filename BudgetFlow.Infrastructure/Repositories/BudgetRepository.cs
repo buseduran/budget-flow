@@ -155,22 +155,21 @@ namespace BudgetFlow.Infrastructure.Repositories
         {
             var entries = await context.Entries
                 .Where(e => e.UserID == userID)
-                .Include(e => e.Category) 
+                .Include(e => e.Category)
                 .OrderByDescending(e => e.CreatedAt)
                 .Take(5)
                 .Select(e => new LastEntryResponse
                 {
-                    ID = e.ID.ToString(),
+                    ID = e.ID,
                     Name = e.Name,
                     Amount = e.Amount,
                     Date = e.Date,
                     Type = e.Type,
-                    CategoryName = e.Category.Name 
+                    CategoryName = e.Category.Name
                 })
                 .ToListAsync();
 
             return entries;
         }
-
     }
 }
