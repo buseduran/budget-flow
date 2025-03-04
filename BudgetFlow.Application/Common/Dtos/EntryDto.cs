@@ -1,8 +1,8 @@
 ﻿using BudgetFlow.Domain.Enums;
 
-namespace BudgetFlow.Application.Common.Models
+namespace BudgetFlow.Application.Common.Dtos
 {
-    public class EntryModel
+    public class EntryDto
     {
         public string Name { get; set; }
         public decimal Amount { get; set; }

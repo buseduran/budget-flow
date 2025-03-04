@@ -1,5 +1,5 @@
-﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
-using BudgetFlow.Application.Common.Models;
+﻿using BudgetFlow.Application.Common.Dtos;
+using BudgetFlow.Application.Common.Interfaces.Repositories;
 using MediatR;
 
 namespace BudgetFlow.Application.Budget.Commands.UpdateEntry
@@ -7,7 +7,7 @@ namespace BudgetFlow.Application.Budget.Commands.UpdateEntry
     public class UpdateEntryCommand : IRequest<bool>
     {
         public int ID { get; set; }
-        public EntryModel Entry { get; set; }
+        public EntryDto Entry { get; set; }
         public class UpdateEntryCommandHandler : IRequestHandler<UpdateEntryCommand, bool>
         {
             private readonly IBudgetRepository budgetRepository;

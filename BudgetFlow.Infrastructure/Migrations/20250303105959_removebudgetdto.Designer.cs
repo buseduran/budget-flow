@@ -3,6 +3,7 @@ using System;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BudgetFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(BudgetContext))]
-    partial class BudgetContextModelSnapshot : ModelSnapshot
+    [Migration("20250303105959_removebudgetdto")]
+    partial class removebudgetdto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,66 +46,6 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("RefreshTokens");
-                });
-
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.AssetDto", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<int>("AssetTypeId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("CurrentPrice")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("AssetTypeId");
-
-                    b.ToTable("Assets");
-                });
-
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.AssetTypeDto", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("AssetTypes");
                 });
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.CategoryDto", b =>
@@ -179,44 +122,6 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.ToTable("Entries");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.InvestmentDto", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("AssetId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("PortfolioId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("PurchaseDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("PurchasePrice")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("AssetId");
-
-                    b.HasIndex("PortfolioId");
-
-                    b.ToTable("Investments");
-                });
-
             modelBuilder.Entity("BudgetFlow.Domain.Entities.LogDto", b =>
                 {
                     b.Property<int>("ID")
@@ -246,37 +151,6 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("Logs");
-                });
-
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.PortfolioDto", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Portfolios");
                 });
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.UserDto", b =>
@@ -324,17 +198,6 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.AssetDto", b =>
-                {
-                    b.HasOne("BudgetFlow.Domain.Entities.AssetTypeDto", "AssetType")
-                        .WithMany("Assets")
-                        .HasForeignKey("AssetTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AssetType");
-                });
-
             modelBuilder.Entity("BudgetFlow.Domain.Entities.CategoryDto", b =>
                 {
                     b.HasOne("BudgetFlow.Domain.Entities.UserDto", "User")
@@ -365,25 +228,6 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.InvestmentDto", b =>
-                {
-                    b.HasOne("BudgetFlow.Domain.Entities.AssetDto", "Asset")
-                        .WithMany("Investments")
-                        .HasForeignKey("AssetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BudgetFlow.Domain.Entities.PortfolioDto", "Portfolio")
-                        .WithMany("Investments")
-                        .HasForeignKey("PortfolioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Asset");
-
-                    b.Navigation("Portfolio");
-                });
-
             modelBuilder.Entity("BudgetFlow.Domain.Entities.LogDto", b =>
                 {
                     b.HasOne("BudgetFlow.Domain.Entities.UserDto", "User")
@@ -395,37 +239,9 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.PortfolioDto", b =>
-                {
-                    b.HasOne("BudgetFlow.Domain.Entities.UserDto", "User")
-                        .WithMany("Portfolios")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.AssetDto", b =>
-                {
-                    b.Navigation("Investments");
-                });
-
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.AssetTypeDto", b =>
-                {
-                    b.Navigation("Assets");
-                });
-
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.PortfolioDto", b =>
-                {
-                    b.Navigation("Investments");
-                });
-
             modelBuilder.Entity("BudgetFlow.Domain.Entities.UserDto", b =>
                 {
                     b.Navigation("Logs");
-
-                    b.Navigation("Portfolios");
                 });
 #pragma warning restore 612, 618
         }

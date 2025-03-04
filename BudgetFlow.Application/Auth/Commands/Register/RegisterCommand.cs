@@ -26,7 +26,7 @@ public class RegisterCommand : IRequest<bool>
             {
                 throw new Exception("Passwords do not match");
             }
-            UserDto user = new UserDto()
+            User user = new User()
             {
                 Name = request.User.Name,
                 Email = request.User.Email,

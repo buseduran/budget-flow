@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using BudgetFlow.Application.Budget;
+using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
-using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
@@ -19,7 +19,7 @@ namespace BudgetFlow.Infrastructure.Repositories
             this.context = context;
             this.mapper = mapper;
         }
-        public async Task<bool> CreateEntryAsync(EntryDto Entry)
+        public async Task<bool> CreateEntryAsync(EntryEntity Entry)
         {
             Entry.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
             Entry.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
@@ -28,7 +28,7 @@ namespace BudgetFlow.Infrastructure.Repositories
             await context.Entries.AddAsync(Entry);
             return await context.SaveChangesAsync() > 0;
         }
-        public async Task<bool> UpdateEntryAsync(int ID, EntryModel Entry)
+        public async Task<bool> UpdateEntryAsync(int ID, EntryDto Entry)
         {
             var entry = await context.Entries.FindAsync(ID);
             if (entry is null) return false;

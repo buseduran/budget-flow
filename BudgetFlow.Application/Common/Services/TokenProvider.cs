@@ -11,7 +11,7 @@ using System.Text;
 namespace BudgetFlow.Application.Common.Services;
 public sealed class TokenProvider(IConfiguration configuration) : ITokenProvider
 {
-    public string Create(UserDto user)
+    public string Create(User user)
     {
         string secretKey = configuration["Jwt:Secret"];
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));

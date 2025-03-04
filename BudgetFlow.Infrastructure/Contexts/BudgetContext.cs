@@ -10,16 +10,19 @@ namespace BudgetFlow.Infrastructure.Contexts
         private readonly string connectionString = configuration.GetConnectionString("DbConnection");
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql(connectionString);
 
-        public DbSet<UserDto> Users { get; set; }
-        public DbSet<BudgetDto> Budgets { get; set; }
-        public DbSet<LogDto> Logs { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Log> Logs { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
-        public DbSet<EntryDto> Entries { get; set; }
-        public DbSet<CategoryDto> Categories { get; set; }
+        public DbSet<EntryEntity> Entries { get; set; }
+        public DbSet<CategoryEntity> Categories { get; set; }
+        public DbSet<Asset> Assets { get; set; }
+        public DbSet<AssetTypeEntity> AssetTypes { get; set; }
+        public DbSet<Portfolio> Portfolios { get; set; }
+        public DbSet<Investment> Investments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<UserDto>()
+            modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
         }

@@ -18,7 +18,7 @@ public class UserRepository : IUserRepository
         this.mapper = mapper;
     }
 
-    public async Task<bool> CreateAsync(UserDto user)
+    public async Task<bool> CreateAsync(User user)
     {
         user.CreatedAt = DateTime.UtcNow;
         user.UpdatedAt = DateTime.UtcNow;
@@ -59,7 +59,7 @@ public class UserRepository : IUserRepository
         user.Email = Email;
         user.PasswordHash = PasswordHash;
 
-        var userDto = mapper.Map<UserDto>(user);
+        var userDto = mapper.Map<User>(user);
         context.Users.Update(userDto);
         return await context.SaveChangesAsync() > 0;
     }
@@ -106,7 +106,7 @@ public class UserRepository : IUserRepository
         user.Name = Name;
         user.Email = Email;
 
-        var userDto = mapper.Map<UserDto>(user);
+        var userDto = mapper.Map<User>(user);
         context.Users.Update(userDto);
         return await context.SaveChangesAsync() > 0;
     }

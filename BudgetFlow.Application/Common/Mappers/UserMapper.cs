@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BudgetFlow.Application.Auth;
+using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Domain.Entities;
 
@@ -8,8 +9,8 @@ public class UserMapper : Profile
 {
     public UserMapper()
     {
-        CreateMap<UserRegisterModel, UserDto>().ReverseMap();
-        CreateMap<UserResponse, UserDto>().ReverseMap();
-        CreateMap<EntryModel, EntryDto>().ReverseMap();
+        CreateMap<UserRegisterModel, User>().ReverseMap();
+        CreateMap<UserResponse, User>().ReverseMap();
+        CreateMap<EntryDto, EntryEntity>().ReverseMap();
     }
 }

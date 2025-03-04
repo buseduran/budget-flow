@@ -5,7 +5,7 @@ namespace BudgetFlow.Application.Budget
     public class GroupedEntry
     {
         public int CategoryID { get; set; }
-        public CategoryDto Category { get; set; }
+        public Domain.Entities.CategoryEntity Category { get; set; }
         public string CategoryName { get; set; }
         public decimal Amount { get; set; }
         public string Color { get; set; }

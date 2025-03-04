@@ -9,6 +9,6 @@ namespace BudgetFlow.Application.Common.Models
         public DateTime Expiration { get; set; }
 
         public int UserID { get; set; }
-        public UserDto User { get; set; }
+        public User User { get; set; }
     }
 }

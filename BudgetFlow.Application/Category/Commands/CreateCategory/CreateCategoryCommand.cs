@@ -26,7 +26,7 @@ namespace BudgetFlow.Application.Category.Commands.CreateCategory
             {
                 GetCurrentUser getCurrentUser = new(httpContextAccessor);
 
-                CategoryDto categoryDto = new CategoryDto
+                Domain.Entities.CategoryEntity categoryDto = new Domain.Entities.CategoryEntity
                 {
                     Name = request.Name,
                     Color = request.Color,

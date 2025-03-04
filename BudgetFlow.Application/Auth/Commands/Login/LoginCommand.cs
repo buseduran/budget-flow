@@ -51,7 +51,7 @@ public sealed record LoginCommand(string Email, string Password) : IRequest<Resp
             else
             {
                 #region Create Tokens
-                var userDto = mapper.Map<UserDto>(user);
+                var userDto = mapper.Map<User>(user);
                 accessToken = tokenProvider.Create(userDto);
 
                 refreshToken = new RefreshToken

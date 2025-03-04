@@ -15,7 +15,7 @@ namespace BudgetFlow.Infrastructure.Repositories
             this.context = context;
         }
 
-        public async Task<bool> CreateCategoryAsync(CategoryDto Category)
+        public async Task<bool> CreateCategoryAsync(CategoryEntity Category)
         {
             Category.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
             Category.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);

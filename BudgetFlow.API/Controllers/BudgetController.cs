@@ -24,7 +24,7 @@ public class BudgetController : ControllerBase
     }
 
     /// <summary>
-    /// Records a Budget Entry. 
+    /// Creates a Budget Entry. 
     /// </summary>
     /// <param name="createEntryCommand"></param>
     /// <returns></returns>

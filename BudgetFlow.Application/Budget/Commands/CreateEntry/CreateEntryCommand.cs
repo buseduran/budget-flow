@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
+using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
-using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
 using MediatR;
@@ -10,7 +10,7 @@ namespace BudgetFlow.Application.Budget.Commands.CreateEntry
 {
     public class CreateEntryCommand : IRequest<bool>
     {
-        public EntryModel Entry { get; set; }
+        public EntryDto Entry { get; set; }
         public class CreateEntryCommandHandler : IRequestHandler<CreateEntryCommand, bool>
         {
             private readonly IBudgetRepository budgetRepository;
@@ -25,7 +25,7 @@ namespace BudgetFlow.Application.Budget.Commands.CreateEntry
 
             public async Task<bool> Handle(CreateEntryCommand request, CancellationToken cancellationToken)
             {
-                var mappedEntry = mapper.Map<EntryDto>(request.Entry);
+                var mappedEntry = mapper.Map<EntryEntity>(request.Entry);
                 GetCurrentUser getCurrentUser = new(httpContextAccessor);
                 mappedEntry.UserID = getCurrentUser.GetCurrentUserID();
 
