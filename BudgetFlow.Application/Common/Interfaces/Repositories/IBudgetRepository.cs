@@ -7,7 +7,7 @@ namespace BudgetFlow.Application.Common.Interfaces.Repositories
 {
     public interface IBudgetRepository
     {
-        Task<bool> CreateEntryAsync(EntryEntity Entry);
+        Task<bool> CreateEntryAsync(Entry Entry);
         Task<bool> UpdateEntryAsync(int ID, EntryDto Entry);
         Task<bool> DeleteEntryAsync(int ID);
         Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID);

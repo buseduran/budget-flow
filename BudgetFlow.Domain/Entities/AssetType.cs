@@ -2,7 +2,7 @@
 
 namespace BudgetFlow.Domain.Entities
 {
-    public class AssetTypeEntity : BaseEntity
+    public class AssetType : BaseEntity
     {
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }

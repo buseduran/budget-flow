@@ -1,4 +1,4 @@
-﻿using BudgetFlow.Application.Asset.Commands.CreateAsset;
+﻿using BudgetFlow.Application.Assets.Commands.CreateAsset;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

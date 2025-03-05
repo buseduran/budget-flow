@@ -2,7 +2,7 @@
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using MediatR;
 
-namespace BudgetFlow.Application.AssetType.Commands.CreateAssetType
+namespace BudgetFlow.Application.AssetTypes.Commands.CreateAssetType
 {
     public class CreateAssetTypeCommand : IRequest<bool>
     {

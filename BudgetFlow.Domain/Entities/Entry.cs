@@ -3,7 +3,7 @@ using BudgetFlow.Domain.Enums;
 
 namespace BudgetFlow.Domain.Entities
 {
-    public class EntryEntity : BaseEntity
+    public class Entry : BaseEntity
     {
         public string Name { get; set; }
         public decimal Amount { get; set; }

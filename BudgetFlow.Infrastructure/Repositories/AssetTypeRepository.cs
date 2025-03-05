@@ -16,13 +16,25 @@ namespace BudgetFlow.Infrastructure.Repositories
             this.mapper = mapper;
         }
 
-        public async Task<bool> CreateAssetTypeAsync(AssetTypeEntity AssetType)
+        public async Task<bool> CreateAssetTypeAsync(AssetTypeDto AssetType)
         {
             AssetType.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
             AssetType.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+            AssetType assetType = mapper.Map<AssetType>(AssetType);
 
-            await context.AssetTypes.AddAsync(AssetType);
+            await context.AssetTypes.AddAsync(assetType);
             return await context.SaveChangesAsync() > 0;
         }
+        public async Task<bool> UpdateAssetTypeAsync(int ID, AssetTypeDto AssetType)
+        {
+            var assetType = await context.AssetTypes.FindAsync(ID);
+            if (assetType is null) return false;
+
+            mapper.Map(AssetType, assetType);
+            assetType.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+
+            return await context.SaveChangesAsync() > 0;
+        }
+
     }
 }

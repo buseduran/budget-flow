@@ -8,8 +8,8 @@ namespace BudgetFlow.Application.Common.Mappers
     {
         public EntryMapper()
         {
-            CreateMap<EntryResponse, EntryEntity>();
-            CreateMap<EntryEntity, EntryResponse>();
+            CreateMap<EntryResponse, Entry>();
+            CreateMap<Entry, EntryResponse>();
         }
     }
 }

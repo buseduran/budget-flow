@@ -19,7 +19,7 @@ namespace BudgetFlow.Infrastructure.Repositories
             this.context = context;
             this.mapper = mapper;
         }
-        public async Task<bool> CreateEntryAsync(EntryEntity Entry)
+        public async Task<bool> CreateEntryAsync(Entry Entry)
         {
             Entry.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
             Entry.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
