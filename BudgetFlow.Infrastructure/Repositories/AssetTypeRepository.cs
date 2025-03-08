@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using BudgetFlow.Application.AssetTypes;
 using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace BudgetFlow.Infrastructure.Repositories
 {
@@ -16,7 +18,7 @@ namespace BudgetFlow.Infrastructure.Repositories
             this.mapper = mapper;
         }
 
-        public async Task<bool> CreateAssetTypeAsync(AssetTypeDto AssetType)
+        public async Task<bool> CreateAssetTypeAsync(AssetType AssetType)
         {
             AssetType.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
             AssetType.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
@@ -25,6 +27,7 @@ namespace BudgetFlow.Infrastructure.Repositories
             await context.AssetTypes.AddAsync(assetType);
             return await context.SaveChangesAsync() > 0;
         }
+
         public async Task<bool> UpdateAssetTypeAsync(int ID, AssetTypeDto AssetType)
         {
             var assetType = await context.AssetTypes.FindAsync(ID);
@@ -36,5 +39,23 @@ namespace BudgetFlow.Infrastructure.Repositories
             return await context.SaveChangesAsync() > 0;
         }
 
+        public async Task<bool> DeleteAssetTypeAsync(int ID)
+        {
+            return await context.AssetTypes
+                  .Where(e => e.ID == ID)
+                  .ExecuteDeleteAsync() > 0;
+        }
+
+        public async Task<IEnumerable<AssetTypeResponse>> GetAssetTypesAsync()
+        {
+            var assetTypes = await context.AssetTypes
+                .Select(e => new AssetTypeResponse
+                {
+                    ID = e.ID,
+                    Name = e.Name,
+                    Description = e.Description
+                }).ToListAsync();
+            return assetTypes;
+        }
     }
 }

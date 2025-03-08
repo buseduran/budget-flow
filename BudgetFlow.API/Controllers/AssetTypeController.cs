@@ -1,7 +1,8 @@
-﻿using BudgetFlow.Application.AssetTypes.Commands.CreateAssetType;
+﻿using BudgetFlow.Application.AssetTypes;
+using BudgetFlow.Application.AssetTypes.Commands.CreateAssetType;
+using BudgetFlow.Application.AssetTypes.Commands.DeleteAssetType;
 using BudgetFlow.Application.AssetTypes.Commands.UpdateAssetType;
-using BudgetFlow.Application.Budget.Commands.DeleteEntry;
-using BudgetFlow.Application.Budget.Commands.UpdateEntry;
+using BudgetFlow.Application.AssetTypes.Queries.GetAssetTypes;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,32 +33,41 @@ public class AssetTypeController : ControllerBase
     }
 
     /// <summary>
-    /// Updates a Asset Type. 
+    /// Updates an Asset Type. 
     /// </summary>
     /// <param name="updateAssetTypeCommand"></param>
     /// <returns></returns>
     [HttpPut]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IActionResult> UpdateEntryAsync([FromBody] UpdateAssetTypeCommand updateAssetTypeCommand)
+    public async Task<IActionResult> UpdateAssetTypeAsync([FromBody] UpdateAssetTypeCommand updateAssetTypeCommand)
     {
         return Ok(await mediator.Send(updateAssetTypeCommand));
     }
 
-
+    /// <summary>
+    /// Deletes an Asset Type. 
+    /// </summary>
+    /// <param name="deleteAssetTypeCommand"></param>
+    /// <returns></returns>
+    [HttpDelete]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    public async Task<IActionResult> DeleteAssetTypeAsync([FromBody] DeleteAssetTypeCommand deleteAssetTypeCommand)
+    {
+        return Ok(await mediator.Send(deleteAssetTypeCommand));
+    }
 
     /// <summary>
-    /// Deletes a Budget Entry. 
+    /// Get List of Asset Types. 
     /// </summary>
-    /// <param name="deleteEntryCommand"></param>
+    /// <param name="deleteAssetTypeCommand"></param>
     /// <returns></returns>
-    //[HttpDelete]
-    //[Produces(MediaTypeNames.Application.Json)]
-    //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    //public async Task<IActionResult> DeleteEntryAsync([FromBody] DeleteEntryCommand deleteEntryCommand)
-    //{
-    //    return Ok(await mediator.Send(deleteEntryCommand));
-    //}
-
-
+    [HttpGet]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AssetTypeResponse>))]
+    public async Task<IActionResult> GetAssetTypesAsync()
+    {
+        return Ok(await mediator.Send(new GetAssetTypesQuery()));
+    }
 }

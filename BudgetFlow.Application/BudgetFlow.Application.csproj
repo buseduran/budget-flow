@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Assets\Queries\GetAssetPagination\" />
     <Folder Include="Auth\Queries\" />
   </ItemGroup>
 

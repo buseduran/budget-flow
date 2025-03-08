@@ -29,7 +29,18 @@ public class AssetController : ControllerBase
         return Ok(await mediator.Send(createAssetCommand));
     }
 
-
+    /// <summary>
+    /// Updates an Asset. 
+    /// </summary>
+    /// <param name="updateAssetCommand"></param>
+    /// <returns></returns>
+    [HttpPut]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    public async Task<IActionResult> UpdateAssetTypeAsync([FromBody] UpdateAssetCommand updateAssetCommand)
+    {
+        return Ok(await mediator.Send(updateAssetCommand));
+    }
 
 }
 

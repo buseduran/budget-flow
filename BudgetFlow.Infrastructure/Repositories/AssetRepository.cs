@@ -1,7 +1,12 @@
 ﻿using AutoMapper;
+using BudgetFlow.Application.Assets;
+using BudgetFlow.Application.Budget;
+using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace BudgetFlow.Infrastructure.Repositories
 {
@@ -21,6 +26,36 @@ namespace BudgetFlow.Infrastructure.Repositories
 
             await context.Assets.AddAsync(Asset);
             return await context.SaveChangesAsync() > 0;
+        }
+        public async Task<bool> UpdateAssetAsync(int ID, AssetDto Asset)
+        {
+            var asset = await context.Assets.FindAsync(ID);
+            if (asset is null) return false;
+
+            mapper.Map(Asset, asset);
+            asset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+
+            return await context.SaveChangesAsync() > 0;
+        }
+        public async Task<bool> DeleteAssetAsync(int ID)
+        {
+            return await context.Assets
+                    .Where(e => e.ID == ID)
+                    .ExecuteDeleteAsync() > 0;
+        }
+
+        public async Task<PaginatedList<AssetResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID)
+        {
+            var assets = await context.Assets
+                .OrderByDescending(c => c.CreatedAt)
+                .Skip((Page - 1) * PageSize)
+                .Take(PageSize)
+                .ToListAsync();
+            var count = await context.Assets.CountAsync();
+
+            var assetsResponse = mapper.Map<List<AssetResponse>>(assets);
+
+            return new PaginatedList<AssetResponse>(assetsResponse, count, Page, PageSize);
         }
     }
 }
