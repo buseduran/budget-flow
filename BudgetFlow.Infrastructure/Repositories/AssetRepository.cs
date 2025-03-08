@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using BudgetFlow.Application.Assets;
-using BudgetFlow.Application.Budget;
 using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Utils;
@@ -44,7 +43,7 @@ namespace BudgetFlow.Infrastructure.Repositories
                     .ExecuteDeleteAsync() > 0;
         }
 
-        public async Task<PaginatedList<AssetResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID)
+        public async Task<PaginatedList<AssetResponse>> GetPaginatedAsync(int Page, int PageSize)
         {
             var assets = await context.Assets
                 .OrderByDescending(c => c.CreatedAt)

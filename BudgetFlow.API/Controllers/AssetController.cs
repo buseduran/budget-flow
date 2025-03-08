@@ -1,4 +1,9 @@
-﻿using BudgetFlow.Application.Assets.Commands.CreateAsset;
+﻿using BudgetFlow.Application.Assets;
+using BudgetFlow.Application.Assets.Commands.CreateAsset;
+using BudgetFlow.Application.Assets.Commands.DeleteAsset;
+using BudgetFlow.Application.Assets.Commands.UpdateAsset;
+using BudgetFlow.Application.Assets.Queries.GetAssetPagination;
+using BudgetFlow.Application.Common.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -41,6 +46,33 @@ public class AssetController : ControllerBase
     {
         return Ok(await mediator.Send(updateAssetCommand));
     }
+
+    /// <summary>
+    /// Deletes an Asset. 
+    /// </summary>
+    /// <param name="deleteAssetCommand"></param>
+    /// <returns></returns>
+    [HttpDelete("{ID}")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    public async Task<IActionResult> DeleteAssetAsync([FromRoute] int ID)
+    {
+        return Ok(await mediator.Send(new DeleteAssetCommand(ID)));
+    }
+
+    /// <summary>
+    /// Pages Assets. 
+    /// </summary>
+    /// <param name="getAssetPaginationQuery"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<AssetResponse>))]
+    public async Task<IActionResult> GetAssetsPaginationAsync([FromQuery] GetAssetPaginationQuery getAssetPaginationQuery)
+    {
+        return Ok(await mediator.Send(getAssetPaginationQuery));
+    }
+
 
 }
 
