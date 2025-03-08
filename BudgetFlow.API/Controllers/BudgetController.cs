@@ -73,6 +73,11 @@ public class BudgetController : ControllerBase
         return Ok(await mediator.Send(getEntryPaginationQuery));
     }
 
+    /// <summary>
+    /// Get Entries for Dashboard. 
+    /// </summary>
+    /// <param name="Range"></param>
+    /// <returns></returns>
     [HttpGet]
     [Route("Grouped")]
     [Produces(MediaTypeNames.Application.Json)]
@@ -82,6 +87,10 @@ public class BudgetController : ControllerBase
         return Ok(await mediator.Send(new GetGroupedEntriesQuery(Range)));
     }
 
+    /// <summary>
+    /// Get Last Entries for Dashboard. 
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     [Route("LastFive")]
     [Produces(MediaTypeNames.Application.Json)]

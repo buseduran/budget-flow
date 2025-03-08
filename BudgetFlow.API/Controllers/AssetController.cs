@@ -50,7 +50,7 @@ public class AssetController : ControllerBase
     /// <summary>
     /// Deletes an Asset. 
     /// </summary>
-    /// <param name="deleteAssetCommand"></param>
+    /// <param name="ID"></param>
     /// <returns></returns>
     [HttpDelete("{ID}")]
     [Produces(MediaTypeNames.Application.Json)]
