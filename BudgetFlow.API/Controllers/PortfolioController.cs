@@ -1,6 +1,8 @@
-﻿using MediatR;
+﻿using BudgetFlow.Application.Portfolios.Commands.CreatePortfolio;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mime;
 
 namespace BudgetFlow.API.Controllers;
 [ApiController]
@@ -14,6 +16,18 @@ public class PortfolioController : ControllerBase
         this.mediator = mediator;
     }
 
+    /// <summary>
+    /// Creates a Portfolio. 
+    /// </summary>
+    /// <param name="createPortfolioCommand"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    public async Task<IActionResult> CreatePortfolioAsync([FromBody] CreatePortfolioCommand createPortfolioCommand)
+    {
+        return Ok(await mediator.Send(createPortfolioCommand));
+    }
 
 }
 

@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using BudgetFlow.Application.AssetTypes;
+﻿using BudgetFlow.Application.AssetTypes;
 using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Domain.Entities;
@@ -11,20 +10,17 @@ namespace BudgetFlow.Infrastructure.Repositories
     public class AssetTypeRepository : IAssetTypeRepository
     {
         private readonly BudgetContext context;
-        private readonly IMapper mapper;
-        public AssetTypeRepository(BudgetContext context, IMapper mapper)
+        public AssetTypeRepository(BudgetContext context)
         {
             this.context = context;
-            this.mapper = mapper;
         }
 
         public async Task<bool> CreateAssetTypeAsync(AssetType AssetType)
         {
             AssetType.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
             AssetType.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-            AssetType assetType = mapper.Map<AssetType>(AssetType);
 
-            await context.AssetTypes.AddAsync(assetType);
+            await context.AssetTypes.AddAsync(AssetType);
             return await context.SaveChangesAsync() > 0;
         }
 
@@ -33,7 +29,6 @@ namespace BudgetFlow.Infrastructure.Repositories
             var assetType = await context.AssetTypes.FindAsync(ID);
             if (assetType is null) return false;
 
-            mapper.Map(AssetType, assetType);
             assetType.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
             return await context.SaveChangesAsync() > 0;

@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Folder Include="Auth\Queries\" />
+    <Folder Include="Portfolios\Queries\" />
   </ItemGroup>
 
   <ItemGroup>
