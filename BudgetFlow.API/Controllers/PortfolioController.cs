@@ -59,7 +59,6 @@ public class PortfolioController : ControllerBase
         return Ok(await mediator.Send(updatePortfolioCommand));
     }
 
-
     /// <summary>
     /// Get Portfolios. 
     /// </summary>

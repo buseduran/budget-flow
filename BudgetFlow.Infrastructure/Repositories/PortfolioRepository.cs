@@ -44,6 +44,7 @@ namespace BudgetFlow.Infrastructure.Repositories
 
             return await context.SaveChangesAsync() > 0;
         }
+
         public async Task<List<PortfolioResponse>> GetPortfoliosAsync(int UserID)
         {
             //calculate investments analysis here
