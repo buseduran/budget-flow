@@ -13,5 +13,8 @@ public static class ServiceRegistration
         services.AddScoped<IBudgetRepository, BudgetRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IAssetRepository, AssetRepository>();
+        services.AddScoped<IAssetTypeRepository, AssetTypeRepository>();
+        services.AddScoped<IInvestmentRepository, InvestmentRepository>();
+        services.AddScoped<IPortfolioRepository, PortfolioRepository>();
     }
 }
