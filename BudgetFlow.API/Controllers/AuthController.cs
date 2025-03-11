@@ -39,7 +39,7 @@ public class AuthController : ControllerBase
     [HttpPost("Login")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
-    public async Task<IActionResult> SigninAsync([FromBody] LoginCommand loginCommand)
+    public async Task<IActionResult> LoginAsync([FromBody] LoginCommand loginCommand)
     {
         return Ok(await mediator.Send(loginCommand));
     }

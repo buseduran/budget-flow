@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using BudgetFlow.Application.Common.Dtos;
+﻿using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
@@ -14,17 +13,19 @@ namespace BudgetFlow.Application.Portfolios.Commands.CreatePortfolio
         public class CreatePortfolioCommandHandler : IRequestHandler<CreatePortfolioCommand, bool>
         {
             private readonly IPortfolioRepository portfolioRepository;
-            private readonly IMapper mapper;
             private readonly IHttpContextAccessor httpContextAccessor;
-            public CreatePortfolioCommandHandler(IPortfolioRepository portfolioRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+            public CreatePortfolioCommandHandler(IPortfolioRepository portfolioRepository, IHttpContextAccessor httpContextAccessor)
             {
                 this.portfolioRepository = portfolioRepository;
-                this.mapper = mapper;
                 this.httpContextAccessor = httpContextAccessor;
             }
             public async Task<bool> Handle(CreatePortfolioCommand request, CancellationToken cancellationToken)
             {
-                var portfolio = mapper.Map<Portfolio>(request.Portfolio);
+                Portfolio portfolio = new()
+                {
+                    Name = request.Portfolio.Name,
+                    Description = request.Portfolio.Description
+                };
                 GetCurrentUser getCurrentUser = new(httpContextAccessor);
                 portfolio.UserID = getCurrentUser.GetCurrentUserID();
 
