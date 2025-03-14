@@ -75,12 +75,12 @@ public class PortfolioController : ControllerBase
     /// Get Portfolio. 
     /// </summary>
     /// <returns></returns>
-    [HttpGet("{ID}")]
+    [HttpGet("{Name}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<PortfolioResponse>))]
-    public async Task<IActionResult> GetPortfoliosAsync([FromRoute] int ID)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PortfolioResponse))]
+    public async Task<IActionResult> GetPortfolioAsync([FromRoute] string Name)
     {
-        return Ok(await mediator.Send(new GetPortfolioQuery(ID)));
+        return Ok(await mediator.Send(new GetPortfolioQuery(Name)));
     }
 
 }

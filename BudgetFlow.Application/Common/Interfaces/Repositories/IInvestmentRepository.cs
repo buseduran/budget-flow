@@ -10,5 +10,6 @@ namespace BudgetFlow.Application.Common.Interfaces.Repositories
         Task<bool> DeleteInvestmentAsync(int ID);
         Task<bool> UpdateInvestmentAsync(int ID, InvestmentDto investment);
         Task<List<InvestmentResponse>> GetInvestmentsAsync(int PortfolioID);
+        Task<List<LastInvestmentResponse>> GetLastInvestmentsAsync(string Portfolio);
     }
 }

@@ -10,6 +10,6 @@ namespace BudgetFlow.Application.Common.Interfaces.Repositories
         Task<bool> DeletePortfolioAsync(int ID);
         Task<bool> UpdatePortfolioAsync(int ID, PortfolioDto Portfolio);
         Task<List<PortfolioResponse>> GetPortfoliosAsync(int UserID);
-        Task<PortfolioResponse> GetPortfolioAsync(int ID);
+        Task<PortfolioResponse> GetPortfolioAsync(string Name);
     }
 }

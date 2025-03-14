@@ -3,11 +3,11 @@ using BudgetFlow.Application.Common.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace BudgetFlow.Application.Budget.Queries.GetLastFiveEntries
+namespace BudgetFlow.Application.Budget.Queries.GetLastEntries
 {
-    public class GetLastFiveEntriesQuery : IRequest<List<LastEntryResponse>>
+    public class GetLastEntriesQuery : IRequest<List<LastEntryResponse>>
     {
-        public class GetLastFiveEntriesQueryHandler : IRequestHandler<GetLastFiveEntriesQuery, List<LastEntryResponse>>
+        public class GetLastFiveEntriesQueryHandler : IRequestHandler<GetLastEntriesQuery, List<LastEntryResponse>>
         {
             private readonly IBudgetRepository _budgetRepository;
             private readonly IHttpContextAccessor _httpContextAccessor;
@@ -16,7 +16,7 @@ namespace BudgetFlow.Application.Budget.Queries.GetLastFiveEntries
                 _budgetRepository = budgetRepository;
                 _httpContextAccessor = httpContextAccessor;
             }
-            public async Task<List<LastEntryResponse>> Handle(GetLastFiveEntriesQuery request, CancellationToken cancellationToken)
+            public async Task<List<LastEntryResponse>> Handle(GetLastEntriesQuery request, CancellationToken cancellationToken)
             {
                 GetCurrentUser getCurrentUser = new(_httpContextAccessor);
                 int userID = getCurrentUser.GetCurrentUserID();

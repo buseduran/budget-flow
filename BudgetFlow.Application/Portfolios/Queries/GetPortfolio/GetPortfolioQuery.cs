@@ -5,10 +5,10 @@ namespace BudgetFlow.Application.Portfolios.Queries.GetPortfolio
 {
     public class GetPortfolioQuery : IRequest<PortfolioResponse>
     {
-        public int ID { get; set; }
-        public GetPortfolioQuery(int ID)
+        public string Name { get; set; }
+        public GetPortfolioQuery(string Name)
         {
-            this.ID = ID;
+            this.Name = Name;
         }
         public class GetPortfolioQueryHandler:IRequestHandler<GetPortfolioQuery, PortfolioResponse>
         {
@@ -19,15 +19,12 @@ namespace BudgetFlow.Application.Portfolios.Queries.GetPortfolio
             }
             public async Task<PortfolioResponse> Handle(GetPortfolioQuery request, CancellationToken cancellationToken)
             {
-                var portfolio = await portfolioRepository.GetPortfolioAsync(request.ID);
+                var portfolio = await portfolioRepository.GetPortfolioAsync(request.Name);
                 if (portfolio == null)
                 {
                     throw new Exception("Portfolio not found");
                 }
-                return new PortfolioResponse
-                {
-                   
-                };
+                return portfolio;
             }
         }
     }

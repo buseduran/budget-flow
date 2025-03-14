@@ -22,9 +22,11 @@ namespace BudgetFlow.Application.Investments.Commands.CreateInvestment
                 {
                     AssetId = request.Investment.AssetId,
                     Amount = request.Investment.Amount,
+                    Description = request.Investment.Description,
                     PurchaseDate = request.Investment.PurchaseDate,
-                    PortfolioId = request.Investment.PortfolioId
+                    PortfolioId = request.Investment.PortfolioId,
                 };
+                //gonna get the current price of the asset
                 var result = await investmentRepository.CreateInvestmentAsync(investment);
                 return result;
             }

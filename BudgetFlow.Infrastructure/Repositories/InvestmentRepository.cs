@@ -61,5 +61,26 @@ namespace BudgetFlow.Infrastructure.Repositories
                 }).ToListAsync();
             return investments;
         }
+
+        public async Task<List<LastInvestmentResponse>> GetLastInvestmentsAsync(string Portfolio)
+        {
+            var investments = await context.Investments
+               .Include(e => e.Portfolio)
+               .Where(e => e.Portfolio.Name == Portfolio)
+               .Include(e => e.Asset)
+               .OrderByDescending(e => e.CreatedAt)
+               .Take(5)
+               .Select(e => new LastInvestmentResponse
+               {
+                   ID = e.ID,
+                   Name = e.Asset.Name,
+                   Amount = e.Amount,
+                   Description = e.Description,
+                   CreatedAt = e.CreatedAt,
+                   UpdatedAt = e.UpdatedAt
+               })
+               .ToListAsync();
+            return investments;
+        }
     }
 }

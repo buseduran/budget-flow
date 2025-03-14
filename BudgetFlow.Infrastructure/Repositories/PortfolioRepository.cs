@@ -62,19 +62,19 @@ namespace BudgetFlow.Infrastructure.Repositories
             return portfolios;
         }
 
-        public async Task<PortfolioResponse> GetPortfolioAsync(int ID)
+        public async Task<PortfolioResponse> GetPortfolioAsync(string Name)
         {
-           var portfolio= await context.Portfolios
-                .Where(e => e.ID == ID)
-                .Include(e => e.Investments)
-                .Select(e => new PortfolioResponse
-                {
-                    ID = e.ID,
-                    Name = e.Name,
-                    Description = e.Description,
-                    TotalInvested = e.Investments.Sum(i => i.Amount)
-                })
-                .FirstOrDefaultAsync();
+            var portfolio = await context.Portfolios
+                 .Where(e => e.Name == Name)
+                 .Include(e => e.Investments)
+                 .Select(e => new PortfolioResponse
+                 {
+                     ID = e.ID,
+                     Name = e.Name,
+                     Description = e.Description,
+                     TotalInvested = e.Investments.Sum(i => i.Amount)
+                 })
+                 .FirstOrDefaultAsync();
             return portfolio;
         }
     }
