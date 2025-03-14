@@ -2,6 +2,7 @@
 using BudgetFlow.Application.Portfolios.Commands.CreatePortfolio;
 using BudgetFlow.Application.Portfolios.Commands.DeletePortfolio;
 using BudgetFlow.Application.Portfolios.Commands.UpdatePortfolio;
+using BudgetFlow.Application.Portfolios.Queries.GetPortfolio;
 using BudgetFlow.Application.Portfolios.Queries.GetPortfolios;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -70,4 +71,16 @@ public class PortfolioController : ControllerBase
     {
         return Ok(await mediator.Send(new GetPortfoliosQuery()));
     }
+    /// <summary>
+    /// Get Portfolio. 
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("{ID}")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<PortfolioResponse>))]
+    public async Task<IActionResult> GetPortfoliosAsync([FromRoute] int ID)
+    {
+        return Ok(await mediator.Send(new GetPortfolioQuery(ID)));
+    }
+
 }
