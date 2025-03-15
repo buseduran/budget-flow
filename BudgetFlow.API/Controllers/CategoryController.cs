@@ -1,10 +1,8 @@
-﻿using BudgetFlow.Application.Budget.Commands.DeleteEntry;
-using BudgetFlow.Application.Budget.Commands.UpdateEntry;
-using BudgetFlow.Application.Category;
-using BudgetFlow.Application.Category.Commands.CreateCategory;
-using BudgetFlow.Application.Category.Commands.DeleteCategory;
-using BudgetFlow.Application.Category.Commands.UpdateCategory;
-using BudgetFlow.Application.Category.Queries.GetCategories;
+﻿using BudgetFlow.Application.Categories;
+using BudgetFlow.Application.Categories.Commands.CreateCategory;
+using BudgetFlow.Application.Categories.Commands.DeleteCategory;
+using BudgetFlow.Application.Categories.Commands.UpdateCategory;
+using BudgetFlow.Application.Categories.Queries.GetCategories;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

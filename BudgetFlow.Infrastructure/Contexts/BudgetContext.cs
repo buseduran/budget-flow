@@ -14,7 +14,7 @@ namespace BudgetFlow.Infrastructure.Contexts
         public DbSet<Log> Logs { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Entry> Entries { get; set; }
-        public DbSet<CategoryEntity> Categories { get; set; }
+        public DbSet<Category> Categories { get; set; }
         public DbSet<Asset> Assets { get; set; }
         public DbSet<AssetType> AssetTypes { get; set; }
         public DbSet<Portfolio> Portfolios { get; set; }

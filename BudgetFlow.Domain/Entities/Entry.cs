@@ -14,6 +14,6 @@ namespace BudgetFlow.Domain.Entities
         public User User { get; set; }
 
         public int CategoryID { get; set; }
-        public CategoryEntity Category { get; set; }
+        public Category Category { get; set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using BudgetFlow.Application.Category;
+﻿using BudgetFlow.Application.Categories;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure.Contexts;
@@ -15,7 +14,7 @@ namespace BudgetFlow.Infrastructure.Repositories
             this.context = context;
         }
 
-        public async Task<bool> CreateCategoryAsync(CategoryEntity Category)
+        public async Task<bool> CreateCategoryAsync(Category Category)
         {
             Category.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
             Category.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
@@ -27,7 +26,7 @@ namespace BudgetFlow.Infrastructure.Repositories
         public async Task<IEnumerable<CategoryResponse>> GetCategoriesAsync()
         {
             return await context.Categories
-                .OrderByDescending(c => c.CreatedAt) 
+                .OrderByDescending(c => c.CreatedAt)
                 .Select(c => new CategoryResponse
                 {
                     ID = c.ID,
