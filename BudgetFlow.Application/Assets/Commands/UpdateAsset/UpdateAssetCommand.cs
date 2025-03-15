@@ -1,6 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 
 namespace BudgetFlow.Application.Assets.Commands.UpdateAsset
 {
@@ -8,6 +9,7 @@ namespace BudgetFlow.Application.Assets.Commands.UpdateAsset
     {
         public int ID { get; set; }
         public AssetDto Asset { get; set; }
+        public IFormFile Symbol { get; set; }
         public class UpdateAssetCommandHandler : IRequestHandler<UpdateAssetCommand, bool>
         {
             private readonly IAssetRepository assetRepository;
@@ -15,9 +17,16 @@ namespace BudgetFlow.Application.Assets.Commands.UpdateAsset
             {
                 this.assetRepository = assetRepository;
             }
-            public Task<bool> Handle(UpdateAssetCommand request, CancellationToken cancellationToken)
+            public async Task<bool> Handle(UpdateAssetCommand request, CancellationToken cancellationToken)
             {
-                var result = assetRepository.UpdateAssetAsync(request.ID, request.Asset);
+                if (request.Asset.Symbol != null && request.Asset.Symbol.Length > 0)
+                {
+                    using var memoryStream = new MemoryStream();
+                    await request.Symbol.CopyToAsync(memoryStream, cancellationToken);
+                    request.Asset.Symbol = Convert.ToBase64String(memoryStream.ToArray());
+                }
+                var result = await assetRepository.UpdateAssetAsync(request.ID, request.Asset);
+
                 return result;
             }
         }

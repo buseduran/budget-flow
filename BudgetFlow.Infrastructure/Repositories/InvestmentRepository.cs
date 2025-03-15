@@ -72,6 +72,9 @@ namespace BudgetFlow.Infrastructure.Repositories
                     Name = g.Key.Name,
                     Amount = g.Sum(e => e.Amount),
                     Description = g.OrderByDescending(e => e.CreatedAt).First().Description,
+                    Code = g.OrderByDescending(e => e.CreatedAt).First().Asset.Code,
+                    Unit = g.OrderByDescending(e => e.CreatedAt).First().Asset.Unit,
+                    Symbol = g.OrderByDescending(e => e.CreatedAt).First().Asset.Symbol,
                     CreatedAt = g.Max(e => e.CreatedAt),
                     UpdatedAt = g.Max(e => e.UpdatedAt)
                 })

@@ -40,9 +40,10 @@ public class AssetController : ControllerBase
     /// <param name="updateAssetCommand"></param>
     /// <returns></returns>
     [HttpPut]
+    [Consumes("multipart/form-data")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IActionResult> UpdateAssetTypeAsync([FromBody] UpdateAssetCommand updateAssetCommand)
+    public async Task<IActionResult> UpdateAssetTypeAsync([FromForm] UpdateAssetCommand updateAssetCommand)
     {
         return Ok(await mediator.Send(updateAssetCommand));
     }
@@ -61,7 +62,7 @@ public class AssetController : ControllerBase
     }
 
     /// <summary>
-    /// Pages Assets. 
+    /// Gets All Assets. 
     /// </summary>
     /// <returns></returns>
     [HttpGet]
@@ -71,7 +72,4 @@ public class AssetController : ControllerBase
     {
         return Ok(await mediator.Send(new GetAssetsQuery()));
     }
-
-
 }
-

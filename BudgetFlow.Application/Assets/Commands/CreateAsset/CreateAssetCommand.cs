@@ -2,12 +2,14 @@
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Domain.Entities;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 
 namespace BudgetFlow.Application.Assets.Commands.CreateAsset
 {
     public class CreateAssetCommand : IRequest<bool>
     {
         public AssetDto Asset { get; set; }
+        public IFormFile Symbol { get; set; }
         public class CreateAssetCommandHandler : IRequestHandler<CreateAssetCommand, bool>
         {
             private readonly IAssetRepository assetRepository;
@@ -17,12 +19,11 @@ namespace BudgetFlow.Application.Assets.Commands.CreateAsset
             }
             public async Task<bool> Handle(CreateAssetCommand request, CancellationToken cancellationToken)
             {
-                string base64Symbol = null;
                 if (request.Asset.Symbol != null && request.Asset.Symbol.Length > 0)
                 {
                     using var memoryStream = new MemoryStream();
-                    await request.Asset.Symbol.CopyToAsync(memoryStream, cancellationToken);
-                    base64Symbol = Convert.ToBase64String(memoryStream.ToArray());
+                    await request.Symbol.CopyToAsync(memoryStream, cancellationToken);
+                    request.Asset.Symbol = Convert.ToBase64String(memoryStream.ToArray());
                 }
 
                 Asset asset = new()
@@ -31,7 +32,7 @@ namespace BudgetFlow.Application.Assets.Commands.CreateAsset
                     AssetTypeId = request.Asset.AssetTypeId,
                     CurrentPrice = request.Asset.CurrentPrice,
                     Description = request.Asset.Description,
-                    Symbol = base64Symbol
+                    Symbol = request.Asset.Symbol
                 };
                 var result = await assetRepository.CreateAssetAsync(asset);
                 if (!result)
