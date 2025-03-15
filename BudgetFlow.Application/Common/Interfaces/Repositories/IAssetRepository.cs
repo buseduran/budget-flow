@@ -11,6 +11,6 @@ namespace BudgetFlow.Application.Common.Interfaces.Repositories
         Task<bool> UpdateAssetAsync(int ID, AssetDto asset);
         Task<bool> DeleteAssetAsync(int ID);
         Task<List<AssetResponse>> GetAssetsAsync();
-
+        Task<AssetResponse> GetAssetAsync(int ID);
     }
 }

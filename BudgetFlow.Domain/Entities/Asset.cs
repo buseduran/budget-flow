@@ -9,6 +9,7 @@ namespace BudgetFlow.Domain.Entities
         public AssetType AssetType { get; set; }
         public decimal CurrentPrice { get; set; }
         public string Description { get; set; }
+        public string Symbol { get; set; }
         public ICollection<Investment> Investments { get; set; } = new List<Investment>();
     }
 }

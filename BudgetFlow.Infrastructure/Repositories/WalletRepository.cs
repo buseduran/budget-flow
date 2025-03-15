@@ -1,6 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace BudgetFlow.Infrastructure.Repositories
 {
@@ -23,7 +24,9 @@ namespace BudgetFlow.Infrastructure.Repositories
 
         public async Task<bool> UpdateWalletAsync(int ID, decimal Amount)
         {
-            var wallet = await context.Wallets.FindAsync(ID);
+            var wallet = await context.Wallets
+                .Where(wallet => wallet.UserId == ID)
+                .FirstOrDefaultAsync();
             if (wallet is null) return false;
 
             wallet.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);

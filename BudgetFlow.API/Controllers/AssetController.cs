@@ -26,9 +26,10 @@ public class AssetController : ControllerBase
     /// <param name="createAssetCommand"></param>
     /// <returns></returns>
     [HttpPost]
+    [Consumes("multipart/form-data")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IActionResult> CreateAssetAsync([FromBody] CreateAssetCommand createAssetCommand)
+    public async Task<IActionResult> CreateAssetAsync([FromForm] CreateAssetCommand createAssetCommand)
     {
         return Ok(await mediator.Send(createAssetCommand));
     }

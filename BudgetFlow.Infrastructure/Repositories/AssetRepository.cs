@@ -53,5 +53,11 @@ namespace BudgetFlow.Infrastructure.Repositories
 
             return assetsResponse;
         }
+
+        public async Task<AssetResponse> GetAssetAsync(int ID)
+        {
+            var asset = await context.Assets.FindAsync(ID);
+            return mapper.Map<AssetResponse>(asset);
+        }
     }
 }
