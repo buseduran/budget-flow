@@ -18,12 +18,13 @@ public class UserRepository : IUserRepository
         this.mapper = mapper;
     }
 
-    public async Task<bool> CreateAsync(User user)
+    public async Task<int> CreateAsync(User user)
     {
         user.CreatedAt = DateTime.UtcNow;
         user.UpdatedAt = DateTime.UtcNow;
         await context.Users.AddAsync(user);
-        return await context.SaveChangesAsync() > 0;
+        await context.SaveChangesAsync();
+        return user.ID;
     }
 
     public async Task<bool> DeleteAsync(int ID)

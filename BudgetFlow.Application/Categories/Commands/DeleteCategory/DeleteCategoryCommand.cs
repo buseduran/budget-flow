@@ -1,7 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using MediatR;
 
-namespace BudgetFlow.Application.Category.Commands.DeleteCategory
+namespace BudgetFlow.Application.Categories.Commands.DeleteCategory
 {
     public class DeleteCategoryCommand : IRequest<bool>
     {

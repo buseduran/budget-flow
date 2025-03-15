@@ -12,11 +12,13 @@ public class RegisterCommand : IRequest<bool>
     public class CreateUserCommandHandler : IRequestHandler<RegisterCommand, bool>
     {
         private readonly IUserRepository userRepository;
+        private readonly IWalletRepository walletRepository;
         private readonly IPasswordHasher passwordHasher;
 
-        public CreateUserCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher)
+        public CreateUserCommandHandler(IUserRepository userRepository, IWalletRepository walletRepository, IPasswordHasher passwordHasher)
         {
             this.userRepository = userRepository;
+            this.walletRepository = walletRepository;
             this.passwordHasher = passwordHasher;
         }
 
@@ -32,9 +34,27 @@ public class RegisterCommand : IRequest<bool>
                 Email = request.User.Email,
                 PasswordHash = passwordHasher.Hash(request.User.Password)
             };
+            var userID = await userRepository.CreateAsync(user);
 
-            var result = await userRepository.CreateAsync(user);
-            return result;
+            if (userID != 0)
+            {
+                Wallet wallet = new Wallet()
+                {
+                    Balance = 0,
+                    UserId = userID
+                };
+                var result = await walletRepository.CreateWalletAsync(wallet);
+                if (!result)
+                {
+                    throw new Exception("Failed to create wallet.");
+                }
+            }
+            else
+            {
+                throw new Exception("Failed to create user.");
+            }
+
+            return true;
         }
     }
 }

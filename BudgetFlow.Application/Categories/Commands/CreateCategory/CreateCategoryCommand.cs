@@ -5,7 +5,7 @@ using BudgetFlow.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace BudgetFlow.Application.Category.Commands.CreateCategory
+namespace BudgetFlow.Application.Categories.Commands.CreateCategory
 {
     public class CreateCategoryCommand : IRequest<bool>
     {

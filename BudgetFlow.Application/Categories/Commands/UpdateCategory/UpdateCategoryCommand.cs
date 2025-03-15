@@ -1,7 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using MediatR;
 
-namespace BudgetFlow.Application.Category.Commands.UpdateCategory
+namespace BudgetFlow.Application.Categories.Commands.UpdateCategory
 {
     public class UpdateCategoryCommand : IRequest<bool>
     {

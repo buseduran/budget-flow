@@ -3,7 +3,7 @@ using BudgetFlow.Domain.Enums;
 
 namespace BudgetFlow.Domain.Entities
 {
-    public class CategoryEntity : BaseEntity
+    public class Category : BaseEntity
     {
         public string Name { get; set; }
         public string Color { get; set; }

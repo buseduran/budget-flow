@@ -1,4 +1,4 @@
-﻿namespace BudgetFlow.Application.Category
+﻿namespace BudgetFlow.Application.Categories
 {
     public class CategoryResponse
     {

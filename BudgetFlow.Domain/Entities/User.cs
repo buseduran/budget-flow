@@ -9,5 +9,6 @@ namespace BudgetFlow.Domain.Entities
         public string PasswordHash { get; set; }
         public IEnumerable<Log> Logs { get; set; }
         public IEnumerable<Portfolio> Portfolios { get; set; }
+        public Wallet Wallet { get; set; }
     }
 }

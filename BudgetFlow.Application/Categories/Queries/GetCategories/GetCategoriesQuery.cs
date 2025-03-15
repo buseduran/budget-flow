@@ -1,7 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using MediatR;
 
-namespace BudgetFlow.Application.Category.Queries.GetCategories
+namespace BudgetFlow.Application.Categories.Queries.GetCategories
 {
     public class GetCategoriesQuery : IRequest<IEnumerable<CategoryResponse>>
     {

@@ -19,11 +19,15 @@ namespace BudgetFlow.Infrastructure.Contexts
         public DbSet<AssetType> AssetTypes { get; set; }
         public DbSet<Portfolio> Portfolios { get; set; }
         public DbSet<Investment> Investments { get; set; }
+        public DbSet<Wallet> Wallets { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email)
+                .HasIndex(User => User.Email)
+                .IsUnique();
+            modelBuilder.Entity<Portfolio>()
+                .HasIndex(Portfolio => Portfolio.Name)
                 .IsUnique();
         }
     }

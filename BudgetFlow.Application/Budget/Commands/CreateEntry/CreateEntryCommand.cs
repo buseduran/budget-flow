@@ -3,6 +3,7 @@ using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -14,11 +15,13 @@ namespace BudgetFlow.Application.Budget.Commands.CreateEntry
         public class CreateEntryCommandHandler : IRequestHandler<CreateEntryCommand, bool>
         {
             private readonly IBudgetRepository budgetRepository;
+            private readonly IWalletRepository walletRepository;
             private readonly IMapper mapper;
             private readonly IHttpContextAccessor httpContextAccessor;
-            public CreateEntryCommandHandler(IBudgetRepository budgetRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+            public CreateEntryCommandHandler(IBudgetRepository budgetRepository, IWalletRepository walletRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor)
             {
                 this.budgetRepository = budgetRepository;
+                this.walletRepository = walletRepository;
                 this.mapper = mapper;
                 this.httpContextAccessor = httpContextAccessor;
             }
@@ -29,9 +32,19 @@ namespace BudgetFlow.Application.Budget.Commands.CreateEntry
                 GetCurrentUser getCurrentUser = new(httpContextAccessor);
                 mappedEntry.UserID = getCurrentUser.GetCurrentUserID();
 
-                var result = await budgetRepository.CreateEntryAsync(mappedEntry);
-                if (!result)
+                var entryResult = await budgetRepository.CreateEntryAsync(mappedEntry);
+                if (!entryResult)
                     throw new Exception("Failed to create entry.");
+
+                if(mappedEntry.Type == EntryType.Income)
+                    mappedEntry.Amount = Math.Abs(mappedEntry.Amount);
+                else
+                    mappedEntry.Amount = -Math.Abs(mappedEntry.Amount);
+
+                var result= await walletRepository.UpdateWalletAsync(mappedEntry.UserID, mappedEntry.Amount);
+                if (!result)
+                    throw new Exception("Failed to update wallet.");
+
                 return true;
             }
         }

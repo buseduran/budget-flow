@@ -2,8 +2,7 @@
 using BudgetFlow.Application.Assets.Commands.CreateAsset;
 using BudgetFlow.Application.Assets.Commands.DeleteAsset;
 using BudgetFlow.Application.Assets.Commands.UpdateAsset;
-using BudgetFlow.Application.Assets.Queries.GetAssetPagination;
-using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Assets.Queries.GetAssets;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -63,14 +62,13 @@ public class AssetController : ControllerBase
     /// <summary>
     /// Pages Assets. 
     /// </summary>
-    /// <param name="getAssetPaginationQuery"></param>
     /// <returns></returns>
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<AssetResponse>))]
-    public async Task<IActionResult> GetAssetsPaginationAsync([FromQuery] GetAssetPaginationQuery getAssetPaginationQuery)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AssetResponse>))]
+    public async Task<IActionResult> GetAssetsPaginationAsync()
     {
-        return Ok(await mediator.Send(getAssetPaginationQuery));
+        return Ok(await mediator.Send(new GetAssetsQuery()));
     }
 
 

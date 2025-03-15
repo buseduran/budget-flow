@@ -2,7 +2,6 @@
 using BudgetFlow.Application.Assets;
 using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
-using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -43,18 +42,16 @@ namespace BudgetFlow.Infrastructure.Repositories
                     .ExecuteDeleteAsync() > 0;
         }
 
-        public async Task<PaginatedList<AssetResponse>> GetPaginatedAsync(int Page, int PageSize)
+        public async Task<List<AssetResponse>> GetAssetsAsync()
         {
             var assets = await context.Assets
                 .OrderByDescending(c => c.CreatedAt)
-                .Skip((Page - 1) * PageSize)
-                .Take(PageSize)
                 .ToListAsync();
             var count = await context.Assets.CountAsync();
 
             var assetsResponse = mapper.Map<List<AssetResponse>>(assets);
 
-            return new PaginatedList<AssetResponse>(assetsResponse, count, Page, PageSize);
+            return assetsResponse;
         }
     }
 }
