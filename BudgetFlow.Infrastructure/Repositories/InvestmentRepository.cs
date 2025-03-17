@@ -62,15 +62,15 @@ namespace BudgetFlow.Infrastructure.Repositories
             return investments;
         }
 
-        public async Task<List<LastInvestmentResponse>> GetLastInvestmentsAsync(string portfolio)
+        public async Task<List<AssetInvestmentResponse>> GetAssetInvestmentsAsync(string portfolio)
         {
             var investments = await context.Investments
                 .Where(e => e.Portfolio.Name == portfolio)
-                .GroupBy(e => new { e.AssetId, e.Asset.Name })
-                .Select(g => new LastInvestmentResponse
+                .GroupBy(e => new { e.AssetId, e.Asset.Name, e.Asset.CurrentPrice })
+                .Select(g => new AssetInvestmentResponse
                 {
                     Name = g.Key.Name,
-                    Amount = g.Sum(e => e.Amount),
+                    Amount = g.Sum(e => e.Amount) * g.Key.CurrentPrice,
                     Description = g.OrderByDescending(e => e.CreatedAt).First().Description,
                     Code = g.OrderByDescending(e => e.CreatedAt).First().Asset.Code,
                     Unit = g.OrderByDescending(e => e.CreatedAt).First().Asset.Unit,
@@ -83,6 +83,31 @@ namespace BudgetFlow.Infrastructure.Repositories
                 .ToListAsync();
 
             return investments;
+        }
+
+        public async Task<List<Dictionary<string, object>>> GetAssetRevenueAsync(string Portfolio)
+        {
+            var investments = await context.Investments
+                .Where(e => e.Portfolio.Name == Portfolio)
+                .GroupBy(i => new { i.PurchaseDate.Date, i.Asset.Name })
+                .Select(g => new
+                {
+                    Date = g.Key.Date.ToString("yyyy-MM-dd"),
+                    Asset = g.Key.Name,
+                    Total = g.Sum(e => e.Amount * e.PurchasePrice)
+                }).ToListAsync();
+
+            var transformedData = investments
+                .GroupBy(i => i.Date) 
+                .Select(g => new Dictionary<string, object>
+                {
+            { "date", g.Key } 
+                }
+                .Concat(g.ToDictionary(i => i.Asset, i => ( object )i.Total)) 
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)) 
+                .ToList();
+
+            return transformedData;
         }
 
     }

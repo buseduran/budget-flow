@@ -2,8 +2,9 @@
 using BudgetFlow.Application.Investments.Commands.CreateInvestment;
 using BudgetFlow.Application.Investments.Commands.DeleteInvestment;
 using BudgetFlow.Application.Investments.Commands.UpdateInvestment;
+using BudgetFlow.Application.Investments.Queries.GetAssetInvestments;
+using BudgetFlow.Application.Investments.Queries.GetAssetRevenue;
 using BudgetFlow.Application.Investments.Queries.GetInvestments;
-using BudgetFlow.Application.Investments.Queries.GetLastInvestments;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -73,14 +74,26 @@ public class InvestmentController : ControllerBase
     }
 
     /// <summary>
-    /// Get Last Investments for Dashboard. 
+    /// Get Assets by Portfolio for Dashboard. 
     /// </summary>
     /// <returns></returns>
     [HttpGet("Last/{Portfolio}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<LastResponse>))]
-    public async Task<IActionResult> GetLastInvestmentsAsync(string Portfolio)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AssetInvestmentResponse>))]
+    public async Task<IActionResult> GetAssetInvestmentsAsync(string Portfolio)
     {
-        return Ok(await mediator.Send(new GetLastInvestmentsQuery(Portfolio)));
+        return Ok(await mediator.Send(new GetAssetInvestmentsQuery(Portfolio)));
+    }
+
+    /// <summary>
+    /// Get Asset Revenue for Dashboard. 
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("Revenue/{Portfolio}")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AssetRevenueResponse>))]
+    public async Task<IActionResult> GetAssetRevenueAsync(string Portfolio)
+    {
+        return Ok(await mediator.Send(new GetAssetRevenueQuery(Portfolio)));
     }
 }

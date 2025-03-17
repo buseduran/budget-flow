@@ -1,6 +1,6 @@
 ﻿namespace BudgetFlow.Application.Investments
 {
-    public class LastInvestmentResponse
+    public class AssetInvestmentResponse
     {
         public int ID { get; set; }
         public int AssetID { get; set; }
