@@ -74,10 +74,11 @@ namespace BudgetFlow.Infrastructure.Repositories
 
             var investments = await context.Investments
                 .Where(e => e.Portfolio.Name == portfolio)
-                .GroupBy(e => new { e.AssetId, e.Asset.Name, e.Asset.CurrentPrice })
+                .GroupBy(e => new { e.AssetId, AssetTypeName = e.Asset.AssetType.Name, AssetName = e.Asset.Name, e.Asset.CurrentPrice })
                 .Select(g => new PortfolioAssetResponse
                 {
-                    Name = g.Key.Name,
+                    Name = g.Key.AssetName,
+                    AssetType= g.Key.AssetTypeName,
                     Amount = g.Sum(e => e.Amount) * g.Key.CurrentPrice,
                     Description = g.OrderByDescending(e => e.CreatedAt).First().Description,
                     Code = g.OrderByDescending(e => e.CreatedAt).First().Asset.Code,
@@ -120,13 +121,12 @@ namespace BudgetFlow.Infrastructure.Repositories
             return transformedData;
         }
 
-        public async Task<PaginatedList<AssetInvestResponse>> GetAssetInvestPaginationAsync(int PortfolioID, int AssetID, int Page, int PageSize, int UserID)
+        public async Task<PaginatedList<AssetInvestResponse>> GetAssetInvestPaginationAsync(int PortfolioID, int AssetID, int Page, int PageSize)
         {
             var investments = await context.Investments
                  .OrderByDescending(c => c.CreatedAt)
                  .Skip((Page - 1) * PageSize)
                  .Take(PageSize)
-                 .Where(u => u.UserId == UserID)
                  .Select(i=> new AssetInvestResponse
                  {
                      ID= i.ID,

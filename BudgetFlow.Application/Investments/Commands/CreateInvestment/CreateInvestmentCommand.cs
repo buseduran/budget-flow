@@ -33,8 +33,7 @@ namespace BudgetFlow.Application.Investments.Commands.CreateInvestment
                     Amount = request.Investment.Amount,
                     Description = request.Investment.Description,
                     PurchaseDate = DateTime.SpecifyKind(request.Investment.PurchaseDate, DateTimeKind.Utc),
-                    PortfolioId = request.Investment.PortfolioId,
-                    UserId = getCurrentUser.GetCurrentUserID()
+                    PortfolioId = request.Investment.PortfolioId
                 };
                 var asset = await assetRepository.GetAssetAsync(investment.AssetId);
                 investment.PurchasePrice = asset.CurrentPrice;

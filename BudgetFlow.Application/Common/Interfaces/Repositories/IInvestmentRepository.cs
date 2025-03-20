@@ -13,6 +13,6 @@ namespace BudgetFlow.Application.Common.Interfaces.Repositories
         Task<List<InvestmentResponse>> GetInvestmentsAsync(int PortfolioID);
         Task<List<PortfolioAssetResponse>> GetAssetInvestmentsAsync(string Portfolio);
         Task<List<Dictionary<string, object>>> GetAssetRevenueAsync(string Portfolio);
-        Task<PaginatedList<AssetInvestResponse>> GetAssetInvestPaginationAsync(int PortfolioID, int AssetID, int Page, int PageSize, int UserID);
+        Task<PaginatedList<AssetInvestResponse>> GetAssetInvestPaginationAsync(int PortfolioID, int AssetID, int Page, int PageSize);
     }
 }
