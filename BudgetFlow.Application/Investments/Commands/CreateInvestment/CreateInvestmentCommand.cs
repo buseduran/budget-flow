@@ -34,6 +34,7 @@ namespace BudgetFlow.Application.Investments.Commands.CreateInvestment
                     Description = request.Investment.Description,
                     PurchaseDate = DateTime.SpecifyKind(request.Investment.PurchaseDate, DateTimeKind.Utc),
                     PortfolioId = request.Investment.PortfolioId,
+                    UserId = getCurrentUser.GetCurrentUserID()
                 };
                 var asset = await assetRepository.GetAssetAsync(investment.AssetId);
                 investment.PurchasePrice = asset.CurrentPrice;
@@ -46,10 +47,9 @@ namespace BudgetFlow.Application.Investments.Commands.CreateInvestment
                 #endregion
 
                 #region Update Wallet
-
-                investment.PurchasePrice = asset.CurrentPrice * investment.Amount;
-
                 GetCurrentUser getCurrentUser = new(httpContextAccessor);
+                investment.PurchasePrice = asset.CurrentPrice * investment.Amount;
+               
                 var walletResult = await walletRepository.UpdateWalletAsync(getCurrentUser.GetCurrentUserID(), -investment.Amount);
                 if (!walletResult)
                 {

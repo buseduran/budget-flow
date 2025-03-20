@@ -1,10 +1,10 @@
 ﻿namespace BudgetFlow.Application.Investments
 {
-    public class AssetInvestmentResponse
+    public class PortfolioAssetResponse
     {
         public int ID { get; set; }
-        public int AssetID { get; set; }
-        public int PortfolioID { get; set; }
+        public int AssetId { get; set; }
+        public int PortfolioId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public decimal Amount { get; set; }

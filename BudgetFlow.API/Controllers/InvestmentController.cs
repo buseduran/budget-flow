@@ -1,8 +1,11 @@
-﻿using BudgetFlow.Application.Investments;
+﻿using BudgetFlow.Application.Budget;
+using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Investments;
 using BudgetFlow.Application.Investments.Commands.CreateInvestment;
 using BudgetFlow.Application.Investments.Commands.DeleteInvestment;
 using BudgetFlow.Application.Investments.Commands.UpdateInvestment;
-using BudgetFlow.Application.Investments.Queries.GetAssetInvestments;
+using BudgetFlow.Application.Investments.Queries;
+using BudgetFlow.Application.Investments.Queries.GetAssetInvestPagination;
 using BudgetFlow.Application.Investments.Queries.GetAssetRevenue;
 using BudgetFlow.Application.Investments.Queries.GetInvestments;
 using MediatR;
@@ -79,10 +82,10 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpGet("Last/{Portfolio}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AssetInvestmentResponse>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<PortfolioAssetResponse>))]
     public async Task<IActionResult> GetAssetInvestmentsAsync(string Portfolio)
     {
-        return Ok(await mediator.Send(new GetAssetInvestmentsQuery(Portfolio)));
+        return Ok(await mediator.Send(new GetPortfolioAssetsQuery(Portfolio)));
     }
 
     /// <summary>
@@ -95,5 +98,18 @@ public class InvestmentController : ControllerBase
     public async Task<IActionResult> GetAssetRevenueAsync(string Portfolio)
     {
         return Ok(await mediator.Send(new GetAssetRevenueQuery(Portfolio)));
+    }
+
+    /// <summary>
+    /// Pages an Asset's Investments by Portfolio. 
+    /// </summary>
+    /// <param name="getAssetInvestPaginationQuery"></param>
+    /// <returns></returns>
+    [HttpGet("Invests")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<AssetInvestResponse>))]
+    public async Task<IActionResult> GetAssetInvestsPaginationAsync([FromQuery] GetAssetInvestPaginationQuery getAssetInvestPaginationQuery)
+    {
+        return Ok(await mediator.Send(getAssetInvestPaginationQuery));
     }
 }

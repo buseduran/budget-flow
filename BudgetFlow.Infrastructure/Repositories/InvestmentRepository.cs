@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure.Contexts;
@@ -62,12 +63,19 @@ namespace BudgetFlow.Infrastructure.Repositories
             return investments;
         }
 
-        public async Task<List<AssetInvestmentResponse>> GetAssetInvestmentsAsync(string portfolio)
+        public async Task<List<PortfolioAssetResponse>> GetAssetInvestmentsAsync(string portfolio)
         {
+            var portfolioId = await context.Portfolios
+                .Where(p => p.Name == portfolio)
+                .Select(p => new
+                {
+                    p.ID
+                }).FirstOrDefaultAsync();
+
             var investments = await context.Investments
                 .Where(e => e.Portfolio.Name == portfolio)
                 .GroupBy(e => new { e.AssetId, e.Asset.Name, e.Asset.CurrentPrice })
-                .Select(g => new AssetInvestmentResponse
+                .Select(g => new PortfolioAssetResponse
                 {
                     Name = g.Key.Name,
                     Amount = g.Sum(e => e.Amount) * g.Key.CurrentPrice,
@@ -76,7 +84,9 @@ namespace BudgetFlow.Infrastructure.Repositories
                     Unit = g.OrderByDescending(e => e.CreatedAt).First().Asset.Unit,
                     Symbol = g.OrderByDescending(e => e.CreatedAt).First().Asset.Symbol,
                     CreatedAt = g.Max(e => e.CreatedAt),
-                    UpdatedAt = g.Max(e => e.UpdatedAt)
+                    UpdatedAt = g.Max(e => e.UpdatedAt),
+                    AssetId = g.Key.AssetId,
+                    PortfolioId = portfolioId.ID
                 })
                 .OrderByDescending(e => e.CreatedAt)
                 .Take(5)
@@ -98,17 +108,43 @@ namespace BudgetFlow.Infrastructure.Repositories
                 }).ToListAsync();
 
             var transformedData = investments
-                .GroupBy(i => i.Date) 
+                .GroupBy(i => i.Date)
                 .Select(g => new Dictionary<string, object>
                 {
-            { "date", g.Key } 
+            { "date", g.Key }
                 }
-                .Concat(g.ToDictionary(i => i.Asset, i => ( object )i.Total)) 
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)) 
+                .Concat(g.ToDictionary(i => i.Asset, i => ( object )i.Total))
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value))
                 .ToList();
 
             return transformedData;
         }
 
+        public async Task<PaginatedList<AssetInvestResponse>> GetAssetInvestPaginationAsync(int PortfolioID, int AssetID, int Page, int PageSize, int UserID)
+        {
+            var investments = await context.Investments
+                 .OrderByDescending(c => c.CreatedAt)
+                 .Skip((Page - 1) * PageSize)
+                 .Take(PageSize)
+                 .Where(u => u.UserId == UserID)
+                 .Select(i=> new AssetInvestResponse
+                 {
+                     ID= i.ID,
+                     Amount = i.Amount,
+                     Description = i.Description,
+                     PurchasePrice = i.PurchasePrice,
+                     PurchaseDate = i.PurchaseDate,
+                     AssetId = i.AssetId,
+                     PortfolioId = i.PortfolioId,
+                     CreatedAt = i.CreatedAt,
+                     UpdatedAt = i.UpdatedAt
+                 })
+                 .ToListAsync();
+            var count = await context.Investments.CountAsync();
+
+            //var response = mapper.Map<List<AssetInvestResponse>>(investments);
+
+            return new PaginatedList<AssetInvestResponse>(investments, count, Page, PageSize);
+        }
     }
 }

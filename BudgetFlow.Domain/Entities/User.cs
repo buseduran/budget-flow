@@ -7,8 +7,8 @@ namespace BudgetFlow.Domain.Entities
         public string Name { get; set; }
         public string Email { get; set; }
         public string PasswordHash { get; set; }
-        public IEnumerable<Log> Logs { get; set; }
-        public IEnumerable<Portfolio> Portfolios { get; set; }
+        public List<Log> Logs { get; set; }
+        public List<Portfolio> Portfolios { get; set; }
         public Wallet Wallet { get; set; }
     }
 }
