@@ -19,13 +19,15 @@ namespace BudgetFlow.Infrastructure.Repositories
             this.mapper = mapper;
         }
 
-        public async Task<bool> CreatePortfolioAsync(Portfolio Portfolio)
+        public async Task<int> CreatePortfolioAsync(Portfolio Portfolio)
         {
             Portfolio.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
             Portfolio.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
             await context.Portfolios.AddAsync(Portfolio);
-            return await context.SaveChangesAsync() > 0;
+            var result = await context.SaveChangesAsync();
+            if (result > 0) return Portfolio.ID;
+            return 0;
         }
         public async Task<bool> DeletePortfolioAsync(int ID)
         {

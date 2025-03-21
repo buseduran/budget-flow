@@ -6,7 +6,7 @@ namespace BudgetFlow.Application.Common.Interfaces.Repositories
 {
     public interface IPortfolioRepository
     {
-        Task<bool> CreatePortfolioAsync(Portfolio Portfolio);
+        Task<int> CreatePortfolioAsync(Portfolio Portfolio);
         Task<bool> DeletePortfolioAsync(int ID);
         Task<bool> UpdatePortfolioAsync(int ID, PortfolioDto Portfolio);
         Task<List<PortfolioResponse>> GetPortfoliosAsync(int UserID);

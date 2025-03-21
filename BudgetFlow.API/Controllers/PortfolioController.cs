@@ -28,7 +28,7 @@ public class PortfolioController : ControllerBase
     /// <returns></returns>
     [HttpPost]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
     public async Task<IActionResult> CreatePortfolioAsync([FromBody] CreatePortfolioCommand createPortfolioCommand)
     {
         return Ok(await mediator.Send(createPortfolioCommand));

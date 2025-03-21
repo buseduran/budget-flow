@@ -38,6 +38,7 @@ namespace BudgetFlow.Application.Investments.Commands.CreateInvestment
                 var asset = await assetRepository.GetAssetAsync(investment.AssetId);
                 investment.PurchasePrice = asset.CurrentPrice;
 
+
                 var investmentResult = await investmentRepository.CreateInvestmentAsync(investment);
                 if (!investmentResult)
                 {

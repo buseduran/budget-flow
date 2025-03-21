@@ -107,7 +107,7 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpGet("Invests")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<AssetInvestResponse>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedAssetInvestResponse))]
     public async Task<IActionResult> GetAssetInvestsPaginationAsync([FromQuery] GetAssetInvestPaginationQuery getAssetInvestPaginationQuery)
     {
         return Ok(await mediator.Send(getAssetInvestPaginationQuery));

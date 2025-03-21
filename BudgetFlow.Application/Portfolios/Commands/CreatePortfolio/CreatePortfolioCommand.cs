@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Http;
 
 namespace BudgetFlow.Application.Portfolios.Commands.CreatePortfolio
 {
-    public class CreatePortfolioCommand : IRequest<bool>
+    public class CreatePortfolioCommand : IRequest<int>
     {
         public PortfolioDto Portfolio { get; set; }
-        public class CreatePortfolioCommandHandler : IRequestHandler<CreatePortfolioCommand, bool>
+        public class CreatePortfolioCommandHandler : IRequestHandler<CreatePortfolioCommand, int>
         {
             private readonly IPortfolioRepository portfolioRepository;
             private readonly IHttpContextAccessor httpContextAccessor;
@@ -19,7 +19,7 @@ namespace BudgetFlow.Application.Portfolios.Commands.CreatePortfolio
                 this.portfolioRepository = portfolioRepository;
                 this.httpContextAccessor = httpContextAccessor;
             }
-            public async Task<bool> Handle(CreatePortfolioCommand request, CancellationToken cancellationToken)
+            public async Task<int> Handle(CreatePortfolioCommand request, CancellationToken cancellationToken)
             {
                 Portfolio portfolio = new()
                 {
@@ -30,7 +30,7 @@ namespace BudgetFlow.Application.Portfolios.Commands.CreatePortfolio
                 portfolio.UserID = getCurrentUser.GetCurrentUserID();
 
                 var result = await portfolioRepository.CreatePortfolioAsync(portfolio);
-                if (!result)
+                if (result is 0)
                 {
                     throw new Exception("Failed to create Portfolio");
                 }
