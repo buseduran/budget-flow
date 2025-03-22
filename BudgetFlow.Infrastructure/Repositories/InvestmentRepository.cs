@@ -153,7 +153,9 @@ namespace BudgetFlow.Infrastructure.Repositories
                     Symbol = g.Key.Symbol
                 }).FirstOrDefaultAsync();
 
-            var count = await context.Investments.CountAsync();
+            var count = await context.Investments
+                .Where(i => i.PortfolioId == PortfolioID && i.AssetId == AssetID)
+                .CountAsync();
 
             return new PaginatedAssetInvestResponse
             {
