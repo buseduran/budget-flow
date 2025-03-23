@@ -24,6 +24,8 @@ namespace BudgetFlow.Application.Investments
         public string Code { get; set; }
         public string Unit { get; set; }
         public string Symbol { get; set; }
+        public string TotalAmount { get; set; }
+        public string TotalPrice { get; set; }
     }
 
 }

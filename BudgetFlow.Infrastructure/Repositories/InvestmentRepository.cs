@@ -150,7 +150,9 @@ namespace BudgetFlow.Infrastructure.Repositories
                     Name = g.Key.Name,
                     Code = g.Key.Code,
                     Unit = g.Key.Unit,
-                    Symbol = g.Key.Symbol
+                    Symbol = g.Key.Symbol,
+                    TotalAmount = g.Sum(e => e.Amount).ToString(),
+                    TotalPrice = g.Sum(e => e.Amount * e.PurchasePrice).ToString()
                 }).FirstOrDefaultAsync();
 
             var count = await context.Investments

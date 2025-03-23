@@ -41,7 +41,9 @@ namespace BudgetFlow.Infrastructure.Repositories
             var portfolio = await context.Portfolios.FindAsync(ID);
             if (portfolio is null) return false;
 
-            mapper.Map(Portfolio, portfolio);
+            portfolio.Name = Portfolio.Name;
+            portfolio.Description = Portfolio.Description;
+
             portfolio.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
             return await context.SaveChangesAsync() > 0;
@@ -52,6 +54,7 @@ namespace BudgetFlow.Infrastructure.Repositories
             //calculate investments analysis here
             var portfolios = await context.Portfolios
                 .Where(e => e.UserID == UserID)
+                .OrderByDescending(c => c.UpdatedAt)
                 .Include(e => e.Investments)
                 .Select(e => new PortfolioResponse
                 {
