@@ -2,6 +2,7 @@
 using BudgetFlow.Application.Common.Interfaces.Services;
 using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Enums;
 using MediatR;
 
 namespace BudgetFlow.Application.Auth.Commands.Register;
@@ -41,7 +42,8 @@ public class RegisterCommand : IRequest<bool>
                 Wallet wallet = new Wallet()
                 {
                     Balance = 0,
-                    UserId = userID
+                    UserId = userID,
+                    Currency = CurrencyType.USD // default currency is USD
                 };
                 var result = await walletRepository.CreateWalletAsync(wallet);
                 if (!result)
