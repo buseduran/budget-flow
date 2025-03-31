@@ -30,7 +30,8 @@ namespace BudgetFlow.Application.Assets.Commands.CreateAsset
                 {
                     Name = request.Asset.Name,
                     AssetTypeId = request.Asset.AssetTypeId,
-                    CurrentPrice = request.Asset.CurrentPrice,
+                    BuyPrice = request.Asset.BuyPrice,
+                    SellPrice = request.Asset.SellPrice,
                     Description = request.Asset.Description,
                     Symbol = request.Asset.Symbol
                 };

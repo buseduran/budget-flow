@@ -2,6 +2,7 @@
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -32,12 +33,12 @@ namespace BudgetFlow.Application.Investments.Commands.CreateInvestment
                     AssetId = request.Investment.AssetId,
                     Amount = request.Investment.Amount,
                     Description = request.Investment.Description,
-                    PurchaseDate = DateTime.SpecifyKind(request.Investment.PurchaseDate, DateTimeKind.Utc),
+                    Date = DateTime.SpecifyKind(request.Investment.Date, DateTimeKind.Utc),
                     PortfolioId = request.Investment.PortfolioId
                 };
                 var asset = await assetRepository.GetAssetAsync(investment.AssetId);
-                investment.PurchasePrice = asset.CurrentPrice;
-
+                investment.Price = request.Investment.Type == InvestmentType.Sell ? asset.SellPrice
+                      : asset.BuyPrice;
 
                 var investmentResult = await investmentRepository.CreateInvestmentAsync(investment);
                 if (!investmentResult)
@@ -47,9 +48,10 @@ namespace BudgetFlow.Application.Investments.Commands.CreateInvestment
                 #endregion
 
                 #region Update Wallet
+                investment.Price = request.Investment.Type == InvestmentType.Sell ? asset.SellPrice * investment.Amount
+                    : asset.BuyPrice * investment.Amount;
+
                 GetCurrentUser getCurrentUser = new(httpContextAccessor);
-                investment.PurchasePrice = asset.CurrentPrice * investment.Amount;
-               
                 var walletResult = await walletRepository.UpdateWalletAsync(getCurrentUser.GetCurrentUserID(), -investment.Amount);
                 if (!walletResult)
                 {

@@ -50,7 +50,6 @@ namespace BudgetFlow.Infrastructure.Repositories
             var count = await context.Assets.CountAsync();
 
             var assetsResponse = mapper.Map<List<AssetResponse>>(assets);
-
             return assetsResponse;
         }
 

@@ -1,4 +1,5 @@
 ﻿using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Domain.Enums;
 
 namespace BudgetFlow.Application.Investments
 {
@@ -13,8 +14,9 @@ namespace BudgetFlow.Application.Investments
         public decimal Amount { get; set; }
         public decimal Balance { get; set; }
         public string Description { get; set; }
-        public decimal PurchasePrice { get; set; }
-        public DateTime PurchaseDate { get; set; }
+        public InvestmentType Type { get; set; }
+        public decimal Price { get; set; }
+        public DateTime Date { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

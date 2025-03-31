@@ -1,4 +1,5 @@
 ﻿using BudgetFlow.Domain.Common;
+using BudgetFlow.Domain.Enums;
 
 namespace BudgetFlow.Domain.Entities
 {
@@ -6,8 +7,9 @@ namespace BudgetFlow.Domain.Entities
     {
         public decimal Amount { get; set; }
         public string Description { get; set; }
-        public decimal PurchasePrice { get; set; }
-        public DateTime PurchaseDate { get; set; }
+        public decimal Price { get; set; }
+        public InvestmentType Type { get; set; }
+        public DateTime Date { get; set; }
         public int PortfolioId { get; set; }
         public Portfolio Portfolio { get; set; }
         public int AssetId { get; set; }
