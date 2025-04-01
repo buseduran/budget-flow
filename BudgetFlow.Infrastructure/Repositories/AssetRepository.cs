@@ -58,5 +58,21 @@ namespace BudgetFlow.Infrastructure.Repositories
             var asset = await context.Assets.FindAsync(ID);
             return mapper.Map<AssetResponse>(asset);
         }
+
+        public async Task<(decimal BuyPrice, decimal SellPrice)> GetAssetRateAsync(int ID)
+        {
+            if(ID==0)
+                return ( 0,0);
+            var rate = await context.Assets
+                  .Where(e => e.ID == ID)
+                  .Select(e => new
+                  {
+                      e.BuyPrice,
+                      e.SellPrice
+                  })
+                  .FirstOrDefaultAsync();
+
+            return (rate.BuyPrice, rate.SellPrice);
+        }
     }
 }

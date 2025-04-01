@@ -2,6 +2,7 @@
 using BudgetFlow.Application.Assets.Commands.CreateAsset;
 using BudgetFlow.Application.Assets.Commands.DeleteAsset;
 using BudgetFlow.Application.Assets.Commands.UpdateAsset;
+using BudgetFlow.Application.Assets.Queries.GetAssetRate;
 using BudgetFlow.Application.Assets.Queries.GetAssets;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -71,5 +72,18 @@ public class AssetController : ControllerBase
     public async Task<IActionResult> GetAssetsPaginationAsync()
     {
         return Ok(await mediator.Send(new GetAssetsQuery()));
+    }
+
+    // get rate
+    /// <summary>
+    /// Gets Asset Rate. 
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("Rate/{ID}")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof((decimal BuyPrice, decimal SellPrice)))]
+    public async Task<IActionResult> GetAssetRateAsync([FromRoute] int ID)
+    {
+        return Ok(await mediator.Send(new GetAssetRateQuery(ID)));
     }
 }

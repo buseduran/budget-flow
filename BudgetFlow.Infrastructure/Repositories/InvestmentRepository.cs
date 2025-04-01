@@ -144,9 +144,10 @@ namespace BudgetFlow.Infrastructure.Repositories
 
             var assetInvestMainResponse = await context.Investments
                 .Where(e => e.PortfolioId == PortfolioID && e.AssetId == AssetID)
-                .GroupBy(e => new { e.Asset.Name, e.Asset.Code, e.Asset.Unit, e.Asset.Symbol })
+                .GroupBy(e => new { e.AssetId, e.Asset.Name, e.Asset.Code, e.Asset.Unit, e.Asset.Symbol })
                 .Select(g => new AssetInvestInfoResponse
                 {
+                    ID = g.Key.AssetId,
                     Name = g.Key.Name,
                     Code = g.Key.Code,
                     Unit = g.Key.Unit,

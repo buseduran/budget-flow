@@ -1,6 +1,5 @@
 ﻿using BudgetFlow.Application.Assets;
 using BudgetFlow.Application.Common.Dtos;
-using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
 
 namespace BudgetFlow.Application.Common.Interfaces.Repositories
@@ -12,5 +11,6 @@ namespace BudgetFlow.Application.Common.Interfaces.Repositories
         Task<bool> DeleteAssetAsync(int ID);
         Task<List<AssetResponse>> GetAssetsAsync();
         Task<AssetResponse> GetAssetAsync(int ID);
+        Task<(decimal BuyPrice, decimal SellPrice)> GetAssetRateAsync(int ID);
     }
 }
