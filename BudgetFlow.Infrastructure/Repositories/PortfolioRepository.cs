@@ -61,7 +61,7 @@ namespace BudgetFlow.Infrastructure.Repositories
                     ID = e.ID,
                     Name = e.Name,
                     Description = e.Description,
-                    TotalInvested = e.Investments.Sum(i => i.Amount)
+                    TotalInvested = e.Investments.Sum(i => i.UnitAmount)
                 })
                 .ToListAsync();
             return portfolios;
@@ -77,7 +77,7 @@ namespace BudgetFlow.Infrastructure.Repositories
                      ID = e.ID,
                      Name = e.Name,
                      Description = e.Description,
-                     TotalInvested = e.Investments.Sum(i => i.Amount)
+                     TotalInvested = e.Investments.Sum(i => i.UnitAmount)
                  })
                  .FirstOrDefaultAsync();
             return portfolio;

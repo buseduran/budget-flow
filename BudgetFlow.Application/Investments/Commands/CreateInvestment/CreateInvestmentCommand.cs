@@ -31,7 +31,8 @@ namespace BudgetFlow.Application.Investments.Commands.CreateInvestment
                 var investment = new Investment
                 {
                     AssetId = request.Investment.AssetId,
-                    Amount = request.Investment.Amount,
+                    CurrencyAmount = request.Investment.CurrencyAmount,
+                    UnitAmount = request.Investment.UnitAmount,
                     Description = request.Investment.Description,
                     Date = DateTime.SpecifyKind(request.Investment.Date, DateTimeKind.Utc),
                     PortfolioId = request.Investment.PortfolioId
@@ -48,11 +49,10 @@ namespace BudgetFlow.Application.Investments.Commands.CreateInvestment
                 #endregion
 
                 #region Update Wallet
-                investment.Price = request.Investment.Type == InvestmentType.Sell ? asset.SellPrice * investment.Amount
-                    : asset.BuyPrice * investment.Amount;
+                investment.Price = request.Investment.CurrencyAmount;
 
                 GetCurrentUser getCurrentUser = new(httpContextAccessor);
-                var walletResult = await walletRepository.UpdateWalletAsync(getCurrentUser.GetCurrentUserID(), -investment.Amount);
+                var walletResult = await walletRepository.UpdateWalletAsync(getCurrentUser.GetCurrentUserID(), -investment.CurrencyAmount);
                 if (!walletResult)
                 {
                     throw new Exception("Wallet could not be updated.");

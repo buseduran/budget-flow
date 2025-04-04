@@ -5,7 +5,8 @@ namespace BudgetFlow.Domain.Entities
 {
     public class Investment : BaseEntity
     {
-        public decimal Amount { get; set; }
+        public decimal CurrencyAmount { get; set; }
+        public decimal UnitAmount { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }
         public InvestmentType Type { get; set; }

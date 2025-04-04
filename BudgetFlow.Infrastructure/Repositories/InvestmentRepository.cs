@@ -55,7 +55,8 @@ namespace BudgetFlow.Infrastructure.Repositories
                 {
                     ID = i.ID,
                     Name = i.Asset.Name,
-                    Amount = i.Amount,
+                    CurrencyAmount = i.CurrencyAmount,
+                    UnitAmount = i.UnitAmount,
                     Description = i.Description,
                     CreatedAt = i.CreatedAt,
                     UpdatedAt = i.UpdatedAt
@@ -79,8 +80,9 @@ namespace BudgetFlow.Infrastructure.Repositories
                 {
                     Name = g.Key.AssetName,
                     AssetType = g.Key.AssetTypeName,
-                    Amount = g.Sum(e => e.Amount),
-                    Balance = g.Sum(e => e.Amount) * g.Key.SellPrice,
+                    CurrencyAmount = g.Sum(e => e.CurrencyAmount),
+                    UnitAmount = g.Sum(e => e.UnitAmount),
+                    Balance = g.Sum(e => e.UnitAmount) * g.Key.SellPrice,
                     Description = g.OrderByDescending(e => e.CreatedAt).First().Description,
                     Code = g.OrderByDescending(e => e.CreatedAt).First().Asset.Code,
                     Unit = g.OrderByDescending(e => e.CreatedAt).First().Asset.Unit,
@@ -106,7 +108,7 @@ namespace BudgetFlow.Infrastructure.Repositories
                 {
                     Date = g.Key.Date.ToString("yyyy-MM-dd"),
                     Asset = g.Key.Name,
-                    Total = g.Sum(e => e.Amount * e.Price)
+                    Total = g.Sum(e => e.UnitAmount * e.Price)
                 }).ToListAsync();
 
             var transformedData = investments
@@ -132,8 +134,8 @@ namespace BudgetFlow.Infrastructure.Repositories
                  .Select(i => new AssetInvestResponse
                  {
                      ID = i.ID,
-                     Amount = i.Amount,
-                     Balance = i.Amount * i.Price,
+                     Amount = i.UnitAmount,
+                     Balance = i.UnitAmount * i.Price,
                      Description = i.Description,
                      Price = i.Price,
                      Date = i.Date,
@@ -152,8 +154,8 @@ namespace BudgetFlow.Infrastructure.Repositories
                     Code = g.Key.Code,
                     Unit = g.Key.Unit,
                     Symbol = g.Key.Symbol,
-                    TotalAmount = g.Sum(e => e.Amount).ToString(),
-                    TotalPrice = g.Sum(e => e.Amount * e.Price).ToString()
+                    TotalAmount = g.Sum(e => e.UnitAmount).ToString(),
+                    TotalPrice = g.Sum(e => e.UnitAmount * e.Price).ToString()
                 }).FirstOrDefaultAsync();
 
             var count = await context.Investments
