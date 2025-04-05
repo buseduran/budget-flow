@@ -35,7 +35,8 @@ namespace BudgetFlow.Application.Investments.Commands.CreateInvestment
                     UnitAmount = request.Investment.UnitAmount,
                     Description = request.Investment.Description,
                     Date = DateTime.SpecifyKind(request.Investment.Date, DateTimeKind.Utc),
-                    PortfolioId = request.Investment.PortfolioId
+                    PortfolioId = request.Investment.PortfolioId,
+                    Type= request.Investment.Type
                 };
                 var asset = await assetRepository.GetAssetAsync(investment.AssetId);
                 investment.Price = request.Investment.Type == InvestmentType.Sell ? asset.SellPrice

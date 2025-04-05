@@ -4,6 +4,7 @@ using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Enums;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -59,7 +60,7 @@ namespace BudgetFlow.Infrastructure.Repositories
                     UnitAmount = i.UnitAmount,
                     Description = i.Description,
                     CreatedAt = i.CreatedAt,
-                    UpdatedAt = i.UpdatedAt
+                    UpdatedAt = i.UpdatedAt,
                 }).ToListAsync();
             return investments;
         }
@@ -134,29 +135,29 @@ namespace BudgetFlow.Infrastructure.Repositories
                  .Select(i => new AssetInvestResponse
                  {
                      ID = i.ID,
-                     Amount = i.UnitAmount,
-                     Balance = i.UnitAmount * i.Price,
+                     UnitAmount = i.UnitAmount,
+                     CurrencyAmount = i.Price,
                      Description = i.Description,
-                     Price = i.Price,
                      Date = i.Date,
+                     Type = i.Type,
                      CreatedAt = i.CreatedAt,
                      UpdatedAt = i.UpdatedAt
                  })
                  .ToListAsync();
 
             var assetInvestMainResponse = await context.Investments
-                .Where(e => e.PortfolioId == PortfolioID && e.AssetId == AssetID)
-                .GroupBy(e => new { e.AssetId, e.Asset.Name, e.Asset.Code, e.Asset.Unit, e.Asset.Symbol })
-                .Select(g => new AssetInvestInfoResponse
-                {
-                    ID = g.Key.AssetId,
-                    Name = g.Key.Name,
-                    Code = g.Key.Code,
-                    Unit = g.Key.Unit,
-                    Symbol = g.Key.Symbol,
-                    TotalAmount = g.Sum(e => e.UnitAmount).ToString(),
-                    TotalPrice = g.Sum(e => e.UnitAmount * e.Price).ToString()
-                }).FirstOrDefaultAsync();
+            .Where(e => e.PortfolioId == PortfolioID && e.AssetId == AssetID)
+            .GroupBy(e => new { e.AssetId, e.Asset.Name, e.Asset.Code, e.Asset.Unit, e.Asset.Symbol })
+            .Select(g => new AssetInvestInfoResponse
+            {
+                ID = g.Key.AssetId,
+                Name = g.Key.Name,
+                Code = g.Key.Code,
+                Unit = g.Key.Unit,
+                Symbol = g.Key.Symbol,
+                TotalAmount = g.Sum(e => e.Type == InvestmentType.Buy ? e.UnitAmount : 0), //YENİ TABLO, USERASSETS
+                TotalPrice = g.Sum(e => e.Type == InvestmentType.Buy ? e.CurrencyAmount : 0)
+            }).FirstOrDefaultAsync();
 
             var count = await context.Investments
                 .Where(i => i.PortfolioId == PortfolioID && i.AssetId == AssetID)

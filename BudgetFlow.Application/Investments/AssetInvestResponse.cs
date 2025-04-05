@@ -11,11 +11,10 @@ namespace BudgetFlow.Application.Investments
     public class AssetInvestResponse
     {
         public int ID { get; set; }
-        public decimal Amount { get; set; }
-        public decimal Balance { get; set; }
+        public decimal UnitAmount { get; set; }
+        public decimal CurrencyAmount { get; set; }
         public string Description { get; set; }
         public InvestmentType Type { get; set; }
-        public decimal Price { get; set; }
         public DateTime Date { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -27,8 +26,8 @@ namespace BudgetFlow.Application.Investments
         public string Code { get; set; }
         public string Unit { get; set; }
         public string Symbol { get; set; }
-        public string TotalAmount { get; set; }
-        public string TotalPrice { get; set; }
+        public decimal TotalAmount { get; set; }
+        public decimal TotalPrice { get; set; }
     }
 
 }
