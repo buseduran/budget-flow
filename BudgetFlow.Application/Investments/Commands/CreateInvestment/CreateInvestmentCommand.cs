@@ -36,27 +36,61 @@ namespace BudgetFlow.Application.Investments.Commands.CreateInvestment
                     Description = request.Investment.Description,
                     Date = DateTime.SpecifyKind(request.Investment.Date, DateTimeKind.Utc),
                     PortfolioId = request.Investment.PortfolioId,
-                    Type= request.Investment.Type
+                    Type = request.Investment.Type
                 };
                 var asset = await assetRepository.GetAssetAsync(investment.AssetId);
-                investment.Price = request.Investment.Type == InvestmentType.Sell ? asset.SellPrice
-                      : asset.BuyPrice;
+
+                investment.CurrencyAmount = investment.Type == InvestmentType.Buy
+                                            ? investment.UnitAmount * asset.BuyPrice
+                                            : investment.UnitAmount * asset.SellPrice;
+
+                GetCurrentUser getCurrentUser = new(httpContextAccessor);
+                var UserAsset = await assetRepository.GetUserAssetAsync(getCurrentUser.GetCurrentUserID(), investment.AssetId);
+                var Wallet= await walletRepository.GetWalletAsync(getCurrentUser.GetCurrentUserID());
+                if (UserAsset is not null)
+                {
+                    if (investment.Type == InvestmentType.Buy)
+                    {
+                        if (Wallet.Balance > investment.CurrencyAmount)
+                        {
+                            UserAsset.Amount += investment.UnitAmount;
+                            UserAsset.Balance += investment.CurrencyAmount;
+                            var walletUpdateResult = await walletRepository.UpdateWalletAsync(getCurrentUser.GetCurrentUserID(), investment.CurrencyAmount);
+                            if (!walletUpdateResult)
+                            {
+                                throw new Exception("Wallet could not be updated.");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (UserAsset.Amount < investment.UnitAmount)
+                        {
+                            throw new Exception("Not enough asset amount.");
+                        }
+                        UserAsset.Amount -= investment.UnitAmount;
+                        UserAsset.Balance -= investment.CurrencyAmount;
+                        var walletUpdateResult = await walletRepository.UpdateWalletAsync(getCurrentUser.GetCurrentUserID(), -investment.CurrencyAmount);
+                        if (!walletUpdateResult)
+                        {
+                            throw new Exception("Wallet could not be updated.");
+                        }
+                    }
+                }
+                else
+                {
+                    var result = await assetRepository.CreateUserAssetAsync(new UserAsset
+                    {
+                        UserId = getCurrentUser.GetCurrentUserID(),
+                        AssetId = investment.AssetId,
+                        Amount = investment.Type == InvestmentType.Buy ? investment.UnitAmount : -investment.UnitAmount
+                    });
+                }
 
                 var investmentResult = await investmentRepository.CreateInvestmentAsync(investment);
                 if (!investmentResult)
                 {
                     throw new Exception("Investment could not be saved.");
-                }
-                #endregion
-
-                #region Update Wallet
-                investment.Price = request.Investment.CurrencyAmount;
-
-                GetCurrentUser getCurrentUser = new(httpContextAccessor);
-                var walletResult = await walletRepository.UpdateWalletAsync(getCurrentUser.GetCurrentUserID(), -investment.CurrencyAmount);
-                if (!walletResult)
-                {
-                    throw new Exception("Wallet could not be updated.");
                 }
                 #endregion
 

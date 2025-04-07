@@ -1,4 +1,5 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +34,21 @@ namespace BudgetFlow.Infrastructure.Repositories
             wallet.Balance += Amount;
 
             return await context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<WalletResponse> GetWalletAsync(int UserID)
+        {
+            var wallet = await context.Wallets
+                .Where(wallet => wallet.UserId == UserID)
+                .Select(wallet => new WalletResponse
+                {
+
+                    Balance = wallet.Balance,
+                    Currency = wallet.Currency,
+                    UserId = wallet.UserId
+                })
+                .FirstOrDefaultAsync();
+            return wallet;
         }
     }
 }

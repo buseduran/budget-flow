@@ -2,6 +2,7 @@
 using BudgetFlow.Application.Assets;
 using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -61,8 +62,8 @@ namespace BudgetFlow.Infrastructure.Repositories
 
         public async Task<(decimal BuyPrice, decimal SellPrice)> GetAssetRateAsync(int ID)
         {
-            if(ID==0)
-                return ( 0,0);
+            if (ID == 0)
+                return (0, 0);
             var rate = await context.Assets
                   .Where(e => e.ID == ID)
                   .Select(e => new
@@ -73,6 +74,28 @@ namespace BudgetFlow.Infrastructure.Repositories
                   .FirstOrDefaultAsync();
 
             return (rate.BuyPrice, rate.SellPrice);
+        }
+
+        public async Task<UserAssetResponse> GetUserAssetAsync(int UserID, int AssetID)
+        {
+            var userAsset = await context.UserAssets
+                .Where(e => e.UserId == UserID && e.AssetId == AssetID)
+                .Select(e => new UserAssetResponse
+                {
+                    Amount = e.Amount,
+                    Balance = e.Balance,
+                    UserId = e.UserId,
+                    AssetId = e.AssetId
+                })
+                .FirstOrDefaultAsync();
+            return userAsset;
+        }
+        public async Task<bool> CreateUserAssetAsync(UserAsset userAsset)
+        {
+            userAsset.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+            userAsset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+            await context.UserAssets.AddAsync(userAsset);
+            return await context.SaveChangesAsync() > 0;
         }
     }
 }

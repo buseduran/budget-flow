@@ -20,6 +20,7 @@ namespace BudgetFlow.Infrastructure.Contexts
         public DbSet<Portfolio> Portfolios { get; set; }
         public DbSet<Investment> Investments { get; set; }
         public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<UserAsset> UserAssets { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

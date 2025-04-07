@@ -109,7 +109,7 @@ namespace BudgetFlow.Infrastructure.Repositories
                 {
                     Date = g.Key.Date.ToString("yyyy-MM-dd"),
                     Asset = g.Key.Name,
-                    Total = g.Sum(e => e.UnitAmount * e.Price)
+                    Total = g.Sum(e => e.UnitAmount * e.Price) // USERASSET içinden alınacak
                 }).ToListAsync();
 
             var transformedData = investments
@@ -136,7 +136,7 @@ namespace BudgetFlow.Infrastructure.Repositories
                  {
                      ID = i.ID,
                      UnitAmount = i.UnitAmount,
-                     CurrencyAmount = i.Price,
+                     CurrencyAmount = i.Price, // YENİ TABLO, USERASSETS
                      Description = i.Description,
                      Date = i.Date,
                      Type = i.Type,
