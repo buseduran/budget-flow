@@ -33,7 +33,9 @@ namespace BudgetFlow.Application.Assets.Commands.CreateAsset
                     BuyPrice = request.Asset.BuyPrice,
                     SellPrice = request.Asset.SellPrice,
                     Description = request.Asset.Description,
-                    Symbol = request.Asset.Symbol
+                    Symbol = request.Asset.Symbol,
+                    Code = request.Asset.Code,
+                    Unit= request.Asset.Unit
                 };
                 var result = await assetRepository.CreateAssetAsync(asset);
                 if (!result)

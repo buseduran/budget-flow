@@ -4,7 +4,6 @@ using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Entities;
-using BudgetFlow.Domain.Enums;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -100,32 +99,40 @@ namespace BudgetFlow.Infrastructure.Repositories
             return investments;
         }
 
-        public async Task<List<Dictionary<string, object>>> GetAssetRevenueAsync(string Portfolio)
+        public async Task<List<Dictionary<string, object>>> GetAssetRevenueAsync(string Portfolio, int UserID)
         {
+            var portfolioId = await context.Portfolios
+                .Where(p => p.Name == Portfolio && p.UserID == UserID)
+                .Select(p => p.ID)
+                .FirstOrDefaultAsync();
+
             var investments = await context.Investments
-                .Where(e => e.Portfolio.Name == Portfolio)
+                .Where(e => e.Portfolio.ID == portfolioId)
                 .GroupBy(i => new { i.Date.Date, i.Asset.Name })
                 .Select(g => new
                 {
                     Date = g.Key.Date.ToString("yyyy-MM-dd"),
                     Asset = g.Key.Name,
-                    Total = g.Sum(e => e.UnitAmount * e.Price) // USERASSET içinden alınacak
+                    Total = g.Sum(e => e.CurrencyAmount)
                 }).ToListAsync();
 
             var transformedData = investments
                 .GroupBy(i => i.Date)
-                .Select(g => new Dictionary<string, object>
+                .Select(g =>
                 {
-                    { "date", g.Key }
-                }
-                .Concat(g.ToDictionary(i => i.Asset, i => ( object )i.Total))
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value))
+                    var dict = new Dictionary<string, object> { { "date", g.Key } };
+                    foreach (var item in g)
+                    {
+                        dict[item.Asset] = item.Total;
+                    }
+                    return dict;
+                })
                 .ToList();
 
             return transformedData;
         }
 
-        public async Task<PaginatedAssetInvestResponse> GetAssetInvestPaginationAsync(int PortfolioID, int AssetID, int Page, int PageSize)
+        public async Task<PaginatedAssetInvestResponse> GetAssetInvestPaginationAsync(int UserID, int PortfolioID, int AssetID, int Page, int PageSize)
         {
             var investments = await context.Investments
                  .Where(e => e.PortfolioId == PortfolioID && e.AssetId == AssetID)
@@ -136,7 +143,7 @@ namespace BudgetFlow.Infrastructure.Repositories
                  {
                      ID = i.ID,
                      UnitAmount = i.UnitAmount,
-                     CurrencyAmount = i.Price, // YENİ TABLO, USERASSETS
+                     CurrencyAmount = i.CurrencyAmount,
                      Description = i.Description,
                      Date = i.Date,
                      Type = i.Type,
@@ -146,18 +153,24 @@ namespace BudgetFlow.Infrastructure.Repositories
                  .ToListAsync();
 
             var assetInvestMainResponse = await context.Investments
-            .Where(e => e.PortfolioId == PortfolioID && e.AssetId == AssetID)
-            .GroupBy(e => new { e.AssetId, e.Asset.Name, e.Asset.Code, e.Asset.Unit, e.Asset.Symbol })
-            .Select(g => new AssetInvestInfoResponse
-            {
-                ID = g.Key.AssetId,
-                Name = g.Key.Name,
-                Code = g.Key.Code,
-                Unit = g.Key.Unit,
-                Symbol = g.Key.Symbol,
-                TotalAmount = g.Sum(e => e.Type == InvestmentType.Buy ? e.UnitAmount : 0), //YENİ TABLO, USERASSETS
-                TotalPrice = g.Sum(e => e.Type == InvestmentType.Buy ? e.CurrencyAmount : 0)
-            }).FirstOrDefaultAsync();
+                .Where(e => e.PortfolioId == PortfolioID && e.AssetId == AssetID)
+                .GroupBy(e => new { e.AssetId, e.Asset.Name, e.Asset.Code, e.Asset.Unit, e.Asset.Symbol })
+                .Select(g => new AssetInvestInfoResponse
+                {
+                    ID = g.Key.AssetId,
+                    Name = g.Key.Name,
+                    Code = g.Key.Code,
+                    Unit = g.Key.Unit,
+                    Symbol = g.Key.Symbol,
+                }).FirstOrDefaultAsync();
+
+            var userAsset = await context.UserAssets
+                .Where(u => u.AssetId == AssetID && u.UserId == UserID)
+                .Select(u => new
+                {
+                    assetInvestMainResponse.TotalAmount,
+                    assetInvestMainResponse.TotalPrice
+                }).FirstOrDefaultAsync();
 
             var count = await context.Investments
                 .Where(i => i.PortfolioId == PortfolioID && i.AssetId == AssetID)

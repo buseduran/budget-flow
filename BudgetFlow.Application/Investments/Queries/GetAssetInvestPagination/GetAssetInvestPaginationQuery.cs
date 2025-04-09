@@ -1,5 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Utils;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 
 namespace BudgetFlow.Application.Investments.Queries.GetAssetInvestPagination
 {
@@ -12,14 +14,17 @@ namespace BudgetFlow.Application.Investments.Queries.GetAssetInvestPagination
         public class GetAssetInvestPaginationQueryHandler : IRequestHandler<GetAssetInvestPaginationQuery, PaginatedAssetInvestResponse>
         {
             private readonly IInvestmentRepository investmentRepository;
-            public GetAssetInvestPaginationQueryHandler(IInvestmentRepository investmentRepository)
+            private readonly IHttpContextAccessor httpContextAccessor;
+            public GetAssetInvestPaginationQueryHandler(IInvestmentRepository investmentRepository, IHttpContextAccessor httpContextAccessor)
             {
                 this.investmentRepository = investmentRepository;
+                this.httpContextAccessor = httpContextAccessor;
             }
 
             public async Task<PaginatedAssetInvestResponse> Handle(GetAssetInvestPaginationQuery request, CancellationToken cancellationToken)
             {
-                var result = await investmentRepository.GetAssetInvestPaginationAsync(request.Portfolio, request.Asset, request.Page, request.PageSize);
+                var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
+                var result = await investmentRepository.GetAssetInvestPaginationAsync(userID, request.Portfolio, request.Asset, request.Page, request.PageSize);
                 return result;
             }
         }

@@ -29,8 +29,7 @@ namespace BudgetFlow.Application.Budget.Commands.CreateEntry
             public async Task<bool> Handle(CreateEntryCommand request, CancellationToken cancellationToken)
             {
                 var mappedEntry = mapper.Map<Entry>(request.Entry);
-                GetCurrentUser getCurrentUser = new(httpContextAccessor);
-                mappedEntry.UserID = getCurrentUser.GetCurrentUserID();
+                mappedEntry.UserID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
 
                 var entryResult = await budgetRepository.CreateEntryAsync(mappedEntry);
                 if (!entryResult)

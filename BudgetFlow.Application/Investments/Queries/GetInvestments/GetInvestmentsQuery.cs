@@ -15,11 +15,9 @@ namespace BudgetFlow.Application.Investments.Queries.GetInvestments
         public class GetInvestmentsQueryHandler : IRequestHandler<GetInvestmentsQuery, List<InvestmentResponse>>
         {
             private readonly IInvestmentRepository investmentRepository;
-            private readonly IMapper mapper;
-            public GetInvestmentsQueryHandler(IInvestmentRepository investmentRepository, IMapper mapper)
+            public GetInvestmentsQueryHandler(IInvestmentRepository investmentRepository)
             {
                 this.investmentRepository = investmentRepository;
-                this.mapper = mapper;
             }
             public async Task<List<InvestmentResponse>> Handle(GetInvestmentsQuery request, CancellationToken cancellationToken)
             {
