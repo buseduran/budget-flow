@@ -112,4 +112,5 @@ public class InvestmentController : ControllerBase
     {
         return Ok(await mediator.Send(getAssetInvestPaginationQuery));
     }
+     
 }

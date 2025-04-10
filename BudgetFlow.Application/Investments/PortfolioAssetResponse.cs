@@ -2,6 +2,16 @@
 {
     public class PortfolioAssetResponse
     {
+        public List<PortfolioAssetInfoResponse> AssetInfo { get; set; }
+        public List<PortfolioAssetInvestmentsResponse> Investments { get; set; }
+    }
+    public class PortfolioAssetInfoResponse
+    {
+        public string Name { get; set; }
+        public string Unit { get; set; }
+    }
+    public class PortfolioAssetInvestmentsResponse
+    {
         public int ID { get; set; }
         public int AssetId { get; set; }
         public string AssetType { get; set; }

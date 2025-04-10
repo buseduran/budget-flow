@@ -64,7 +64,7 @@ namespace BudgetFlow.Infrastructure.Repositories
             return investments;
         }
 
-        public async Task<List<PortfolioAssetResponse>> GetAssetInvestmentsAsync(string portfolio)
+        public async Task<PortfolioAssetResponse> GetAssetInvestmentsAsync(string portfolio)
         {
             var portfolioId = await context.Portfolios
                 .Where(p => p.Name == portfolio)
@@ -76,7 +76,7 @@ namespace BudgetFlow.Infrastructure.Repositories
             var investments = await context.Investments
                 .Where(e => e.Portfolio.Name == portfolio)
                 .GroupBy(e => new { e.AssetId, AssetTypeName = e.Asset.AssetType.Name, AssetName = e.Asset.Name, e.Asset.SellPrice })
-                .Select(g => new PortfolioAssetResponse
+                .Select(g => new PortfolioAssetInvestmentsResponse
                 {
                     Name = g.Key.AssetName,
                     AssetType = g.Key.AssetTypeName,
@@ -96,7 +96,21 @@ namespace BudgetFlow.Infrastructure.Repositories
                 .Take(5)
                 .ToListAsync();
 
-            return investments;
+            var portfolioAssetInfoResponse = await context.Investments
+                .Where(e => e.Portfolio.Name == portfolio)
+                .GroupBy(e => new { e.AssetId, e.Asset.Name, e.Asset.Code, e.Asset.Unit, e.Asset.Symbol })
+                .Select(g => new PortfolioAssetInfoResponse
+                {
+                    Name = g.Key.Name,
+                    Unit = g.Key.Unit
+                })
+                .ToListAsync();
+
+            return new PortfolioAssetResponse
+            {
+                Investments = investments,
+                AssetInfo = portfolioAssetInfoResponse
+            };
         }
 
         public async Task<List<Dictionary<string, object>>> GetAssetRevenueAsync(string Portfolio, int UserID)
