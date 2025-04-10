@@ -155,21 +155,21 @@ namespace BudgetFlow.Infrastructure.Repositories
             var assetInvestMainResponse = await context.Investments
                 .Where(e => e.PortfolioId == PortfolioID && e.AssetId == AssetID)
                 .GroupBy(e => new { e.AssetId, e.Asset.Name, e.Asset.Code, e.Asset.Unit, e.Asset.Symbol })
-                .Select(g => new AssetInvestInfoResponse
+                .Select(g => new
                 {
                     ID = g.Key.AssetId,
-                    Name = g.Key.Name,
-                    Code = g.Key.Code,
-                    Unit = g.Key.Unit,
-                    Symbol = g.Key.Symbol,
+                    g.Key.Name,
+                    g.Key.Code,
+                    g.Key.Unit,
+                    g.Key.Symbol,
                 }).FirstOrDefaultAsync();
 
             var userAsset = await context.UserAssets
                 .Where(u => u.AssetId == AssetID && u.UserId == UserID)
                 .Select(u => new
                 {
-                    assetInvestMainResponse.TotalAmount,
-                    assetInvestMainResponse.TotalPrice
+                    u.Amount,
+                    u.Balance
                 }).FirstOrDefaultAsync();
 
             var count = await context.Investments
@@ -178,7 +178,16 @@ namespace BudgetFlow.Infrastructure.Repositories
 
             return new PaginatedAssetInvestResponse
             {
-                AssetInfo = assetInvestMainResponse,
+                AssetInfo = new AssetInvestInfoResponse
+                {
+                    ID = assetInvestMainResponse.ID,
+                    Name = assetInvestMainResponse.Name,
+                    Code = assetInvestMainResponse.Code,
+                    Unit = assetInvestMainResponse.Unit,
+                    Symbol = assetInvestMainResponse.Symbol,
+                    TotalAmount = userAsset.Amount,
+                    TotalPrice = userAsset.Balance
+                },
                 AssetInvests = new PaginatedList<AssetInvestResponse>(investments, count, Page, PageSize)
             };
         }
