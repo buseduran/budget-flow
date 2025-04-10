@@ -26,9 +26,9 @@ namespace BudgetFlow.Infrastructure.Repositories
             await context.Assets.AddAsync(Asset);
             return await context.SaveChangesAsync() > 0;
         }
-        public async Task<bool> UpdateAssetAsync(int ID, AssetDto Asset)
+        public async Task<bool> UpdateAssetAsync(Asset Asset)
         {
-            var asset = await context.Assets.FindAsync(ID);
+            var asset = await context.Assets.FindAsync(Asset.ID);
             if (asset is null) return false;
 
             mapper.Map(Asset, asset);

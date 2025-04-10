@@ -40,13 +40,14 @@ namespace BudgetFlow.Application.Investments.Commands.CreateInvestment
                 };
                 var asset = await assetRepository.GetAssetAsync(investment.AssetId);
 
+                //buraya gerek yok gibi zaten frontta hesaplıyo
                 investment.CurrencyAmount = investment.Type == InvestmentType.Buy
                                             ? investment.UnitAmount * asset.BuyPrice
                                             : investment.UnitAmount * asset.SellPrice;
 
                 GetCurrentUser getCurrentUser = new(httpContextAccessor);
                 var UserAsset = await assetRepository.GetUserAssetAsync(getCurrentUser.GetCurrentUserID(), investment.AssetId);
-                var Wallet= await walletRepository.GetWalletAsync(getCurrentUser.GetCurrentUserID());
+                var Wallet = await walletRepository.GetWalletAsync(getCurrentUser.GetCurrentUserID());
                 if (UserAsset is not null)
                 {
                     if (investment.Type == InvestmentType.Buy)
@@ -79,12 +80,24 @@ namespace BudgetFlow.Application.Investments.Commands.CreateInvestment
                 }
                 else
                 {
-                    var result = await assetRepository.CreateUserAssetAsync(new UserAsset
+                    if (Wallet.Balance > investment.CurrencyAmount)
                     {
-                        UserId = getCurrentUser.GetCurrentUserID(),
-                        AssetId = investment.AssetId,
-                        Amount = investment.Type == InvestmentType.Buy ? investment.UnitAmount : -investment.UnitAmount
-                    });
+                        var result = await assetRepository.CreateUserAssetAsync(new UserAsset
+                        {
+                            UserId = getCurrentUser.GetCurrentUserID(),
+                            AssetId = investment.AssetId,
+                            Amount = investment.Type == InvestmentType.Buy ? investment.UnitAmount : -investment.UnitAmount
+                        });
+                        if (!result)
+                        {
+                            throw new Exception("User asset could not be created.");
+                        }
+                        var walletUpdateResult = await walletRepository.UpdateWalletAsync(getCurrentUser.GetCurrentUserID(), -investment.CurrencyAmount);
+                        if (!walletUpdateResult)
+                        {
+                            throw new Exception("Wallet could not be updated.");
+                        }
+                    }
                 }
 
                 var investmentResult = await investmentRepository.CreateInvestmentAsync(investment);

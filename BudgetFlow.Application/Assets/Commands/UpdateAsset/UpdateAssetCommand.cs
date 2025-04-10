@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -19,13 +20,27 @@ namespace BudgetFlow.Application.Assets.Commands.UpdateAsset
             }
             public async Task<bool> Handle(UpdateAssetCommand request, CancellationToken cancellationToken)
             {
-                if (request.Asset.Symbol != null && request.Asset.Symbol.Length > 0)
+                string image = string.Empty;    
+                if (request.Symbol != null && request.Symbol.Length > 0)
                 {
                     using var memoryStream = new MemoryStream();
                     await request.Symbol.CopyToAsync(memoryStream, cancellationToken);
-                    request.Asset.Symbol = Convert.ToBase64String(memoryStream.ToArray());
+                    image = Convert.ToBase64String(memoryStream.ToArray());
                 }
-                var result = await assetRepository.UpdateAssetAsync(request.ID, request.Asset);
+                Asset asset = new()
+                {
+                    ID = request.ID,
+                    Name = request.Asset.Name,
+                    AssetTypeId = request.Asset.AssetTypeId,
+                    BuyPrice = request.Asset.BuyPrice,
+                    SellPrice = request.Asset.SellPrice,
+                    Description = request.Asset.Description,
+                    Symbol = image,
+                    Code = request.Asset.Code,
+                    Unit = request.Asset.Unit
+                };
+
+                var result = await assetRepository.UpdateAssetAsync(asset);
 
                 return result;
             }

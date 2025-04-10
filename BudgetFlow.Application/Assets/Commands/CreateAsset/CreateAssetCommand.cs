@@ -19,11 +19,12 @@ namespace BudgetFlow.Application.Assets.Commands.CreateAsset
             }
             public async Task<bool> Handle(CreateAssetCommand request, CancellationToken cancellationToken)
             {
-                if (request.Asset.Symbol != null && request.Asset.Symbol.Length > 0)
+                string image = string.Empty;
+                if (request.Symbol != null && request.Symbol.Length > 0)
                 {
                     using var memoryStream = new MemoryStream();
                     await request.Symbol.CopyToAsync(memoryStream, cancellationToken);
-                    request.Asset.Symbol = Convert.ToBase64String(memoryStream.ToArray());
+                    image = Convert.ToBase64String(memoryStream.ToArray());
                 }
 
                 Asset asset = new()
@@ -33,9 +34,9 @@ namespace BudgetFlow.Application.Assets.Commands.CreateAsset
                     BuyPrice = request.Asset.BuyPrice,
                     SellPrice = request.Asset.SellPrice,
                     Description = request.Asset.Description,
-                    Symbol = request.Asset.Symbol,
+                    Symbol = image,
                     Code = request.Asset.Code,
-                    Unit= request.Asset.Unit
+                    Unit = request.Asset.Unit
                 };
                 var result = await assetRepository.CreateAssetAsync(asset);
                 if (!result)

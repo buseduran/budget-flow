@@ -7,8 +7,7 @@
         public decimal BuyPrice { get; set; }
         public decimal SellPrice { get; set; }
         public string? Description { get; set; }
-        public string Symbol { get; set; }
-        public string Code { get; set; }
-        public string Unit { get; set; }
+        public string Code { get; set; } //XAU XPT
+        public string Unit { get; set; } //gr vs
     }
 }
