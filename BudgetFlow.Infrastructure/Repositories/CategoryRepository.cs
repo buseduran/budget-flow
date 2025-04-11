@@ -14,13 +14,14 @@ namespace BudgetFlow.Infrastructure.Repositories
             this.context = context;
         }
 
-        public async Task<bool> CreateCategoryAsync(Category Category)
+        public async Task<int> CreateCategoryAsync(Category Category)
         {
             Category.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
             Category.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
             await context.Categories.AddAsync(Category);
-            return await context.SaveChangesAsync() > 0;
+            await context.SaveChangesAsync();
+            return Category.ID;
         }
 
         public async Task<IEnumerable<CategoryResponse>> GetCategoriesAsync()

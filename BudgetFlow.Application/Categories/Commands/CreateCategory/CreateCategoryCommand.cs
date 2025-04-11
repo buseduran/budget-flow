@@ -7,13 +7,13 @@ using Microsoft.AspNetCore.Http;
 
 namespace BudgetFlow.Application.Categories.Commands.CreateCategory
 {
-    public class CreateCategoryCommand : IRequest<bool>
+    public class CreateCategoryCommand : IRequest<int>
     {
         public string Name { get; set; }
         public string Color { get; set; }
         public EntryType Type { get; set; }
 
-        public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, bool>
+        public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, int>
         {
             private readonly ICategoryRepository categoryRepository;
             private readonly IHttpContextAccessor httpContextAccessor;
@@ -22,7 +22,7 @@ namespace BudgetFlow.Application.Categories.Commands.CreateCategory
                 this.categoryRepository = categoryRepository;
                 this.httpContextAccessor = httpContextAccessor;
             }
-            public async Task<bool> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
+            public async Task<int> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
             {
                 GetCurrentUser getCurrentUser = new(httpContextAccessor);
 

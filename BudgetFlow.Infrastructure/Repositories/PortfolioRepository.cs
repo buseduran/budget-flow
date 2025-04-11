@@ -88,7 +88,6 @@ namespace BudgetFlow.Infrastructure.Repositories
             return result;
         }
 
-
         public async Task<PortfolioResponse> GetPortfolioAsync(string Name)
         {
             var portfolio = await context.Portfolios
