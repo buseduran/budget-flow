@@ -54,6 +54,12 @@ namespace BudgetFlow.Application.Investments.Commands.CreateInvestment
                         {
                             UserAsset.Amount += investment.UnitAmount;
                             UserAsset.Balance += investment.CurrencyAmount;
+                            var userAssetResult = await assetRepository.UpdateUserAssetAsync(UserAsset.ID, UserAsset.Amount, UserAsset.Balance);
+                            if (!userAssetResult)
+                            {
+                                throw new Exception("User asset could not be updated.");
+                            }
+
                             var walletUpdateResult = await walletRepository.UpdateWalletAsync(getCurrentUser.GetCurrentUserID(), investment.CurrencyAmount);
                             if (!walletUpdateResult)
                             {
@@ -69,6 +75,12 @@ namespace BudgetFlow.Application.Investments.Commands.CreateInvestment
                         }
                         UserAsset.Amount -= investment.UnitAmount;
                         UserAsset.Balance -= investment.CurrencyAmount;
+                        var userAssetResult = await assetRepository.UpdateUserAssetAsync(UserAsset.ID, UserAsset.Amount, UserAsset.Balance);
+                        if (!userAssetResult)
+                        {
+                            throw new Exception("User asset could not be updated.");
+                        }
+
                         var walletUpdateResult = await walletRepository.UpdateWalletAsync(getCurrentUser.GetCurrentUserID(), -investment.CurrencyAmount);
                         if (!walletUpdateResult)
                         {

@@ -49,23 +49,45 @@ namespace BudgetFlow.Infrastructure.Repositories
             return await context.SaveChangesAsync() > 0;
         }
 
-        public async Task<List<PortfolioResponse>> GetPortfoliosAsync(int UserID)
+        public async Task<List<PortfolioResponse>> GetPortfoliosAsync(int userID)
         {
-            //calculate investments analysis here
-            var portfolios = await context.Portfolios
-                .Where(e => e.UserID == UserID)
-                .OrderByDescending(c => c.UpdatedAt)
-                .Include(e => e.Investments)
-                .Select(e => new PortfolioResponse
-                {
-                    ID = e.ID,
-                    Name = e.Name,
-                    Description = e.Description,
-                    TotalInvested = e.Investments.Sum(i => i.UnitAmount)
-                })
+            var userAssets = await context.UserAssets
+                .Where(u => u.UserId == userID)
                 .ToListAsync();
-            return portfolios;
+
+            var portfolios = await context.Portfolios
+                .Where(p => p.UserID == userID)
+                .Include(p => p.Investments)
+                .ThenInclude(i => i.Asset)
+                .OrderByDescending(p => p.UpdatedAt)
+                .ToListAsync();
+
+            var result = portfolios.Select(p =>
+            {
+                var portfolioAssetIds = p.Investments
+                    .Select(i => i.AssetId)
+                    .Distinct()
+                    .ToList();
+
+                var matchingUserAssets = userAssets
+                    .Where(ua => portfolioAssetIds.Contains(ua.AssetId))
+                    .ToList();
+
+                var totalInvested = matchingUserAssets
+                    .Sum(ua => ua.Balance);
+
+                return new PortfolioResponse
+                {
+                    ID = p.ID,
+                    Name = p.Name,
+                    Description = p.Description,
+                    TotalInvested = totalInvested,
+                };
+            }).ToList();
+
+            return result;
         }
+
 
         public async Task<PortfolioResponse> GetPortfolioAsync(string Name)
         {

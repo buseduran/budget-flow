@@ -64,7 +64,7 @@ namespace BudgetFlow.Infrastructure.Repositories
             return investments;
         }
 
-        public async Task<PortfolioAssetResponse> GetAssetInvestmentsAsync(string portfolio)
+        public async Task<PortfolioAssetResponse> GetAssetInvestmentsAsync(string portfolio, int userID)
         {
             var portfolioId = await context.Portfolios
                 .Where(p => p.Name == portfolio)
@@ -73,28 +73,57 @@ namespace BudgetFlow.Infrastructure.Repositories
                     p.ID
                 }).FirstOrDefaultAsync();
 
-            var investments = await context.Investments
+            var investmentsRaw = await context.Investments
                 .Where(e => e.Portfolio.Name == portfolio)
-                .GroupBy(e => new { e.AssetId, AssetTypeName = e.Asset.AssetType.Name, AssetName = e.Asset.Name, e.Asset.SellPrice })
-                .Select(g => new PortfolioAssetInvestmentsResponse
+                .GroupBy(e => new
                 {
-                    Name = g.Key.AssetName,
-                    AssetType = g.Key.AssetTypeName,
-                    CurrencyAmount = g.Sum(e => e.CurrencyAmount),
-                    UnitAmount = g.Sum(e => e.UnitAmount),
-                    Balance = g.Sum(e => e.UnitAmount) * g.Key.SellPrice,
-                    Description = g.OrderByDescending(e => e.CreatedAt).First().Description,
+                    e.AssetId,
+                    AssetTypeName = e.Asset.AssetType.Name,
+                    AssetName = e.Asset.Name,
+                    e.Asset.SellPrice
+                })
+                .Select(g => new
+                {
+                    g.Key.AssetId,
+                    g.Key.AssetTypeName,
+                    g.Key.AssetName,
+                    g.Key.SellPrice,
+                    TotalUnitAmount = g.Sum(e => e.UnitAmount),
+                    TotalCurrencyAmount = g.Sum(e => e.CurrencyAmount),
                     Code = g.OrderByDescending(e => e.CreatedAt).First().Asset.Code,
                     Unit = g.OrderByDescending(e => e.CreatedAt).First().Asset.Unit,
                     Symbol = g.OrderByDescending(e => e.CreatedAt).First().Asset.Symbol,
                     CreatedAt = g.Max(e => e.CreatedAt),
-                    UpdatedAt = g.Max(e => e.UpdatedAt),
-                    AssetId = g.Key.AssetId,
-                    PortfolioId = portfolioId.ID
+                    UpdatedAt = g.Max(e => e.UpdatedAt)
                 })
-                .OrderByDescending(e => e.CreatedAt)
-                .Take(5)
                 .ToListAsync();
+
+            var userAssets = await context.UserAssets
+                .Where(u => u.UserId == userID)
+                .ToListAsync();
+
+            var investments = investmentsRaw
+                .Select(i =>
+                {
+                    var userAsset = userAssets.FirstOrDefault(u => u.AssetId == i.AssetId);
+                    return new PortfolioAssetInvestmentsResponse
+                    {
+                        Name = i.AssetName,
+                        AssetType = i.AssetTypeName,
+                        Code = i.Code,
+                        Unit = i.Unit,
+                        Symbol = i.Symbol,
+                        CreatedAt = i.CreatedAt,
+                        UpdatedAt = i.UpdatedAt,
+                        AssetId = i.AssetId,
+                        PortfolioId = portfolioId.ID,
+                        UnitAmount = userAsset?.Amount ?? 0,
+                        CurrencyAmount = userAsset?.Balance ?? 0
+                    };
+                })
+                .OrderByDescending(i => i.CreatedAt)
+                .Take(5)
+                .ToList();
 
             var portfolioAssetInfoResponse = await context.Investments
                 .Where(e => e.Portfolio.Name == portfolio)

@@ -71,6 +71,7 @@ public class PortfolioController : ControllerBase
     {
         return Ok(await mediator.Send(new GetPortfoliosQuery()));
     }
+
     /// <summary>
     /// Get Portfolio. 
     /// </summary>

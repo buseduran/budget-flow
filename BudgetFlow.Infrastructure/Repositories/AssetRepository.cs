@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using BudgetFlow.Application.Assets;
-using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Entities;
@@ -30,6 +29,7 @@ namespace BudgetFlow.Infrastructure.Repositories
         {
             var asset = await context.Assets.FindAsync(Asset.ID);
             if (asset is null) return false;
+
 
             mapper.Map(Asset, asset);
             asset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
@@ -82,6 +82,7 @@ namespace BudgetFlow.Infrastructure.Repositories
                 .Where(e => e.UserId == UserID && e.AssetId == AssetID)
                 .Select(e => new UserAssetResponse
                 {
+                    ID = e.ID,
                     Amount = e.Amount,
                     Balance = e.Balance,
                     UserId = e.UserId,
@@ -95,6 +96,15 @@ namespace BudgetFlow.Infrastructure.Repositories
             userAsset.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
             userAsset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
             await context.UserAssets.AddAsync(userAsset);
+            return await context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> UpdateUserAssetAsync(int ID, decimal Amount, decimal Balance)
+        {
+            var userAsset = await context.UserAssets.FindAsync(ID);
+            userAsset.Amount = Amount;
+            userAsset.Balance = Balance;
+            userAsset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
             return await context.SaveChangesAsync() > 0;
         }
     }

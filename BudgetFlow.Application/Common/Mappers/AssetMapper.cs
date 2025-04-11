@@ -11,6 +11,11 @@ namespace BudgetFlow.Application.Common.Mappers
         {
             CreateMap<AssetResponse, Asset>().ReverseMap();
             CreateMap<AssetDto, Asset>().ReverseMap();
+
+            CreateMap<Asset, Asset>()
+                .ForMember(dest => dest.ID, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore()) 
+                .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
         }
     }
 }

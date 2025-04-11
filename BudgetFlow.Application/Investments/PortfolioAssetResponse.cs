@@ -20,7 +20,6 @@
         public string Description { get; set; }
         public decimal CurrencyAmount { get; set; }
         public decimal UnitAmount { get; set; }
-        public decimal Balance { get; set; }
         public string Code { get; set; }
         public string Unit { get; set; }
         public string Symbol { get; set; }
