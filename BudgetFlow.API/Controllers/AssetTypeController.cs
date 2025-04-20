@@ -3,6 +3,8 @@ using BudgetFlow.Application.AssetTypes.Commands.CreateAssetType;
 using BudgetFlow.Application.AssetTypes.Commands.DeleteAssetType;
 using BudgetFlow.Application.AssetTypes.Commands.UpdateAssetType;
 using BudgetFlow.Application.AssetTypes.Queries.GetAssetTypes;
+using BudgetFlow.Application.Common.Extensions;
+using BudgetFlow.Application.Common.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -53,10 +55,14 @@ public class AssetTypeController : ControllerBase
     [HttpDelete]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IActionResult> DeleteAssetTypeAsync([FromBody] DeleteAssetTypeCommand deleteAssetTypeCommand)
+    public async Task<IResult> DeleteAssetTypeAsync([FromBody] DeleteAssetTypeCommand deleteAssetTypeCommand)
     {
-        return Ok(await mediator.Send(deleteAssetTypeCommand));
+        var result = await mediator.Send(deleteAssetTypeCommand);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
     }
+
 
     /// <summary>
     /// Get List of Asset Types. 

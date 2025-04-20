@@ -1,3 +1,4 @@
+using BudgetFlow.API.Middlewares;
 using BudgetFlow.Application;
 using BudgetFlow.Infrastructure;
 using BudgetFlow.Infrastructure.Contexts;
@@ -14,6 +15,9 @@ builder.Services.AddControllers();
 
 builder.Services.AddInfrastructure();
 builder.Services.AddApplication();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -93,6 +97,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseExceptionHandler();
+
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
