@@ -1,26 +1,27 @@
 ﻿using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
 namespace BudgetFlow.Application.Assets.Commands.UpdateAsset
 {
-    public class UpdateAssetCommand : IRequest<bool>
+    public class UpdateAssetCommand : IRequest<Result<bool>>
     {
         public int ID { get; set; }
         public AssetDto Asset { get; set; }
         public IFormFile Symbol { get; set; }
-        public class UpdateAssetCommandHandler : IRequestHandler<UpdateAssetCommand, bool>
+        public class UpdateAssetCommandHandler : IRequestHandler<UpdateAssetCommand, Result<bool>>
         {
             private readonly IAssetRepository assetRepository;
             public UpdateAssetCommandHandler(IAssetRepository assetRepository)
             {
                 this.assetRepository = assetRepository;
             }
-            public async Task<bool> Handle(UpdateAssetCommand request, CancellationToken cancellationToken)
+            public async Task<Result<bool>> Handle(UpdateAssetCommand request, CancellationToken cancellationToken)
             {
-                string image = string.Empty;    
+                string image = string.Empty;
                 if (request.Symbol != null && request.Symbol.Length > 0)
                 {
                     using var memoryStream = new MemoryStream();
@@ -42,7 +43,9 @@ namespace BudgetFlow.Application.Assets.Commands.UpdateAsset
 
                 var result = await assetRepository.UpdateAssetAsync(asset);
 
-                return result;
+                return result
+                    ? Result.Success(true)
+                    : Result.Failure<bool>("Failed to update Asset");
             }
         }
     }

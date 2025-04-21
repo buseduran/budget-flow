@@ -54,7 +54,7 @@ public class AssetTypeController : ControllerBase
     /// <returns></returns>
     [HttpDelete]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
     public async Task<IResult> DeleteAssetTypeAsync([FromBody] DeleteAssetTypeCommand deleteAssetTypeCommand)
     {
         var result = await mediator.Send(deleteAssetTypeCommand);

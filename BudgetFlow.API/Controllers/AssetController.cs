@@ -4,6 +4,8 @@ using BudgetFlow.Application.Assets.Commands.DeleteAsset;
 using BudgetFlow.Application.Assets.Commands.UpdateAsset;
 using BudgetFlow.Application.Assets.Queries.GetAssetRate;
 using BudgetFlow.Application.Assets.Queries.GetAssets;
+using BudgetFlow.Application.Common.Extensions;
+using BudgetFlow.Application.Common.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,10 +31,13 @@ public class AssetController : ControllerBase
     [HttpPost]
     [Consumes("multipart/form-data")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IActionResult> CreateAssetAsync([FromForm] CreateAssetCommand createAssetCommand)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    public async Task<IResult> CreateAssetAsync([FromForm] CreateAssetCommand createAssetCommand)
     {
-        return Ok(await mediator.Send(createAssetCommand));
+        var result = await mediator.Send(createAssetCommand);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -43,10 +48,13 @@ public class AssetController : ControllerBase
     [HttpPut]
     [Consumes("multipart/form-data")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IActionResult> UpdateAssetTypeAsync([FromForm] UpdateAssetCommand updateAssetCommand)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    public async Task<IResult> UpdateAssetTypeAsync([FromForm] UpdateAssetCommand updateAssetCommand)
     {
-        return Ok(await mediator.Send(updateAssetCommand));
+        var result = await mediator.Send(updateAssetCommand);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -56,10 +64,13 @@ public class AssetController : ControllerBase
     /// <returns></returns>
     [HttpDelete("{ID}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IActionResult> DeleteAssetAsync([FromRoute] int ID)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    public async Task<IResult> DeleteAssetAsync([FromRoute] int ID)
     {
-        return Ok(await mediator.Send(new DeleteAssetCommand(ID)));
+        var result = await mediator.Send(new DeleteAssetCommand(ID));
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -68,13 +79,15 @@ public class AssetController : ControllerBase
     /// <returns></returns>
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AssetResponse>))]
-    public async Task<IActionResult> GetAssetsPaginationAsync()
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<List<AssetResponse>>))]
+    public async Task<IResult> GetAssetsPaginationAsync()
     {
-        return Ok(await mediator.Send(new GetAssetsQuery()));
+        var result = await mediator.Send(new GetAssetsQuery());
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
     }
 
-    // get rate
     /// <summary>
     /// Gets Asset Rate. 
     /// </summary>
@@ -82,8 +95,11 @@ public class AssetController : ControllerBase
     [HttpGet("Rate/{ID}")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof((decimal BuyPrice, decimal SellPrice)))]
-    public async Task<IActionResult> GetAssetRateAsync([FromRoute] int ID)
+    public async Task<IResult> GetAssetRateAsync([FromRoute] int ID)
     {
-        return Ok(await mediator.Send(new GetAssetRateQuery(ID)));
+        var result=await mediator.Send(new GetAssetRateQuery(ID));
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
     }
 }

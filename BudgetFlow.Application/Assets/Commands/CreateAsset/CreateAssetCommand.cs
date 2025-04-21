@@ -1,23 +1,24 @@
 ﻿using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
 namespace BudgetFlow.Application.Assets.Commands.CreateAsset
 {
-    public class CreateAssetCommand : IRequest<bool>
+    public class CreateAssetCommand : IRequest<Result<bool>>
     {
         public AssetDto Asset { get; set; }
         public IFormFile Symbol { get; set; }
-        public class CreateAssetCommandHandler : IRequestHandler<CreateAssetCommand, bool>
+        public class CreateAssetCommandHandler : IRequestHandler<CreateAssetCommand, Result<bool>>
         {
             private readonly IAssetRepository assetRepository;
             public CreateAssetCommandHandler(IAssetRepository assetRepository)
             {
                 this.assetRepository = assetRepository;
             }
-            public async Task<bool> Handle(CreateAssetCommand request, CancellationToken cancellationToken)
+            public async Task<Result<bool>> Handle(CreateAssetCommand request, CancellationToken cancellationToken)
             {
                 string image = string.Empty;
                 if (request.Symbol != null && request.Symbol.Length > 0)
@@ -39,9 +40,9 @@ namespace BudgetFlow.Application.Assets.Commands.CreateAsset
                     Unit = request.Asset.Unit
                 };
                 var result = await assetRepository.CreateAssetAsync(asset);
-                if (!result)
-                    throw new Exception("Failed to create asset.");
-                return true;
+                return result
+                    ? Result.Success(true)
+                    : Result.Failure<bool>("Failed to create Asset");
             }
         }
     }
