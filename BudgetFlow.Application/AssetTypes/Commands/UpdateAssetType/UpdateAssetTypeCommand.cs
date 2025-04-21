@@ -1,14 +1,15 @@
 ﻿using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Results;
 using MediatR;
 
 namespace BudgetFlow.Application.AssetTypes.Commands.UpdateAssetType
 {
-    public class UpdateAssetTypeCommand : IRequest<bool>
+    public class UpdateAssetTypeCommand : IRequest<Result<bool>>
     {
         public int ID { get; set; }
         public AssetTypeDto AssetType { get; set; }
-        public class UpdateAssetTypeCommandHandler : IRequestHandler<UpdateAssetTypeCommand, bool>
+        public class UpdateAssetTypeCommandHandler : IRequestHandler<UpdateAssetTypeCommand, Result<bool>>
         {
             private readonly IAssetTypeRepository assetTypeRepository;
             public UpdateAssetTypeCommandHandler(IAssetTypeRepository assetTypeRepository)
@@ -16,10 +17,15 @@ namespace BudgetFlow.Application.AssetTypes.Commands.UpdateAssetType
                 this.assetTypeRepository = assetTypeRepository;
             }
 
-            public Task<bool> Handle(UpdateAssetTypeCommand request, CancellationToken cancellationToken)
+            public async Task<Result<bool>> Handle(UpdateAssetTypeCommand request, CancellationToken cancellationToken)
             {
-                var result = assetTypeRepository.UpdateAssetTypeAsync(request.ID, request.AssetType);
-                return result;
+                if (request.ID == 0)
+                    return Result.Failure<bool>("ID cannot be empty");
+
+                var result = await assetTypeRepository.UpdateAssetTypeAsync(request.ID, request.AssetType);
+                return result
+                    ? Result.Success(result)
+                    : Result.Failure<bool>("Error updating asset type");
             }
         }
     }

@@ -94,10 +94,10 @@ public class AssetController : ControllerBase
     /// <returns></returns>
     [HttpGet("Rate/{ID}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof((decimal BuyPrice, decimal SellPrice)))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<AssetRateResponse>))]
     public async Task<IResult> GetAssetRateAsync([FromRoute] int ID)
     {
-        var result=await mediator.Send(new GetAssetRateQuery(ID));
+        var result = await mediator.Send(new GetAssetRateQuery(ID));
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();

@@ -28,10 +28,13 @@ public class AssetTypeController : ControllerBase
     /// <returns></returns>
     [HttpPost]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IActionResult> CreateAssetTypeAsync([FromBody] CreateAssetTypeCommand createAssetTypeCommand)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    public async Task<IResult> CreateAssetTypeAsync([FromBody] CreateAssetTypeCommand createAssetTypeCommand)
     {
-        return Ok(await mediator.Send(createAssetTypeCommand));
+        var result = await mediator.Send(createAssetTypeCommand);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -41,10 +44,13 @@ public class AssetTypeController : ControllerBase
     /// <returns></returns>
     [HttpPut]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IActionResult> UpdateAssetTypeAsync([FromBody] UpdateAssetTypeCommand updateAssetTypeCommand)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    public async Task<IResult> UpdateAssetTypeAsync([FromBody] UpdateAssetTypeCommand updateAssetTypeCommand)
     {
-        return Ok(await mediator.Send(updateAssetTypeCommand));
+        var result = await mediator.Send(updateAssetTypeCommand);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -63,7 +69,6 @@ public class AssetTypeController : ControllerBase
             : result.ToProblemDetails();
     }
 
-
     /// <summary>
     /// Get List of Asset Types. 
     /// </summary>
@@ -71,9 +76,12 @@ public class AssetTypeController : ControllerBase
     /// <returns></returns>
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AssetTypeResponse>))]
-    public async Task<IActionResult> GetAssetTypesAsync()
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<List<AssetTypeResponse>>))]
+    public async Task<IResult> GetAssetTypesAsync()
     {
-        return Ok(await mediator.Send(new GetAssetTypesQuery()));
+        var result = await mediator.Send(new GetAssetTypesQuery());
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
     }
 }
