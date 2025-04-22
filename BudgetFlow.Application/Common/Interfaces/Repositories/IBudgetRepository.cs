@@ -3,8 +3,8 @@ using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
 
-namespace BudgetFlow.Application.Common.Interfaces.Repositories
-    public interface IBudgetRepository
+namespace BudgetFlow.Application.Common.Interfaces.Repositories;
+public interface IBudgetRepository
 {
     Task<bool> CreateEntryAsync(Entry Entry);
     Task<bool> UpdateEntryAsync(int ID, EntryDto Entry);
