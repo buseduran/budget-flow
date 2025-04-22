@@ -1,7 +1,5 @@
-﻿namespace BudgetFlow.Domain.Errors
+﻿namespace BudgetFlow.Domain.Errors;
+public static class UserErrors
 {
-    public static class UserErrors
-    {
-       
-    }
+
 }

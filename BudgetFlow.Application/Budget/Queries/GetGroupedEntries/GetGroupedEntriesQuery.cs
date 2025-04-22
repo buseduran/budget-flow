@@ -1,33 +1,35 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace BudgetFlow.Application.Budget.Queries.GetGroupedEntries
+namespace BudgetFlow.Application.Budget.Queries.GetGroupedEntries;
+public class GetGroupedEntriesQuery : IRequest<Result<GroupedEntriesResponse>>
 {
-    public class GetGroupedEntriesQuery : IRequest<GroupedEntriesResponse>
+    public string Range { get; set; }
+    public GetGroupedEntriesQuery(string Range)
     {
-        public string Range { get; set; }
-        public GetGroupedEntriesQuery(string Range)
+        this.Range = Range;
+    }
+    public class GetGroupedEntriesQueryHandler : IRequestHandler<GetGroupedEntriesQuery, Result<GroupedEntriesResponse>>
+    {
+        private readonly IBudgetRepository budgetRepository;
+        private readonly IHttpContextAccessor httpContextAccessor;
+        public GetGroupedEntriesQueryHandler(IBudgetRepository budgetRepository, IHttpContextAccessor httpContextAccessor)
         {
-            this.Range = Range;
+            this.budgetRepository = budgetRepository;
+            this.httpContextAccessor = httpContextAccessor;
         }
-        public class GetGroupedEntriesQueryHandler : IRequestHandler<GetGroupedEntriesQuery, GroupedEntriesResponse>
+        public async Task<Result<GroupedEntriesResponse>> Handle(GetGroupedEntriesQuery request, CancellationToken cancellationToken)
         {
-            private readonly IBudgetRepository _budgetRepository;
-            private readonly IHttpContextAccessor _httpContextAccessor;
-            public GetGroupedEntriesQueryHandler(IBudgetRepository budgetRepository, IHttpContextAccessor httpContextAccessor)
-            {
-                _budgetRepository = budgetRepository;
-                _httpContextAccessor = httpContextAccessor;
-            }
-            public async Task<GroupedEntriesResponse> Handle(GetGroupedEntriesQuery request, CancellationToken cancellationToken)
-            {
-                GetCurrentUser getCurrentUser = new(_httpContextAccessor);
-                int userID = getCurrentUser.GetCurrentUserID();
+            GetCurrentUser getCurrentUser = new(httpContextAccessor);
+            int userID = getCurrentUser.GetCurrentUserID();
 
-                return await _budgetRepository.GetGroupedEntriesAsync(userID, request.Range);
-            }
+            var entries = await budgetRepository.GetGroupedEntriesAsync(userID, request.Range);
+            return entries != null
+                ? Result.Success(entries)
+                : Result.Failure<GroupedEntriesResponse>("Failed to retrieve grouped entries.");
         }
     }
 }

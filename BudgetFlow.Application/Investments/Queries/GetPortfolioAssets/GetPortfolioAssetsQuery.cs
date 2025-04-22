@@ -1,33 +1,34 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace BudgetFlow.Application.Investments.Queries
+namespace BudgetFlow.Application.Investments.Queries;
+public class GetPortfolioAssetsQuery : IRequest<Result<PortfolioAssetResponse>>
 {
-    public class GetPortfolioAssetsQuery : IRequest<PortfolioAssetResponse>
+    public string Portfolio { get; set; }
+    public GetPortfolioAssetsQuery(string Portfolio)
     {
-        public string Portfolio { get; set; }
-        public GetPortfolioAssetsQuery(string Portfolio)
+        this.Portfolio = Portfolio;
+    }
+    public class GetPortfolioAssetsQueryHandler : IRequestHandler<GetPortfolioAssetsQuery, Result<PortfolioAssetResponse>>
+    {
+        private readonly IInvestmentRepository investmentRepository;
+        private readonly IHttpContextAccessor httpContextAccessor;
+        public GetPortfolioAssetsQueryHandler(IInvestmentRepository investmentRepository, IHttpContextAccessor httpContextAccessor)
         {
-            this.Portfolio = Portfolio;
+            this.investmentRepository = investmentRepository;
+            this.httpContextAccessor = httpContextAccessor;
         }
-        public class GetPortfolioAssetsQueryHandler : IRequestHandler<GetPortfolioAssetsQuery, PortfolioAssetResponse>
+        public async Task<Result<PortfolioAssetResponse>> Handle(GetPortfolioAssetsQuery request, CancellationToken cancellationToken)
         {
-            private readonly IInvestmentRepository investmentRepository;
-            private readonly IHttpContextAccessor httpContextAccessor;
-            public GetPortfolioAssetsQueryHandler(IInvestmentRepository investmentRepository, IHttpContextAccessor httpContextAccessor)
-            {
-                this.investmentRepository = investmentRepository;
-                this.httpContextAccessor = httpContextAccessor;
-            }
-            public async Task<PortfolioAssetResponse> Handle(GetPortfolioAssetsQuery request, CancellationToken cancellationToken)
-            {
-                var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
-                var investments = await investmentRepository.GetAssetInvestmentsAsync(request.Portfolio, userID);
+            var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
+            var investments = await investmentRepository.GetAssetInvestmentsAsync(request.Portfolio, userID);
 
-                return investments;
-            }
+            return investments != null
+                ? Result.Success(investments)
+                : Result.Failure<PortfolioAssetResponse>("Failed to get Investments");
         }
     }
 }

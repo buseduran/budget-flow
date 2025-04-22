@@ -1,16 +1,17 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Interfaces.Services;
 using BudgetFlow.Application.Common.Models;
+using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using MediatR;
 
 namespace BudgetFlow.Application.Auth.Commands.Register;
-public class RegisterCommand : IRequest<bool>
+public class RegisterCommand : IRequest<Result<bool>>
 {
     public UserRegisterModel User { get; set; }
 
-    public class CreateUserCommandHandler : IRequestHandler<RegisterCommand, bool>
+    public class CreateUserCommandHandler : IRequestHandler<RegisterCommand, Result<bool>>
     {
         private readonly IUserRepository userRepository;
         private readonly IWalletRepository walletRepository;
@@ -23,11 +24,11 @@ public class RegisterCommand : IRequest<bool>
             this.passwordHasher = passwordHasher;
         }
 
-        public async Task<bool> Handle(RegisterCommand request, CancellationToken cancellationToken)
+        public async Task<Result<bool>> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
             if (request.User.Password != request.User.ConfirmPassword)
             {
-                throw new Exception("Passwords do not match");
+                return Result.Failure<bool>("Passwords do not match");
             }
             User user = new User()
             {
@@ -36,7 +37,6 @@ public class RegisterCommand : IRequest<bool>
                 PasswordHash = passwordHasher.Hash(request.User.Password)
             };
             var userID = await userRepository.CreateAsync(user);
-
             if (userID != 0)
             {
                 Wallet wallet = new Wallet()
@@ -48,15 +48,15 @@ public class RegisterCommand : IRequest<bool>
                 var result = await walletRepository.CreateWalletAsync(wallet);
                 if (!result)
                 {
-                    throw new Exception("Failed to create wallet.");
+                    return Result.Failure<bool>("Failed to create wallet");
                 }
             }
             else
             {
-                throw new Exception("Failed to create user.");
+                return Result.Failure<bool>("Failed to create user");
             }
 
-            return true;
+            return Result.Success(true);
         }
     }
 }

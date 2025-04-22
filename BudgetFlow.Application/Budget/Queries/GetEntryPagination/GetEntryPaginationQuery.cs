@@ -1,32 +1,33 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace BudgetFlow.Application.Budget.Queries.GetEntryPagination
+namespace BudgetFlow.Application.Budget.Queries.GetEntryPagination;
+public class GetEntryPaginationQuery : IRequest<Result<PaginatedList<EntryResponse>>>
 {
-    public class GetEntryPaginationQuery : IRequest<PaginatedList<EntryResponse>>
+    public int Page { get; set; } = 1;
+    public int PageSize { get; set; } = 50;
+    public class GetEntryPaginationQueryHandler : IRequestHandler<GetEntryPaginationQuery, Result<PaginatedList<EntryResponse>>>
     {
-        public int Page { get; set; } = 1;
-        public int PageSize { get; set; } = 50;
-        public class GetEntryPaginationQueryHandler : IRequestHandler<GetEntryPaginationQuery, PaginatedList<EntryResponse>>
+        private readonly IBudgetRepository budgetRepository;
+        private readonly IHttpContextAccessor httpContextAccessor;
+        public GetEntryPaginationQueryHandler(IBudgetRepository budgetRepository, IHttpContextAccessor httpContextAccessor)
         {
-            private readonly IBudgetRepository _budgetRepository;
-            private readonly IHttpContextAccessor _httpContextAccessor;
-            public GetEntryPaginationQueryHandler(IBudgetRepository budgetRepository, IHttpContextAccessor httpContextAccessor)
-            {
-                _budgetRepository = budgetRepository;
-                _httpContextAccessor = httpContextAccessor;
-            }
+            this.budgetRepository = budgetRepository;
+            this.httpContextAccessor = httpContextAccessor;
+        }
 
-            public async Task<PaginatedList<EntryResponse>> Handle(GetEntryPaginationQuery request, CancellationToken cancellationToken)
-            {
-                GetCurrentUser getCurrentUser = new(_httpContextAccessor);
-                int userID = getCurrentUser.GetCurrentUserID();
-                var result = await _budgetRepository.GetPaginatedAsync(request.Page, request.PageSize,userID);
+        public async Task<Result<PaginatedList<EntryResponse>>> Handle(GetEntryPaginationQuery request, CancellationToken cancellationToken)
+        {
+            GetCurrentUser getCurrentUser = new(httpContextAccessor);
+            int userID = getCurrentUser.GetCurrentUserID();
+            var result = await budgetRepository.GetPaginatedAsync(request.Page, request.PageSize, userID);
+            if (result == null)
+                return Result.Failure<PaginatedList<EntryResponse>>("No entries found.");
 
-                return result;
-            }
+            return Result.Success(result);
         }
     }
 }

@@ -2,15 +2,15 @@
 using BudgetFlow.Application.Auth.Commands.Logout;
 using BudgetFlow.Application.Auth.Commands.Register;
 using BudgetFlow.Application.Auth.Commands.UpdateAccount;
-using BudgetFlow.Application.Budget.Queries.GetLastEntries;
-using BudgetFlow.Application.Budget;
+using BudgetFlow.Application.Auth.Commands.UpdateUserCurrency;
+using BudgetFlow.Application.Auth.Queries.GetUserCurrency;
+using BudgetFlow.Application.Common.Extensions;
+using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
-using BudgetFlow.Domain.Enums;
-using BudgetFlow.Application.Auth.Queries.GetUserCurrency;
-using BudgetFlow.Application.Auth.Commands.UpdateUserCurrency;
 
 namespace BudgetFlow.API.Controllers;
 [ApiController]
@@ -30,10 +30,13 @@ public class AuthController : ControllerBase
     /// <returns></returns>
     [HttpPost("Register")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IActionResult> SignupAsync([FromBody] RegisterCommand registerCommand)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    public async Task<IResult> SignupAsync([FromBody] RegisterCommand registerCommand)
     {
-        return Ok(await mediator.Send(registerCommand));
+        var result = await mediator.Send(registerCommand);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -43,10 +46,13 @@ public class AuthController : ControllerBase
     /// <returns></returns>
     [HttpPost("Login")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
-    public async Task<IActionResult> LoginAsync([FromBody] LoginCommand loginCommand)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<string>))]
+    public async Task<IResult> LoginAsync([FromBody] LoginCommand loginCommand)
     {
-        return Ok(await mediator.Send(loginCommand));
+        var result = await mediator.Send(loginCommand);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -56,11 +62,14 @@ public class AuthController : ControllerBase
     /// <returns></returns>
     [HttpPost("Logout")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
     [Authorize]
-    public async Task<IActionResult> LogoutAsync()
+    public async Task<IResult> LogoutAsync()
     {
-        return Ok(await mediator.Send(new LogoutCommand()));
+        var result = await mediator.Send(new LogoutCommand());
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -70,11 +79,14 @@ public class AuthController : ControllerBase
     /// <returns></returns>
     [HttpPut]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
     [Authorize]
-    public async Task<IActionResult> UpdateAccountAsync([FromBody] UpdateAccountCommand updateAccountCommand)
+    public async Task<IResult> UpdateAccountAsync([FromBody] UpdateAccountCommand updateAccountCommand)
     {
-        return Ok(await mediator.Send(updateAccountCommand));
+        var result = await mediator.Send(updateAccountCommand);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -83,11 +95,14 @@ public class AuthController : ControllerBase
     /// <returns></returns>
     [HttpGet("Currency")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CurrencyType))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<CurrencyType>))]
     [Authorize]
-    public async Task<IActionResult> GetUserCurrencyAsync()
+    public async Task<IResult> GetUserCurrencyAsync()
     {
-        return Ok(await mediator.Send(new GetUserCurrencyQuery()));
+        var result = await mediator.Send(new GetUserCurrencyQuery());
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -97,10 +112,13 @@ public class AuthController : ControllerBase
     /// <returns></returns>
     [HttpPut("Currency")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<string>))]
     [Authorize]
-    public async Task<IActionResult> UpdateCurrencyAsync([FromBody] UpdateUserCurrencyCommand updateUserCurrencyCommand)
+    public async Task<IResult> UpdateCurrencyAsync([FromBody] UpdateUserCurrencyCommand updateUserCurrencyCommand)
     {
-        return Ok(await mediator.Send(updateUserCurrencyCommand));
+        var result = await mediator.Send(updateUserCurrencyCommand);
+        return result.IsSuccess
+        ? Results.Ok(result.Value)
+        : result.ToProblemDetails();
     }
 }

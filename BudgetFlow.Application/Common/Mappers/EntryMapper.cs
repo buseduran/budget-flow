@@ -2,14 +2,12 @@
 using BudgetFlow.Application.Budget;
 using BudgetFlow.Domain.Entities;
 
-namespace BudgetFlow.Application.Common.Mappers
+namespace BudgetFlow.Application.Common.Mappers;
+public class EntryMapper : Profile
 {
-    public class EntryMapper : Profile
+    public EntryMapper()
     {
-        public EntryMapper()
-        {
-            CreateMap<EntryResponse, Entry>();
-            CreateMap<Entry, EntryResponse>();
-        }
+        CreateMap<EntryResponse, Entry>();
+        CreateMap<Entry, EntryResponse>();
     }
 }

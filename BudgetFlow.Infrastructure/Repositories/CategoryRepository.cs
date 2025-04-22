@@ -4,55 +4,53 @@ using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 
-namespace BudgetFlow.Infrastructure.Repositories
+namespace BudgetFlow.Infrastructure.Repositories;
+public class CategoryRepository : ICategoryRepository
 {
-    public class CategoryRepository : ICategoryRepository
+    private readonly BudgetContext context;
+    public CategoryRepository(BudgetContext context)
     {
-        private readonly BudgetContext context;
-        public CategoryRepository(BudgetContext context)
-        {
-            this.context = context;
-        }
+        this.context = context;
+    }
 
-        public async Task<int> CreateCategoryAsync(Category Category)
-        {
-            Category.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-            Category.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+    public async Task<int> CreateCategoryAsync(Category Category)
+    {
+        Category.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+        Category.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
-            await context.Categories.AddAsync(Category);
-            await context.SaveChangesAsync();
-            return Category.ID;
-        }
+        await context.Categories.AddAsync(Category);
+        await context.SaveChangesAsync();
+        return Category.ID;
+    }
 
-        public async Task<IEnumerable<CategoryResponse>> GetCategoriesAsync()
-        {
-            return await context.Categories
-                .OrderByDescending(c => c.CreatedAt)
-                .Select(c => new CategoryResponse
-                {
-                    ID = c.ID,
-                    Name = c.Name,
-                    Color = c.Color
-                })
-                .ToListAsync();
-        }
+    public async Task<IEnumerable<CategoryResponse>> GetCategoriesAsync()
+    {
+        return await context.Categories
+            .OrderByDescending(c => c.CreatedAt)
+            .Select(c => new CategoryResponse
+            {
+                ID = c.ID,
+                Name = c.Name,
+                Color = c.Color
+            })
+            .ToListAsync();
+    }
 
-        public async Task<bool> UpdateCategoryAsync(int ID, string Color)
-        {
-            var category = await context.Categories.FindAsync(ID);
-            if (category is null) return false;
+    public async Task<bool> UpdateCategoryAsync(int ID, string Color)
+    {
+        var category = await context.Categories.FindAsync(ID);
+        if (category is null) return false;
 
-            category.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-            category.Color = Color;
+        category.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+        category.Color = Color;
 
-            return await context.SaveChangesAsync() > 0;
-        }
+        return await context.SaveChangesAsync() > 0;
+    }
 
-        public async Task<bool> DeleteCategoryAsync(int ID)
-        {
-            return await context.Categories
-                    .Where(e => e.ID == ID)
-                    .ExecuteDeleteAsync() > 0;
-        }
+    public async Task<bool> DeleteCategoryAsync(int ID)
+    {
+        return await context.Categories
+                .Where(e => e.ID == ID)
+                .ExecuteDeleteAsync() > 0;
     }
 }

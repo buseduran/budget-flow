@@ -8,7 +8,6 @@ using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 
 namespace BudgetFlow.Infrastructure.Repositories;
-
 public class UserRepository : IUserRepository
 {
     private readonly BudgetContext context;

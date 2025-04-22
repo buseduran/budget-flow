@@ -1,14 +1,12 @@
 ﻿using BudgetFlow.Domain.Enums;
 
-namespace BudgetFlow.Application.Budget
+namespace BudgetFlow.Application.Budget;
+public class EntryResponse
 {
-    public class EntryResponse
-    {
-        public string ID { get; set; }
-        public string Name { get; set; }
-        public decimal Amount { get; set; }
-        public DateTime Date { get; set; }
-        public EntryType Type { get; set; }
-        public string CategoryID { get; set; }
-    }
+    public string ID { get; set; }
+    public string Name { get; set; }
+    public decimal Amount { get; set; }
+    public DateTime Date { get; set; }
+    public EntryType Type { get; set; }
+    public string CategoryID { get; set; }
 }

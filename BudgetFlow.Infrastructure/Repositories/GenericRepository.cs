@@ -2,18 +2,16 @@
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 
-namespace BudgetFlow.Infrastructure.Repositories
+namespace BudgetFlow.Infrastructure.Repositories;
+public class GenericRepository<TEntity> : IGenericRepository<TEntity>
+    where TEntity : class, new()
 {
-    public class GenericRepository<TEntity> : IGenericRepository<TEntity>
-        where TEntity : class, new()
-    {
-        protected readonly BudgetContext _context;
-        protected readonly DbSet<TEntity> _dbSet;
+    protected readonly BudgetContext _context;
+    protected readonly DbSet<TEntity> _dbSet;
 
-        public GenericRepository(BudgetContext context, DbSet<TEntity> dbSet)
-        {
-            _context = context;
-            _dbSet = dbSet;
-        }
+    public GenericRepository(BudgetContext context, DbSet<TEntity> dbSet)
+    {
+        _context = context;
+        _dbSet = dbSet;
     }
 }

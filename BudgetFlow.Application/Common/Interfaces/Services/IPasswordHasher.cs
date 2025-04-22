@@ -1,8 +1,6 @@
-﻿namespace BudgetFlow.Application.Common.Interfaces.Services
+﻿namespace BudgetFlow.Application.Common.Interfaces.Services;
+public interface IPasswordHasher
 {
-    public interface IPasswordHasher
-    {
-        string Hash(string password);
-        bool Verify(string password, string passwordHash);
-    }
+    string Hash(string password);
+    bool Verify(string password, string passwordHash);
 }

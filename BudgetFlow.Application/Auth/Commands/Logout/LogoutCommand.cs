@@ -1,48 +1,42 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace BudgetFlow.Application.Auth.Commands.Logout
+namespace BudgetFlow.Application.Auth.Commands.Logout;
+public class LogoutCommand : IRequest<Result<bool>>
 {
-    public class LogoutCommand : IRequest<bool>
+    public class LogoutCommandHandler : IRequestHandler<LogoutCommand, Result<bool>>
     {
-        public class LogoutCommandHandler : IRequestHandler<LogoutCommand, bool>
+        private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly IUserRepository userRepository;
+        public LogoutCommandHandler(IHttpContextAccessor httpContextAccessor, IUserRepository userRepository)
         {
-            private readonly IHttpContextAccessor _httpContextAccessor;
-            private readonly IUserRepository _userRepository;
-            public LogoutCommandHandler(IHttpContextAccessor httpContextAccessor, IUserRepository userRepository)
-            {
-                _httpContextAccessor = httpContextAccessor;
-                _userRepository = userRepository;
-            }
+            this.httpContextAccessor = httpContextAccessor;
+            this.userRepository = userRepository;
+        }
 
-            public async Task<bool> Handle(LogoutCommand request, CancellationToken cancellationToken)
-            {
-                var token = _httpContextAccessor.HttpContext?.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+        public async Task<Result<bool>> Handle(LogoutCommand request, CancellationToken cancellationToken)
+        {
+            var token = httpContextAccessor.HttpContext?.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
 
-                var context = _httpContextAccessor.HttpContext;
+            var context = httpContextAccessor.HttpContext;
 
-                // Clear user identity
-                context.User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity());
+            // Clear user identity
+            context.User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity());
+            httpContextAccessor.HttpContext.Response.Cookies.Delete("AccessToken");
 
-                _httpContextAccessor.HttpContext.Response.Cookies.Delete("AccessToken");
+            GetCurrentUser getCurrentUser = new(httpContextAccessor);
+            int userID = getCurrentUser.GetCurrentUserID();
+            if (userID == 0)
+                return Result.Failure<bool>("User not found");
 
-                GetCurrentUser getCurrentUser = new(_httpContextAccessor);
-                int userID = getCurrentUser.GetCurrentUserID();
-                if (userID == 0)
-                {
-                    throw new UnauthorizedAccessException();
-                }
+            var revokeResult = await userRepository.RevokeToken(userID);
+            if (!revokeResult)
+                return Result.Failure<bool>("Logout failed");
 
-                var revokeResult = await _userRepository.RevokeToken(userID);
-                if (!revokeResult)
-                {
-                    throw new ApplicationException("Çıkış işlemi başarısız.");
-                }
-
-                return true;
-            }
+            return Result.Success(true);
         }
     }
 }

@@ -2,31 +2,30 @@
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Interfaces.Services;
 using BudgetFlow.Application.Common.Models;
+using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using static BudgetFlow.Application.Auth.Commands.Login.LoginCommand;
 
 namespace BudgetFlow.Application.Auth.Commands.Login;
-public sealed record LoginCommand(string Email, string Password) : IRequest<Response>
+public sealed record LoginCommand(string Email, string Password) : IRequest<Result<Response>>
 {
     public sealed record Response(string AccessToken, string RefreshToken);
     public class LoginCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, ITokenProvider tokenProvider, IMapper
-         mapper, IHttpContextAccessor httpContextAccessor) : IRequestHandler<LoginCommand, Response>
+         mapper, IHttpContextAccessor httpContextAccessor) : IRequestHandler<LoginCommand, Result<Response>>
     {
-        public async Task<Response> Handle(LoginCommand request, CancellationToken cancellationToken)
+        public async Task<Result<Response>> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
             string accessToken;
             var user = await userRepository.GetByEmailAsync(request.Email);
             if (user == null)
             {
-                throw new Exception("Kullanıcı bulunamadı.");
+                return Result.Failure<Response>("User not found");
             }
 
             if (!passwordHasher.Verify(request.Password, user.PasswordHash))
-            {
-                throw new Exception("Şifre hatalı.");
-            }
+                return Result.Failure<Response>("Invalid password");
 
             var refreshToken = await userRepository.GetRefreshTokenByUserID(user.ID);
             if (refreshToken is not null)
@@ -35,9 +34,7 @@ public sealed record LoginCommand(string Email, string Password) : IRequest<Resp
                 //revoke refresh token
 
                 if (!revokeResult)
-                {
-                    throw new ApplicationException("Çıkış işlemi başarısız.");
-                }
+                    return Result.Failure<Response>("Failed to revoke refresh token");
 
                 #region Create Refresh Token
                 accessToken = tokenProvider.Create(refreshToken.User);
@@ -62,9 +59,7 @@ public sealed record LoginCommand(string Email, string Password) : IRequest<Resp
                 };
                 var refreshTokenResult = await userRepository.CreateRefreshToken(refreshToken);
                 if (!refreshTokenResult)
-                {
-                    throw new Exception("Token kaydedilemedi.");
-                }
+                    return Result.Failure<Response>("Failed to create refresh token");
                 #endregion
             }
             httpContextAccessor.HttpContext.Response.Cookies.Append("AccessToken", accessToken, new CookieOptions
@@ -74,7 +69,8 @@ public sealed record LoginCommand(string Email, string Password) : IRequest<Resp
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddMinutes(15) // Token süresiyle uyumlu
             });
-            return new Response(accessToken, refreshToken.Token);
+
+            return Result.Success(new Response(accessToken, refreshToken.Token));
         }
     }
 }

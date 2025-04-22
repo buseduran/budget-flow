@@ -2,37 +2,35 @@
 using BudgetFlow.Application.Common.Results;
 using MediatR;
 
-namespace BudgetFlow.Application.Assets.Queries.GetAssetRate
+namespace BudgetFlow.Application.Assets.Queries.GetAssetRate;
+public class GetAssetRateQuery : IRequest<Result<AssetRateResponse>>
 {
-    public class GetAssetRateQuery : IRequest<Result<AssetRateResponse>>
+    public int ID { get; set; }
+    public GetAssetRateQuery(int ID)
     {
-        public int ID { get; set; }
-        public GetAssetRateQuery(int ID)
+        this.ID = ID;
+    }
+    public class GetAssetRateQueryHandler : IRequestHandler<GetAssetRateQuery, Result<AssetRateResponse>>
+    {
+        private readonly IAssetRepository assetRepository;
+        public GetAssetRateQueryHandler(IAssetRepository assetRepository)
         {
-            this.ID = ID;
+            this.assetRepository = assetRepository;
         }
-        public class GetAssetRateQueryHandler : IRequestHandler<GetAssetRateQuery, Result<AssetRateResponse>>
-        {
-            private readonly IAssetRepository assetRepository;
-            public GetAssetRateQueryHandler(IAssetRepository assetRepository)
-            {
-                this.assetRepository = assetRepository;
-            }
 
-            public async Task<Result<AssetRateResponse>> Handle(GetAssetRateQuery request, CancellationToken cancellationToken)
+        public async Task<Result<AssetRateResponse>> Handle(GetAssetRateQuery request, CancellationToken cancellationToken)
+        {
+            var rate = await assetRepository.GetAssetRateAsync(request.ID);
+            if (rate == null)
             {
-                var rate = await assetRepository.GetAssetRateAsync(request.ID);
-                if (rate == null)
-                {
-                    return Result.Failure<AssetRateResponse>("No Asset found");
-                }
-                var response = new AssetRateResponse
-                {
-                    BuyPrice = rate.BuyPrice,
-                    SellPrice = rate.SellPrice
-                };
-                return Result.Success(response);
+                return Result.Failure<AssetRateResponse>("No Asset found");
             }
+            var response = new AssetRateResponse
+            {
+                BuyPrice = rate.BuyPrice,
+                SellPrice = rate.SellPrice
+            };
+            return Result.Success(response);
         }
     }
 }

@@ -5,45 +5,43 @@ using BudgetFlow.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace BudgetFlow.Application.Assets.Commands.CreateAsset
+namespace BudgetFlow.Application.Assets.Commands.CreateAsset;
+public class CreateAssetCommand : IRequest<Result<bool>>
 {
-    public class CreateAssetCommand : IRequest<Result<bool>>
+    public AssetDto Asset { get; set; }
+    public IFormFile Symbol { get; set; }
+    public class CreateAssetCommandHandler : IRequestHandler<CreateAssetCommand, Result<bool>>
     {
-        public AssetDto Asset { get; set; }
-        public IFormFile Symbol { get; set; }
-        public class CreateAssetCommandHandler : IRequestHandler<CreateAssetCommand, Result<bool>>
+        private readonly IAssetRepository assetRepository;
+        public CreateAssetCommandHandler(IAssetRepository assetRepository)
         {
-            private readonly IAssetRepository assetRepository;
-            public CreateAssetCommandHandler(IAssetRepository assetRepository)
+            this.assetRepository = assetRepository;
+        }
+        public async Task<Result<bool>> Handle(CreateAssetCommand request, CancellationToken cancellationToken)
+        {
+            string image = string.Empty;
+            if (request.Symbol != null && request.Symbol.Length > 0)
             {
-                this.assetRepository = assetRepository;
+                using var memoryStream = new MemoryStream();
+                await request.Symbol.CopyToAsync(memoryStream, cancellationToken);
+                image = Convert.ToBase64String(memoryStream.ToArray());
             }
-            public async Task<Result<bool>> Handle(CreateAssetCommand request, CancellationToken cancellationToken)
-            {
-                string image = string.Empty;
-                if (request.Symbol != null && request.Symbol.Length > 0)
-                {
-                    using var memoryStream = new MemoryStream();
-                    await request.Symbol.CopyToAsync(memoryStream, cancellationToken);
-                    image = Convert.ToBase64String(memoryStream.ToArray());
-                }
 
-                Asset asset = new()
-                {
-                    Name = request.Asset.Name,
-                    AssetTypeId = request.Asset.AssetTypeId,
-                    BuyPrice = request.Asset.BuyPrice,
-                    SellPrice = request.Asset.SellPrice,
-                    Description = request.Asset.Description,
-                    Symbol = image,
-                    Code = request.Asset.Code,
-                    Unit = request.Asset.Unit
-                };
-                var result = await assetRepository.CreateAssetAsync(asset);
-                return result
-                    ? Result.Success(true)
-                    : Result.Failure<bool>("Failed to create Asset");
-            }
+            Asset asset = new()
+            {
+                Name = request.Asset.Name,
+                AssetTypeId = request.Asset.AssetTypeId,
+                BuyPrice = request.Asset.BuyPrice,
+                SellPrice = request.Asset.SellPrice,
+                Description = request.Asset.Description,
+                Symbol = image,
+                Code = request.Asset.Code,
+                Unit = request.Asset.Unit
+            };
+            var result = await assetRepository.CreateAssetAsync(asset);
+            return result
+                ? Result.Success(true)
+                : Result.Failure<bool>("Failed to create Asset");
         }
     }
 }

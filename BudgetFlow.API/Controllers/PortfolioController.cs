@@ -1,4 +1,6 @@
-﻿using BudgetFlow.Application.Portfolios;
+﻿using BudgetFlow.Application.Common.Extensions;
+using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Application.Portfolios;
 using BudgetFlow.Application.Portfolios.Commands.CreatePortfolio;
 using BudgetFlow.Application.Portfolios.Commands.DeletePortfolio;
 using BudgetFlow.Application.Portfolios.Commands.UpdatePortfolio;
@@ -28,10 +30,13 @@ public class PortfolioController : ControllerBase
     /// <returns></returns>
     [HttpPost]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
-    public async Task<IActionResult> CreatePortfolioAsync([FromBody] CreatePortfolioCommand createPortfolioCommand)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<int>))]
+    public async Task<IResult> CreatePortfolioAsync([FromBody] CreatePortfolioCommand createPortfolioCommand)
     {
-        return Ok(await mediator.Send(createPortfolioCommand));
+        var result = await mediator.Send(createPortfolioCommand);
+        return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -41,10 +46,13 @@ public class PortfolioController : ControllerBase
     /// <returns></returns>
     [HttpDelete("{ID}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IActionResult> DeletePortfolioAsync([FromRoute] int ID)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    public async Task<IResult> DeletePortfolioAsync([FromRoute] int ID)
     {
-        return Ok(await mediator.Send(new DeletePortfolioCommand(ID)));
+        var result = await mediator.Send(new DeletePortfolioCommand(ID));
+        return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -54,10 +62,13 @@ public class PortfolioController : ControllerBase
     /// <returns></returns>
     [HttpPut]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IActionResult> UpdatePortfolioAsync([FromBody] UpdatePortfolioCommand updatePortfolioCommand)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    public async Task<IResult> UpdatePortfolioAsync([FromBody] UpdatePortfolioCommand updatePortfolioCommand)
     {
-        return Ok(await mediator.Send(updatePortfolioCommand));
+        var result = await mediator.Send(updatePortfolioCommand);
+        return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -66,10 +77,13 @@ public class PortfolioController : ControllerBase
     /// <returns></returns>
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<PortfolioResponse>))]
-    public async Task<IActionResult> GetPortfoliosAsync()
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<List<PortfolioResponse>>))]
+    public async Task<IResult> GetPortfoliosAsync()
     {
-        return Ok(await mediator.Send(new GetPortfoliosQuery()));
+        var result = await mediator.Send(new GetPortfoliosQuery());
+        return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -78,10 +92,12 @@ public class PortfolioController : ControllerBase
     /// <returns></returns>
     [HttpGet("{Name}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PortfolioResponse))]
-    public async Task<IActionResult> GetPortfolioAsync([FromRoute] string Name)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<PortfolioResponse>))]
+    public async Task<IResult> GetPortfolioAsync([FromRoute] string Name)
     {
-        return Ok(await mediator.Send(new GetPortfolioQuery(Name)));
+        var result = await mediator.Send(new GetPortfolioQuery(Name));
+        return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : result.ToProblemDetails();
     }
-
 }

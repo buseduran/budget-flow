@@ -1,32 +1,32 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Results;
 using MediatR;
 
-namespace BudgetFlow.Application.Budget.Commands.DeleteEntry
+namespace BudgetFlow.Application.Budget.Commands.DeleteEntry;
+public class DeleteEntryCommand : IRequest<Result<bool>>
 {
-    public class DeleteEntryCommand : IRequest<bool>
+    public int ID { get; set; }
+    public DeleteEntryCommand(int ID)
     {
-        public int ID { get; set; }
-        public DeleteEntryCommand(int ID)
-        {
-            this.ID = ID;
-        }
-        public class DeleteEntryCommandHandler : IRequestHandler<DeleteEntryCommand, bool>
-        {
-            private readonly IBudgetRepository budgetRepository;
-            public DeleteEntryCommandHandler(IBudgetRepository budgetRepository)
-            {
-                this.budgetRepository = budgetRepository;
-            }
-            public async Task<bool> Handle(DeleteEntryCommand request, CancellationToken cancellationToken)
-            {
-                var result = await budgetRepository.DeleteEntryAsync(request.ID);
-                if (!result)
-                {
-                    throw new Exception("Failed to delete entry.");
-                }
-                return true;
-            }
-        }
-
+        this.ID = ID;
     }
+    public class DeleteEntryCommandHandler : IRequestHandler<DeleteEntryCommand, Result<bool>>
+    {
+        private readonly IBudgetRepository budgetRepository;
+        public DeleteEntryCommandHandler(IBudgetRepository budgetRepository)
+        {
+            this.budgetRepository = budgetRepository;
+        }
+        public async Task<Result<bool>> Handle(DeleteEntryCommand request, CancellationToken cancellationToken)
+        {
+            var result = await budgetRepository.DeleteEntryAsync(request.ID);
+            if (!result)
+            {
+                return Result.Failure<bool>("Failed to delete the entry.");
+            }
+            return Result.Success(true);
+        }
+    }
+
 }
+

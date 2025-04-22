@@ -4,14 +4,12 @@ using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
 
 namespace BudgetFlow.Application.Common.Interfaces.Repositories
-{
     public interface IBudgetRepository
-    {
-        Task<bool> CreateEntryAsync(Entry Entry);
-        Task<bool> UpdateEntryAsync(int ID, EntryDto Entry);
-        Task<bool> DeleteEntryAsync(int ID);
-        Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID);
-        Task<GroupedEntriesResponse> GetGroupedEntriesAsync(int userID, string Range);
-        Task<List<LastEntryResponse>> GetLastFiveEntriesAsync(int userID);
-    }
+{
+    Task<bool> CreateEntryAsync(Entry Entry);
+    Task<bool> UpdateEntryAsync(int ID, EntryDto Entry);
+    Task<bool> DeleteEntryAsync(int ID);
+    Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID);
+    Task<GroupedEntriesResponse> GetGroupedEntriesAsync(int userID, string Range);
+    Task<List<LastEntryResponse>> GetLastFiveEntriesAsync(int userID);
 }

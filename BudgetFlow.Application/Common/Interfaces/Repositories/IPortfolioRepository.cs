@@ -2,14 +2,12 @@
 using BudgetFlow.Application.Portfolios;
 using BudgetFlow.Domain.Entities;
 
-namespace BudgetFlow.Application.Common.Interfaces.Repositories
+namespace BudgetFlow.Application.Common.Interfaces.Repositories;
+public interface IPortfolioRepository
 {
-    public interface IPortfolioRepository
-    {
-        Task<int> CreatePortfolioAsync(Portfolio Portfolio);
-        Task<bool> DeletePortfolioAsync(int ID);
-        Task<bool> UpdatePortfolioAsync(int ID, PortfolioDto Portfolio);
-        Task<List<PortfolioResponse>> GetPortfoliosAsync(int UserID);
-        Task<PortfolioResponse> GetPortfolioAsync(string Name);
-    }
+    Task<int> CreatePortfolioAsync(Portfolio Portfolio);
+    Task<bool> DeletePortfolioAsync(int ID);
+    Task<bool> UpdatePortfolioAsync(int ID, PortfolioDto Portfolio);
+    Task<List<PortfolioResponse>> GetPortfoliosAsync(int UserID);
+    Task<PortfolioResponse> GetPortfolioAsync(string Name);
 }

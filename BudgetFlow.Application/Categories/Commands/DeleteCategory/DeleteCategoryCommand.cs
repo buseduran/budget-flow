@@ -1,26 +1,31 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Results;
 using MediatR;
 
-namespace BudgetFlow.Application.Categories.Commands.DeleteCategory
+namespace BudgetFlow.Application.Categories.Commands.DeleteCategory;
+public class DeleteCategoryCommand : IRequest<Result<bool>>
 {
-    public class DeleteCategoryCommand : IRequest<bool>
+    public int ID { get; set; }
+    public DeleteCategoryCommand(int ID)
     {
-        public int ID { get; set; }
-        public DeleteCategoryCommand(int ID)
+        this.ID = ID;
+    }
+    public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryCommand, Result<bool>>
+    {
+        private readonly ICategoryRepository categoryRepository;
+        public DeleteCategoryCommandHandler(ICategoryRepository categoryRepository)
         {
-            this.ID = ID;
+            this.categoryRepository = categoryRepository;
         }
-        public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryCommand, bool>
+        public async Task<Result<bool>> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
         {
-            private readonly ICategoryRepository categoryRepository;
-            public DeleteCategoryCommandHandler(ICategoryRepository categoryRepository)
-            {
-                this.categoryRepository = categoryRepository;
-            }
-            public async Task<bool> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
-            {
-                return await categoryRepository.DeleteCategoryAsync(request.ID);
-            }
+            if (request.ID <= 0)
+                return Result.Failure<bool>("Invalid category ID");
+
+            var result = await categoryRepository.DeleteCategoryAsync(request.ID);
+            return result
+                ? Result.Success(true)
+                : Result.Failure<bool>("Failed to delete category");
         }
     }
 }

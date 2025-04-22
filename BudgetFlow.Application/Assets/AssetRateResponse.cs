@@ -1,8 +1,6 @@
-﻿namespace BudgetFlow.Application.Assets
+﻿namespace BudgetFlow.Application.Assets;
+public class AssetRateResponse
 {
-    public class AssetRateResponse
-    {
-        public decimal BuyPrice { get; set; }
-        public decimal SellPrice { get; set; }
-    }
+    public decimal BuyPrice { get; set; }
+    public decimal SellPrice { get; set; }
 }

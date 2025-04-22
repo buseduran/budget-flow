@@ -1,5 +1,5 @@
-﻿using BudgetFlow.Application.Budget;
-using BudgetFlow.Application.Common.Utils;
+﻿using BudgetFlow.Application.Common.Extensions;
+using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Investments;
 using BudgetFlow.Application.Investments.Commands.CreateInvestment;
 using BudgetFlow.Application.Investments.Commands.DeleteInvestment;
@@ -32,10 +32,13 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpPost]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IActionResult> CreateInvestmentAsync([FromBody] CreateInvestmentCommand createInvestmentCommand)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    public async Task<IResult> CreateInvestmentAsync([FromBody] CreateInvestmentCommand createInvestmentCommand)
     {
-        return Ok(await mediator.Send(createInvestmentCommand));
+        var result = await mediator.Send(createInvestmentCommand);
+        return result.IsSuccess
+               ? Results.Ok(result.Value)
+               : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -45,10 +48,13 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpDelete("{ID}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IActionResult> DeleteInvestmentAsync([FromRoute] int ID)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    public async Task<IResult> DeleteInvestmentAsync([FromRoute] int ID)
     {
-        return Ok(await mediator.Send(new DeleteInvestmentCommand(ID)));
+        var result = await mediator.Send(new DeleteInvestmentCommand(ID));
+        return result.IsSuccess
+               ? Results.Ok(result.Value)
+               : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -58,10 +64,13 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpPut]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IActionResult> UpdateInvestmentAsync([FromBody] UpdateInvestmentCommand updateInvestmentCommand)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    public async Task<IResult> UpdateInvestmentAsync([FromBody] UpdateInvestmentCommand updateInvestmentCommand)
     {
-        return Ok(await mediator.Send(updateInvestmentCommand));
+        var result = await mediator.Send(updateInvestmentCommand);
+        return result.IsSuccess
+               ? Results.Ok(result.Value)
+               : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -70,10 +79,13 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpGet("{PortfolioID}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<InvestmentResponse>))]
-    public async Task<IActionResult> GetInvestmentsAsync([FromRoute] int PortfolioID)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<List<InvestmentResponse>>))]
+    public async Task<IResult> GetInvestmentsAsync([FromRoute] int PortfolioID)
     {
-        return Ok(await mediator.Send(new GetInvestmentsQuery(PortfolioID)));
+        var result = await mediator.Send(new GetInvestmentsQuery(PortfolioID));
+        return result.IsSuccess
+               ? Results.Ok(result.Value)
+               : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -82,10 +94,13 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpGet("Last/{Portfolio}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<PortfolioAssetResponse>))]
-    public async Task<IActionResult> GetAssetInvestmentsAsync(string Portfolio)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<PortfolioAssetResponse>))]
+    public async Task<IResult> GetAssetInvestmentsAsync(string Portfolio)
     {
-        return Ok(await mediator.Send(new GetPortfolioAssetsQuery(Portfolio)));
+        var result = await mediator.Send(new GetPortfolioAssetsQuery(Portfolio));
+        return result.IsSuccess
+               ? Results.Ok(result.Value)
+               : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -94,10 +109,13 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpGet("Revenue/{Portfolio}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AssetRevenueResponse>))]
-    public async Task<IActionResult> GetAssetRevenueAsync(string Portfolio)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<List<AssetRevenueResponse>>))]
+    public async Task<IResult> GetAssetRevenueAsync(string Portfolio)
     {
-        return Ok(await mediator.Send(new GetAssetRevenueQuery(Portfolio)));
+        var result = await mediator.Send(new GetAssetRevenueQuery(Portfolio));
+        return result.IsSuccess
+               ? Results.Ok(result.Value)
+               : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -107,10 +125,12 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpGet("Invests")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedAssetInvestResponse))]
-    public async Task<IActionResult> GetAssetInvestsPaginationAsync([FromQuery] GetAssetInvestPaginationQuery getAssetInvestPaginationQuery)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<PaginatedAssetInvestResponse>))]
+    public async Task<IResult> GetAssetInvestsPaginationAsync([FromQuery] GetAssetInvestPaginationQuery getAssetInvestPaginationQuery)
     {
-        return Ok(await mediator.Send(getAssetInvestPaginationQuery));
+        var result = await mediator.Send(getAssetInvestPaginationQuery);
+        return result.IsSuccess
+               ? Results.Ok(result.Value)
+               : result.ToProblemDetails();
     }
-     
 }

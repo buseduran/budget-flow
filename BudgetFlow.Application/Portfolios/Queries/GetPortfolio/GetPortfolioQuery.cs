@@ -1,31 +1,28 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Results;
 using MediatR;
 
-namespace BudgetFlow.Application.Portfolios.Queries.GetPortfolio
+namespace BudgetFlow.Application.Portfolios.Queries.GetPortfolio;
+public class GetPortfolioQuery : IRequest<Result<PortfolioResponse>>
 {
-    public class GetPortfolioQuery : IRequest<PortfolioResponse>
+    public string Name { get; set; }
+    public GetPortfolioQuery(string Name)
     {
-        public string Name { get; set; }
-        public GetPortfolioQuery(string Name)
+        this.Name = Name;
+    }
+    public class GetPortfolioQueryHandler : IRequestHandler<GetPortfolioQuery, Result<PortfolioResponse>>
+    {
+        private readonly IPortfolioRepository portfolioRepository;
+        public GetPortfolioQueryHandler(IPortfolioRepository portfolioRepository)
         {
-            this.Name = Name;
+            this.portfolioRepository = portfolioRepository;
         }
-        public class GetPortfolioQueryHandler:IRequestHandler<GetPortfolioQuery, PortfolioResponse>
+        public async Task<Result<PortfolioResponse>> Handle(GetPortfolioQuery request, CancellationToken cancellationToken)
         {
-            private readonly IPortfolioRepository portfolioRepository;
-            public GetPortfolioQueryHandler(IPortfolioRepository portfolioRepository)
-            {
-                this.portfolioRepository = portfolioRepository;
-            }
-            public async Task<PortfolioResponse> Handle(GetPortfolioQuery request, CancellationToken cancellationToken)
-            {
-                var portfolio = await portfolioRepository.GetPortfolioAsync(request.Name);
-                if (portfolio == null)
-                {
-                    throw new Exception("Portfolio not found");
-                }
-                return portfolio;
-            }
+            var portfolio = await portfolioRepository.GetPortfolioAsync(request.Name);
+            return portfolio != null
+                ? Result.Success(portfolio)
+                : Result.Failure<PortfolioResponse>("Portfolio not found");
         }
     }
 }

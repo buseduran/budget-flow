@@ -5,6 +5,8 @@ using BudgetFlow.Application.Budget.Commands.UpdateEntry;
 using BudgetFlow.Application.Budget.Queries.GetEntryPagination;
 using BudgetFlow.Application.Budget.Queries.GetGroupedEntries;
 using BudgetFlow.Application.Budget.Queries.GetLastEntries;
+using BudgetFlow.Application.Common.Extensions;
+using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -31,11 +33,15 @@ namespace BudgetFlow.API.Controllers
         /// <returns></returns>
         [HttpPost]
         [Produces(MediaTypeNames.Application.Json)]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-        public async Task<IActionResult> CreateEntryAsync([FromBody] CreateEntryCommand createEntryCommand)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+        public async Task<IResult> CreateEntryAsync([FromBody] CreateEntryCommand createEntryCommand)
         {
-            return Ok(await mediator.Send(createEntryCommand));
+            var result = await mediator.Send(createEntryCommand);
+            return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : result.ToProblemDetails();
         }
+
         /// <summary>
         /// Updates a Budget Entry. 
         /// </summary>
@@ -43,11 +49,15 @@ namespace BudgetFlow.API.Controllers
         /// <returns></returns>
         [HttpPut]
         [Produces(MediaTypeNames.Application.Json)]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-        public async Task<IActionResult> UpdateEntryAsync([FromBody] UpdateEntryCommand updateEntryCommand)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+        public async Task<IResult> UpdateEntryAsync([FromBody] UpdateEntryCommand updateEntryCommand)
         {
-            return Ok(await mediator.Send(updateEntryCommand));
+            var result = await mediator.Send(updateEntryCommand);
+            return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : result.ToProblemDetails();
         }
+
         /// <summary>
         /// Deletes a Budget Entry. 
         /// </summary>
@@ -55,10 +65,13 @@ namespace BudgetFlow.API.Controllers
         /// <returns></returns>
         [HttpDelete]
         [Produces(MediaTypeNames.Application.Json)]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-        public async Task<IActionResult> DeleteEntryAsync([FromBody] DeleteEntryCommand deleteEntryCommand)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+        public async Task<IResult> DeleteEntryAsync([FromBody] DeleteEntryCommand deleteEntryCommand)
         {
-            return Ok(await mediator.Send(deleteEntryCommand));
+            var result = await mediator.Send(deleteEntryCommand);
+            return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : result.ToProblemDetails();
         }
 
         /// <summary>
@@ -68,10 +81,13 @@ namespace BudgetFlow.API.Controllers
         /// <returns></returns>
         [HttpGet]
         [Produces(MediaTypeNames.Application.Json)]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<EntryResponse>))]
-        public async Task<IActionResult> GetEntriesPaginationAsync([FromQuery] GetEntryPaginationQuery getEntryPaginationQuery)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<PaginatedList<EntryResponse>>))]
+        public async Task<IResult> GetEntriesPaginationAsync([FromQuery] GetEntryPaginationQuery getEntryPaginationQuery)
         {
-            return Ok(await mediator.Send(getEntryPaginationQuery));
+            var result = await mediator.Send(getEntryPaginationQuery);
+            return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : result.ToProblemDetails();
         }
 
         /// <summary>
@@ -82,10 +98,13 @@ namespace BudgetFlow.API.Controllers
         [HttpGet]
         [Route("Grouped")]
         [Produces(MediaTypeNames.Application.Json)]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof((List<EntryResponse> incomes, List<EntryResponse> expenses)))]
-        public async Task<IActionResult> GetGroupedEntriesAsync([FromQuery] string Range)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<GroupedEntriesResponse>))]
+        public async Task<IResult> GetGroupedEntriesAsync([FromQuery] string Range)
         {
-            return Ok(await mediator.Send(new GetGroupedEntriesQuery(Range)));
+            var result = await mediator.Send(new GetGroupedEntriesQuery(Range));
+            return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : result.ToProblemDetails();
         }
 
         /// <summary>
@@ -95,10 +114,13 @@ namespace BudgetFlow.API.Controllers
         [HttpGet]
         [Route("LastFive")]
         [Produces(MediaTypeNames.Application.Json)]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<LastEntryResponse>))]
-        public async Task<IActionResult> GetLastEntriesAsync()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<List<LastEntryResponse>>))]
+        public async Task<IResult> GetLastEntriesAsync()
         {
-            return Ok(await mediator.Send(new GetLastEntriesQuery()));
+            var result = await mediator.Send(new GetLastEntriesQuery());
+            return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : result.ToProblemDetails();
         }
     }
 }
