@@ -14,4 +14,3 @@ public class Asset : BaseEntity
     public string Unit { get; set; }
     public ICollection<Investment> Investments { get; set; }
 }
-

@@ -102,4 +102,20 @@ public class AssetController : ControllerBase
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();
     }
+
+    /// <summary>
+    /// Creates an Asset. 
+    /// </summary>
+    /// <param name="createAssetCommand"></param>
+    /// <returns></returns>
+    [HttpGet("Sync")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    public async Task<IResult> SyncAssetsAsync()
+    {
+        var result = await mediator.Send(new CreateAssetCommand());
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
+    }
 }

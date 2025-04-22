@@ -8,7 +8,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace BudgetFlow.Application.Common.Services;
+namespace BudgetFlow.Application.Common.Utils;
 public sealed class TokenProvider(IConfiguration configuration) : ITokenProvider
 {
     public string Create(User user)

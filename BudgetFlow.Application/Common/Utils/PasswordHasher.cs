@@ -1,7 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Services;
 using System.Security.Cryptography;
 
-namespace BudgetFlow.Application.Common.Services;
+namespace BudgetFlow.Application.Common.Utils;
 public class PasswordHasher : IPasswordHasher
 {
     private const int SaltSize = 16;
