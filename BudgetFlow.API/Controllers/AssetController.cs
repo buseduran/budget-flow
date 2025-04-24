@@ -1,6 +1,7 @@
 ﻿using BudgetFlow.Application.Assets;
 using BudgetFlow.Application.Assets.Commands.CreateAsset;
 using BudgetFlow.Application.Assets.Commands.DeleteAsset;
+using BudgetFlow.Application.Assets.Commands.SyncAsset;
 using BudgetFlow.Application.Assets.Commands.UpdateAsset;
 using BudgetFlow.Application.Assets.Queries.GetAssetRate;
 using BudgetFlow.Application.Assets.Queries.GetAssets;
@@ -108,12 +109,12 @@ public class AssetController : ControllerBase
     /// </summary>
     /// <param name="createAssetCommand"></param>
     /// <returns></returns>
-    [HttpGet("Sync")]
+    [HttpPost("Sync")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
-    public async Task<IResult> SyncAssetsAsync()
+    public async Task<IResult> SyncAssetsAsync([FromBody] SyncAssetCommand syncAssetCommand)
     {
-        var result = await mediator.Send(new CreateAssetCommand());
+        var result = await mediator.Send(syncAssetCommand);
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();

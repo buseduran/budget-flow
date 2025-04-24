@@ -1,7 +1,9 @@
-﻿namespace BudgetFlow.Application.Common.Services.Abstract
+﻿using BudgetFlow.Domain.Entities;
+
+namespace BudgetFlow.Application.Common.Services.Abstract
 {
     public interface IStockScraper
     {
-        Task<IEnumerable<Stock>> GetStocksAsync();
+        Task<IEnumerable<Asset>> GetStocksAsync(int assetTypeID);
     }
 }

@@ -7,9 +7,8 @@ namespace BudgetFlow.Application.Common.Services.Concrete
 {
     public class StockScraper() : IStockScraper
     {
-        public async Task<IEnumerable<Stock>> GetStocksAsync()
+        public async Task<IEnumerable<Asset>> GetStocksAsync(int assetTypeID)
         {
-            List<Stock> stocks = [];
             List<Asset> assets = [];
             var cultureInfo = new CultureInfo("tr-TR");
 
@@ -48,33 +47,31 @@ namespace BudgetFlow.Application.Common.Services.Concrete
 
                 decimal.TryParse(stockPrice, NumberStyles.Currency, cultureInfo, out var price);
                 double.TryParse(stockPercentage, NumberStyles.Any, cultureInfo, out var percentage);
-                Stock stock = new()
-                {
-                    Code = stockName,
-                    Price = price,
-                    ChangePercentage = percentage,
-                    ChangeType = percentage > 0 ? ChangeType.INCREASE : ChangeType.DECREASE,
-                    UpdatedAt = Convert.ToDateTime(date)
-                };
-                stocks.Add(stock);
+                //Stock stock = new()
+                //{
+                //    Code = stockName,
+                //    Price = price,
+                //    ChangePercentage = percentage,
+                //    ChangeType = percentage > 0 ? ChangeType.INCREASE : ChangeType.DECREASE,
+                //    UpdatedAt = Convert.ToDateTime(date)
+                //};
+                //stocks.Add(stock);
 
-
-                // veriler düzenlenecek repoya uygun
                 Asset asset = new()
                 {
-                    Name = stock.Code,
-                    Code = stock.Code,
-                    BuyPrice = stock.Price,
-                    SellPrice = stock.Price,
-                    Description = "Borsa",
-                    Unit = "Adet",
-                    AssetTypeId = 1,
+                    Name = stockName,
+                    Code = stockName,
+                    BuyPrice = price,
+                    SellPrice = price,
+                    Description = percentage.ToString(),
+                    Unit = "",
+                    AssetTypeId = assetTypeID,
                 };
                 assets.Add(asset);
             }
             #endregion
 
-            return stocks;
+            return assets;
         }
     }
 }
