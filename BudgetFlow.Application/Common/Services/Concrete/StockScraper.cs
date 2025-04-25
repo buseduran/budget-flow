@@ -1,4 +1,5 @@
-﻿using BudgetFlow.Application.Common.Services.Abstract;
+﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using HtmlAgilityPack;
@@ -6,8 +7,15 @@ using System.Globalization;
 
 namespace BudgetFlow.Application.Common.Services.Concrete
 {
-    public class StockScraper() : IStockScraper
+    public class StockScraper : IStockScraper
     {
+        private readonly IAssetRepository assetRepository;
+
+        public StockScraper(IAssetRepository assetRepository)
+        {
+            this.assetRepository = assetRepository;
+        }
+
         public async Task<IEnumerable<Asset>> GetStocksAsync(AssetType assetType)
         {
             List<Asset> assets = [];
@@ -49,7 +57,12 @@ namespace BudgetFlow.Application.Common.Services.Concrete
                 decimal.TryParse(stockPrice, NumberStyles.Currency, cultureInfo, out var price);
                 double.TryParse(stockPercentage, NumberStyles.Any, cultureInfo, out var percentage);
 
+                var existAsset = await assetRepository.GetByCodeAsync(stockName);
                 // check if not exist in db
+                if(existAsset != null)
+                {
+                    
+                }
                 Asset asset = new()
                 {
                     Name = stockName,

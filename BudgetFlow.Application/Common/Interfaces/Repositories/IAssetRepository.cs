@@ -14,5 +14,5 @@ public interface IAssetRepository
     Task<UserAssetResponse> GetUserAssetAsync(int UserID, int AssetID);
     Task<bool> CreateUserAssetAsync(UserAsset userAsset);
     Task<bool> UpdateUserAssetAsync(int ID, decimal Amount, decimal Balance);
-
+    Task<AssetResponse> GetByCodeAsync(string AssetCode);
 }
