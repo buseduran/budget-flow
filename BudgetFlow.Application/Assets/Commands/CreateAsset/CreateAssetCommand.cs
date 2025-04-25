@@ -30,7 +30,7 @@ public class CreateAssetCommand : IRequest<Result<bool>>
             Asset asset = new()
             {
                 Name = request.Asset.Name,
-                AssetTypeId = request.Asset.AssetTypeId,
+                AssetType = request.Asset.AssetType,
                 BuyPrice = request.Asset.BuyPrice,
                 SellPrice = request.Asset.SellPrice,
                 Description = request.Asset.Description,

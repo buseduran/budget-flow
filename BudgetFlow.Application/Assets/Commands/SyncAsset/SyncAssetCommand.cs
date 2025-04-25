@@ -1,13 +1,13 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Services.Abstract;
-using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Enums;
 using MediatR;
 
 namespace BudgetFlow.Application.Assets.Commands.SyncAsset;
 public class SyncAssetCommand : IRequest<Result<bool>>
 {
-    public int AssetTypeID { get; set; }
+    public AssetType AssetType { get; set; }
     public class SyncAssetCommandHandler : IRequestHandler<SyncAssetCommand, Result<bool>>
     {
         private readonly IAssetRepository assetRepository;
@@ -20,9 +20,11 @@ public class SyncAssetCommand : IRequest<Result<bool>>
 
         public async Task<Result<bool>> Handle(SyncAssetCommand request, CancellationToken cancellationToken)
         {
-            #region Hisseler
-            //if assettype==hisse
-            var stocks = await stockScraper.GetStocksAsync(request.AssetTypeID);
+            #region Stocks (Hisseler) senkronizasyonu
+            if (request.AssetType == AssetType.Stock)
+            {
+                var stocks = await stockScraper.GetStocksAsync(request.AssetType);
+            }
             //Asset asset = new()
             //{
             //    Name = request.Asset.Name,

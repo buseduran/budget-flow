@@ -77,14 +77,14 @@ public class InvestmentRepository : IInvestmentRepository
             .GroupBy(e => new
             {
                 e.AssetId,
-                AssetTypeName = e.Asset.AssetType.Name,
+                AssetType = e.Asset.AssetType,
                 AssetName = e.Asset.Name,
                 e.Asset.SellPrice
             })
             .Select(g => new
             {
                 g.Key.AssetId,
-                g.Key.AssetTypeName,
+                g.Key.AssetType,
                 g.Key.AssetName,
                 g.Key.SellPrice,
                 TotalUnitAmount = g.Sum(e => e.UnitAmount),
@@ -108,7 +108,7 @@ public class InvestmentRepository : IInvestmentRepository
                 return new PortfolioAssetInvestmentsResponse
                 {
                     Name = i.AssetName,
-                    AssetType = i.AssetTypeName,
+                    AssetType = i.AssetType.ToString(),
                     Code = i.Code,
                     Unit = i.Unit,
                     Symbol = i.Symbol,

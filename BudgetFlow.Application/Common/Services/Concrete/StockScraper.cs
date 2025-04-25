@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Enums;
 using HtmlAgilityPack;
 using System.Globalization;
 
@@ -7,7 +8,7 @@ namespace BudgetFlow.Application.Common.Services.Concrete
 {
     public class StockScraper() : IStockScraper
     {
-        public async Task<IEnumerable<Asset>> GetStocksAsync(int assetTypeID)
+        public async Task<IEnumerable<Asset>> GetStocksAsync(AssetType assetType)
         {
             List<Asset> assets = [];
             var cultureInfo = new CultureInfo("tr-TR");
@@ -15,7 +16,7 @@ namespace BudgetFlow.Application.Common.Services.Concrete
             #region HTML verisi alınır
             HttpClient client = new();
             //var apiUrl = Environment.GetEnvironmentVariable("API_URL") ?? "";
-            var apiUrl = "";
+            var apiUrl = "https://uzmanpara.milliyet.com.tr/canli-borsa/";
             var html = await client.GetStringAsync(apiUrl);
             #endregion
 
@@ -47,16 +48,8 @@ namespace BudgetFlow.Application.Common.Services.Concrete
 
                 decimal.TryParse(stockPrice, NumberStyles.Currency, cultureInfo, out var price);
                 double.TryParse(stockPercentage, NumberStyles.Any, cultureInfo, out var percentage);
-                //Stock stock = new()
-                //{
-                //    Code = stockName,
-                //    Price = price,
-                //    ChangePercentage = percentage,
-                //    ChangeType = percentage > 0 ? ChangeType.INCREASE : ChangeType.DECREASE,
-                //    UpdatedAt = Convert.ToDateTime(date)
-                //};
-                //stocks.Add(stock);
 
+                // check if not exist in db
                 Asset asset = new()
                 {
                     Name = stockName,
@@ -65,9 +58,24 @@ namespace BudgetFlow.Application.Common.Services.Concrete
                     SellPrice = price,
                     Description = percentage.ToString(),
                     Unit = "",
-                    AssetTypeId = assetTypeID,
+                    AssetType = assetType,
                 };
                 assets.Add(asset);
+                //var result = await assetRepository.CreateAssetAsync(asset);
+                //return result
+
+                //else it will update
+                //var asset = await assetRepository.GetAssetByCodeAsync(stockName);
+                //if (asset != null)
+                //{
+                //    asset.BuyPrice = price;
+                //    asset.SellPrice = price;
+                //    asset.Description = percentage.ToString();
+                //    asset.Unit = "";
+                //    asset.AssetType = assetType;
+                //}
+                //var result = await assetRepository.UpdateAssetAsync(asset);
+
             }
             #endregion
 
