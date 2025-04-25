@@ -33,5 +33,6 @@ jobs:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USER }}
         key: ${{ secrets.SSH_KEY }}
-        source: "publish/**"
+        source: "publish/"
         target: "/var/www/budgetflow-dev"
+        strip_components: 1
