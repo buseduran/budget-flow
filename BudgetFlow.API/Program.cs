@@ -74,7 +74,6 @@ builder.Services.AddSwaggerGen(o =>
         }
     };
     o.AddSecurityRequirement(securityRequirements);
-
 });
 
 builder.Services.AddEntityFrameworkNpgsql().AddDbContext<BudgetContext>();
