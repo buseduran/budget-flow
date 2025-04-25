@@ -15,7 +15,6 @@ public class BudgetContext(IConfiguration configuration) : DbContext
     public DbSet<Entry> Entries { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<Asset> Assets { get; set; }
-    public DbSet<AssetType> AssetTypes { get; set; }
     public DbSet<Portfolio> Portfolios { get; set; }
     public DbSet<Investment> Investments { get; set; }
     public DbSet<Wallet> Wallets { get; set; }

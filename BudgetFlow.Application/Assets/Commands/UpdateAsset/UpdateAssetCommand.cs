@@ -31,7 +31,7 @@ public class UpdateAssetCommand : IRequest<Result<bool>>
             {
                 ID = request.ID,
                 Name = request.Asset.Name,
-                AssetTypeId = request.Asset.AssetTypeId,
+                AssetType = request.Asset.AssetType,
                 BuyPrice = request.Asset.BuyPrice,
                 SellPrice = request.Asset.SellPrice,
                 Description = request.Asset.Description,

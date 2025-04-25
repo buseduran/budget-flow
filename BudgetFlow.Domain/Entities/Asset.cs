@@ -1,10 +1,10 @@
 ﻿using BudgetFlow.Domain.Common;
+using BudgetFlow.Domain.Enums;
 
 namespace BudgetFlow.Domain.Entities;
 public class Asset : BaseEntity
 {
     public string Name { get; set; }
-    public int AssetTypeId { get; set; }
     public AssetType AssetType { get; set; }
     public decimal BuyPrice { get; set; }
     public decimal SellPrice { get; set; }
