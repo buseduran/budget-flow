@@ -3,6 +3,7 @@ using BudgetFlow.Application;
 using BudgetFlow.Infrastructure;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.IdentityModel.Tokens.Jwt;
@@ -74,7 +75,6 @@ builder.Services.AddSwaggerGen(o =>
         }
     };
     o.AddSecurityRequirement(securityRequirements);
-
 });
 
 builder.Services.AddEntityFrameworkNpgsql().AddDbContext<BudgetContext>();
@@ -88,6 +88,13 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<BudgetContext>();
+    context.Database.Migrate(); 
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

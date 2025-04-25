@@ -11,7 +11,7 @@ public class QuartzSchedulerService
         this.schedulerFactory = schedulerFactory;
         this.scheduler = schedulerFactory.GetScheduler().Result;
     }
-    public async Task StartAsync(IServiceProvider serviceProvider)
+    public static async Task StartAsync(IServiceProvider serviceProvider)
     {
         var scheduler = await StdSchedulerFactory.GetDefaultScheduler();
         await scheduler.Start();
@@ -24,7 +24,7 @@ public class QuartzSchedulerService
             .WithIdentity("stockTrigger", "group1")
             .StartNow()
             .WithSimpleSchedule(x => x
-                .WithIntervalInSeconds(10) // 1800 seconds = 30 minutes
+                .WithIntervalInSeconds(1800) //30 minutes
                 .RepeatForever())
             .Build();
 

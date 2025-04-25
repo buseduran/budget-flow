@@ -1,9 +1,11 @@
-﻿namespace BudgetFlow.Application.Assets;
+﻿using BudgetFlow.Domain.Enums;
+
+namespace BudgetFlow.Application.Assets;
 public class AssetResponse
 {
     public int ID { get; set; }
     public string Name { get; set; }
-    public int AssetTypeId { get; set; }
+    public AssetType AssetType { get; set; }
     public decimal BuyPrice { get; set; }
     public decimal SellPrice { get; set; }
     public string Description { get; set; }
@@ -11,4 +13,3 @@ public class AssetResponse
     public string Code { get; set; }
     public string Unit { get; set; }
 }
-

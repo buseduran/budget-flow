@@ -103,4 +103,24 @@ public class AssetRepository : IAssetRepository
         userAsset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
         return await context.SaveChangesAsync() > 0;
     }
+
+    public Task<AssetResponse> GetByCodeAsync(string AssetCode)
+    {
+        var asset = context.Assets
+            .Where(e => e.Code == AssetCode)
+            .Select(e => new AssetResponse
+            {
+                ID = e.ID,
+                Name = e.Name,
+                AssetType = e.AssetType,
+                BuyPrice = e.BuyPrice,
+                SellPrice = e.SellPrice,
+                Description = e.Description,
+                Symbol = e.Symbol,
+                Code = e.Code,
+                Unit = e.Unit
+            })
+            .FirstOrDefaultAsync();
+        return asset;
+    }
 }
