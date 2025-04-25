@@ -22,10 +22,10 @@ jobs:
       run: dotnet restore BudgetFlow.API/BudgetFlow.API.csproj
 
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build BudgetFlow.API/BudgetFlow.API.csproj --configuration Release --no-restore
 
     - name: Publish
-      run: dotnet publish -c Release -o publish
+      run: dotnet publish BudgetFlow.API/BudgetFlow.API.csproj -c Release -o publish
 
     - name: Copy files to remote server via SSH
       uses: appleboy/scp-action@v0.1.7
