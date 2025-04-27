@@ -7,7 +7,7 @@ namespace BudgetFlow.Application.Common.Interfaces.Repositories;
 public interface IUserRepository
 {
     Task<int> CreateAsync(User user);
-    Task<UserResponse?> GetByIdAsync(int ID);
+    Task<UserResponse> GetByIdAsync(int ID);
     Task<UserResponse> GetByEmailAsync(string email);
     Task<bool> UpdateAsync(string Name, string OldEmail, string Email, string PasswordHash);
     Task<bool> UpdateWithoutPassword(string Name, string OldEmail, string Email);

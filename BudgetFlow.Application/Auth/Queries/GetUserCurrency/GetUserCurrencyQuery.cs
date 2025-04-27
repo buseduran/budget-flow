@@ -8,15 +8,10 @@ using Microsoft.AspNetCore.Http;
 namespace BudgetFlow.Application.Auth.Queries.GetUserCurrency;
 public class GetUserCurrencyQuery : IRequest<Result<CurrencyType>>
 {
-    public class GetUserCurrencyQueryHandler : IRequestHandler<GetUserCurrencyQuery, Result<CurrencyType>>
+    public class GetUserCurrencyQueryHandler(IHttpContextAccessor httpContextAccessor, IUserRepository userRepository) : IRequestHandler<GetUserCurrencyQuery, Result<CurrencyType>>
     {
-        private readonly IHttpContextAccessor httpContextAccessor;
-        private readonly IUserRepository userRepository;
-        public GetUserCurrencyQueryHandler(IHttpContextAccessor httpContextAccessor, IUserRepository userRepository)
-        {
-            this.httpContextAccessor = httpContextAccessor;
-            this.userRepository = userRepository;
-        }
+        private readonly IHttpContextAccessor httpContextAccessor = httpContextAccessor;
+        private readonly IUserRepository userRepository = userRepository;
 
         public async Task<Result<CurrencyType>> Handle(GetUserCurrencyQuery request, CancellationToken cancellationToken)
         {
@@ -24,7 +19,7 @@ public class GetUserCurrencyQuery : IRequest<Result<CurrencyType>>
             int userID = getCurrentUser.GetCurrentUserID();
 
             var result = await userRepository.GetUserCurrencyAsync(userID);
-            if (result != null)
+            if (Enum.IsDefined(typeof(CurrencyType), result))
             {
                 return Result.Success(result);
             }

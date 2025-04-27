@@ -20,9 +20,9 @@ public class Result<T>
 {
     public bool IsSuccess { get; }
     public bool IsFailure => !IsSuccess;
-    public string? Error { get; }
+    public string Error { get; }
     public T Value { get; }
-    internal Result(bool isSuccess, T value, string? error)
+    internal Result(bool isSuccess, T value, string error)
     {
         IsSuccess = isSuccess;
         Value = value;
