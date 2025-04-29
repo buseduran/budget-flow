@@ -4,4 +4,12 @@ services:
     build:
       context: .
       dockerfile: BudgetFlow.API/Dockerfile
+  budgetflow.seq:
+    image: datalust/seq:latest
+    container_name: budgetflow-seq
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - 5341:5341
+      - 8081:80
   

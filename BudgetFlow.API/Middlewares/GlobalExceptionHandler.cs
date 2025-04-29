@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace BudgetFlow.API.Middlewares;
 public class GlobalExceptionHandler : IExceptionHandler
 {
-    private readonly ILogger<GlobalExceptionHandler> _logger;
+    private readonly ILogger<GlobalExceptionHandler> logger;
     public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
     {
-        _logger = logger;
+        this.logger = logger;
     }
 
     public async ValueTask<bool> TryHandleAsync(
@@ -15,7 +16,20 @@ public class GlobalExceptionHandler : IExceptionHandler
         Exception exception,
         CancellationToken cancellationToken)
     {
-        _logger.LogError(exception, "An unhandled exception occurred while processing the request: {Message}", exception.Message);
+        if (exception is ValidationException validationException)
+        {
+            logger.LogError(
+                exception,
+                "Exception occurred: {Message} {@Exception}",
+                exception.Message,
+                exception
+                );
+        }
+        else
+        {
+            logger.LogError(exception, "An unhandled exception occurred while processing the request: {Message}", exception.Message);
+        }
+
 
         var problemDetails = new ProblemDetails
         {
