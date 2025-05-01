@@ -32,7 +32,8 @@ public class CreateCategoryCommand : IRequest<Result<int>>
             {
                 Name = request.Name,
                 Color = request.Color,
-                UserID = getCurrentUser.GetCurrentUserID()
+                UserID = getCurrentUser.GetCurrentUserID(),
+                Type = request.Type
             };
             var response = await categoryRepository.CreateCategoryAsync(categoryDto);
             return Result.Success(response);
