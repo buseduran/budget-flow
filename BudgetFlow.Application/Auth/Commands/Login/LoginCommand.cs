@@ -67,7 +67,7 @@ public sealed record LoginCommand(string Email, string Password) : IRequest<Resu
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddMinutes(15) // Token süresiyle uyumlu
+                Expires = DateTimeOffset.UtcNow.AddMinutes(60)
             });
 
             return Result.Success(new Response(accessToken, refreshToken.Token));

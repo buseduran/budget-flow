@@ -76,6 +76,11 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(t => t.Token == token);
         return refreshToken;
     }
+    public async Task<bool> UpdateRefreshToken(RefreshToken refreshToken)
+    {
+        context.RefreshTokens.Update(refreshToken);
+        return await context.SaveChangesAsync() > 0;
+    }
     public async Task<RefreshToken> GetRefreshTokenByUserID(int userID)
     {
         RefreshToken refreshToken = await context.RefreshTokens

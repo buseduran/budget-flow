@@ -14,6 +14,7 @@ public interface IUserRepository
     Task<bool> DeleteAsync(int ID);
     Task<bool> CreateRefreshToken(RefreshToken refreshToken);
     Task<RefreshToken> GetRefreshToken(string token);
+    Task<bool> UpdateRefreshToken(RefreshToken refreshToken);
     Task<RefreshToken> GetRefreshTokenByUserID(int userID);
     Task<bool> RevokeToken(int userID);
     Task<CurrencyType> GetUserCurrencyAsync(int UserID);

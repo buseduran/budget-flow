@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Auth.Commands.Login;
 using BudgetFlow.Application.Auth.Commands.Logout;
+using BudgetFlow.Application.Auth.Commands.Refresh;
 using BudgetFlow.Application.Auth.Commands.Register;
 using BudgetFlow.Application.Auth.Commands.UpdateAccount;
 using BudgetFlow.Application.Auth.Commands.UpdateUserCurrency;
@@ -50,6 +51,22 @@ public class AuthController : ControllerBase
     public async Task<IResult> LoginAsync([FromBody] LoginCommand loginCommand)
     {
         var result = await mediator.Send(loginCommand);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Refresh Token
+    /// </summary>
+    /// <param name="refreshCommand"></param>
+    /// <returns></returns>
+    [HttpPost("Refresh")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<string>))]
+    public async Task<IResult> RefreshAsync()
+    {
+        var result = await mediator.Send(new RefreshCommand());
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();
