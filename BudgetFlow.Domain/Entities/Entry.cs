@@ -6,7 +6,6 @@ public class Entry : BaseEntity
 {
     public string Name { get; set; }
     public decimal Amount { get; set; }
-    public EntryType Type { get; set; }
     public DateTime Date { get; set; }
 
     public int UserID { get; set; }

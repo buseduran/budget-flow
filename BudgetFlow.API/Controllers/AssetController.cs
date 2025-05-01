@@ -32,7 +32,7 @@ public class AssetController : ControllerBase
     [HttpPost]
     [Consumes("multipart/form-data")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> CreateAssetAsync([FromForm] CreateAssetCommand createAssetCommand)
     {
         var result = await mediator.Send(createAssetCommand);
@@ -49,7 +49,7 @@ public class AssetController : ControllerBase
     [HttpPut]
     [Consumes("multipart/form-data")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> UpdateAssetTypeAsync([FromForm] UpdateAssetCommand updateAssetCommand)
     {
         var result = await mediator.Send(updateAssetCommand);
@@ -65,7 +65,7 @@ public class AssetController : ControllerBase
     /// <returns></returns>
     [HttpDelete("{ID}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> DeleteAssetAsync([FromRoute] int ID)
     {
         var result = await mediator.Send(new DeleteAssetCommand(ID));
@@ -80,7 +80,7 @@ public class AssetController : ControllerBase
     /// <returns></returns>
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<List<AssetResponse>>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AssetResponse>))]
     public async Task<IResult> GetAssetsPaginationAsync()
     {
         var result = await mediator.Send(new GetAssetsQuery());
@@ -95,7 +95,7 @@ public class AssetController : ControllerBase
     /// <returns></returns>
     [HttpGet("Rate/{ID}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<AssetRateResponse>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AssetRateResponse))]
     public async Task<IResult> GetAssetRateAsync([FromRoute] int ID)
     {
         var result = await mediator.Send(new GetAssetRateQuery(ID));
@@ -111,7 +111,7 @@ public class AssetController : ControllerBase
     /// <returns></returns>
     [HttpPost("Sync")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> SyncAssetsAsync([FromBody] SyncAssetCommand syncAssetCommand)
     {
         var result = await mediator.Send(syncAssetCommand);

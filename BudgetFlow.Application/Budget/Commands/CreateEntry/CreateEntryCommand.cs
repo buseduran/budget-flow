@@ -16,33 +16,43 @@ public class CreateEntryCommand : IRequest<Result<bool>>
     {
         private readonly IBudgetRepository budgetRepository;
         private readonly IWalletRepository walletRepository;
+        private readonly ICategoryRepository categoryRepository;
         private readonly IMapper mapper;
         private readonly IHttpContextAccessor httpContextAccessor;
-        public CreateEntryCommandHandler(IBudgetRepository budgetRepository, IWalletRepository walletRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        public CreateEntryCommandHandler(IBudgetRepository budgetRepository, IWalletRepository walletRepository, ICategoryRepository categoryRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             this.budgetRepository = budgetRepository;
             this.walletRepository = walletRepository;
+            this.categoryRepository = categoryRepository;
             this.mapper = mapper;
             this.httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Result<bool>> Handle(CreateEntryCommand request, CancellationToken cancellationToken)
         {
+            var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
             var mappedEntry = mapper.Map<Entry>(request.Entry);
-            mappedEntry.UserID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
+            mappedEntry.UserID = userID;
+
+            var category = await categoryRepository.GetCategoryByIdAsync(mappedEntry.CategoryID);
+
+            //check wallet if the balance is enough
+            var wallet = await walletRepository.GetWalletAsync(userID);
+            if ((category.Type == EntryType.Expense) && (wallet.Balance < Math.Abs(mappedEntry.Amount)))
+                return Result.Failure<bool>("Hesap bakiyesi yetersiz");
 
             var entryResult = await budgetRepository.CreateEntryAsync(mappedEntry);
             if (!entryResult)
-                return Result.Failure<bool>("Failed to create entry.");
+                return Result.Failure<bool>("Kayıt başarısız.");
 
-            if (mappedEntry.Type == EntryType.Income)
+            if (mappedEntry.Category.Type == EntryType.Income)
                 mappedEntry.Amount = Math.Abs(mappedEntry.Amount);
             else
                 mappedEntry.Amount = -Math.Abs(mappedEntry.Amount);
 
             var result = await walletRepository.UpdateWalletAsync(mappedEntry.UserID, mappedEntry.Amount);
             if (!result)
-                return Result.Failure<bool>("Failed to update wallet.");
+                return Result.Failure<bool>("Hesap bakiyesi güncellenemedi.");
 
             return Result.Success(true);
         }

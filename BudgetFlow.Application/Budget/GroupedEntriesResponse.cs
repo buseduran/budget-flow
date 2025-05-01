@@ -1,7 +1,7 @@
 ﻿using BudgetFlow.Domain.Entities;
 
 namespace BudgetFlow.Application.Budget;
-public class GroupedEntry
+public class AnalysisEntry
 {
     public int CategoryID { get; set; }
     public Category Category { get; set; }
@@ -9,10 +9,10 @@ public class GroupedEntry
     public decimal Amount { get; set; }
     public string Color { get; set; }
 }
-public class GroupedEntriesResponse
+public class AnalysisEntriesResponse
 {
-    public List<GroupedEntry> Incomes { get; set; } = new();
-    public List<GroupedEntry> Expenses { get; set; } = new();
+    public List<AnalysisEntry> Incomes { get; set; } = new();
+    public List<AnalysisEntry> Expenses { get; set; } = new();
     public decimal? IncomeTrendPercentage { get; set; }
     public decimal? ExpenseTrendPercentage { get; set; }
 }

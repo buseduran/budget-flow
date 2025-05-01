@@ -6,7 +6,6 @@ using BudgetFlow.Application.Auth.Commands.UpdateAccount;
 using BudgetFlow.Application.Auth.Commands.UpdateUserCurrency;
 using BudgetFlow.Application.Auth.Queries.GetUserCurrency;
 using BudgetFlow.Application.Common.Extensions;
-using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -31,7 +30,7 @@ public class AuthController : ControllerBase
     /// <returns></returns>
     [HttpPost("Register")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> SignupAsync([FromBody] RegisterCommand registerCommand)
     {
         var result = await mediator.Send(registerCommand);
@@ -47,7 +46,7 @@ public class AuthController : ControllerBase
     /// <returns></returns>
     [HttpPost("Login")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<string>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
     public async Task<IResult> LoginAsync([FromBody] LoginCommand loginCommand)
     {
         var result = await mediator.Send(loginCommand);
@@ -63,7 +62,7 @@ public class AuthController : ControllerBase
     /// <returns></returns>
     [HttpPost("Refresh")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<string>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
     public async Task<IResult> RefreshAsync()
     {
         var result = await mediator.Send(new RefreshCommand());
@@ -79,7 +78,7 @@ public class AuthController : ControllerBase
     /// <returns></returns>
     [HttpPost("Logout")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     [Authorize]
     public async Task<IResult> LogoutAsync()
     {
@@ -96,7 +95,7 @@ public class AuthController : ControllerBase
     /// <returns></returns>
     [HttpPut]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     [Authorize]
     public async Task<IResult> UpdateAccountAsync([FromBody] UpdateAccountCommand updateAccountCommand)
     {
@@ -112,7 +111,7 @@ public class AuthController : ControllerBase
     /// <returns></returns>
     [HttpGet("Currency")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<CurrencyType>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CurrencyType))]
     [Authorize]
     public async Task<IResult> GetUserCurrencyAsync()
     {
@@ -129,7 +128,7 @@ public class AuthController : ControllerBase
     /// <returns></returns>
     [HttpPut("Currency")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<string>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
     [Authorize]
     public async Task<IResult> UpdateCurrencyAsync([FromBody] UpdateUserCurrencyCommand updateUserCurrencyCommand)
     {
