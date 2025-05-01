@@ -1,6 +1,6 @@
 ﻿namespace BudgetFlow.Domain.Enums;
 public enum EntryType
 {
-    Income,
-    Expense
+    Income = 0,
+    Expense = 1
 }

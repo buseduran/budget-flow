@@ -45,7 +45,7 @@ public class CreateEntryCommand : IRequest<Result<bool>>
             if (!entryResult)
                 return Result.Failure<bool>("Kayıt başarısız.");
 
-            if (mappedEntry.Category.Type == EntryType.Income)
+            if (category.Type == EntryType.Income)
                 mappedEntry.Amount = Math.Abs(mappedEntry.Amount);
             else
                 mappedEntry.Amount = -Math.Abs(mappedEntry.Amount);

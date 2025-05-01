@@ -31,7 +31,8 @@ public class CategoryRepository : ICategoryRepository
             {
                 ID = c.ID,
                 Name = c.Name,
-                Color = c.Color
+                Color = c.Color,
+                Type = c.Type
             })
             .ToListAsync();
     }
@@ -62,7 +63,8 @@ public class CategoryRepository : ICategoryRepository
             {
                 ID = c.ID,
                 Name = c.Name,
-                Color = c.Color
+                Color = c.Color,
+                Type = c.Type
             })
             .FirstOrDefaultAsync();
     }
