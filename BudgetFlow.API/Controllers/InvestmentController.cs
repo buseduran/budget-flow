@@ -1,5 +1,4 @@
 ﻿using BudgetFlow.Application.Common.Extensions;
-using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Investments;
 using BudgetFlow.Application.Investments.Commands.CreateInvestment;
 using BudgetFlow.Application.Investments.Commands.DeleteInvestment;
@@ -32,7 +31,7 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpPost]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> CreateInvestmentAsync([FromBody] CreateInvestmentCommand createInvestmentCommand)
     {
         var result = await mediator.Send(createInvestmentCommand);
@@ -48,7 +47,7 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpDelete("{ID}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> DeleteInvestmentAsync([FromRoute] int ID)
     {
         var result = await mediator.Send(new DeleteInvestmentCommand(ID));
@@ -64,7 +63,7 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpPut]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> UpdateInvestmentAsync([FromBody] UpdateInvestmentCommand updateInvestmentCommand)
     {
         var result = await mediator.Send(updateInvestmentCommand);
@@ -79,7 +78,7 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpGet("{PortfolioID}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<List<InvestmentResponse>>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<InvestmentResponse>))]
     public async Task<IResult> GetInvestmentsAsync([FromRoute] int PortfolioID)
     {
         var result = await mediator.Send(new GetInvestmentsQuery(PortfolioID));
@@ -94,7 +93,7 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpGet("Last/{Portfolio}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<PortfolioAssetResponse>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PortfolioAssetResponse))]
     public async Task<IResult> GetAssetInvestmentsAsync(string Portfolio)
     {
         var result = await mediator.Send(new GetPortfolioAssetsQuery(Portfolio));
@@ -109,7 +108,7 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpGet("Revenue/{Portfolio}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<List<AssetRevenueResponse>>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AssetRevenueResponse>))]
     public async Task<IResult> GetAssetRevenueAsync(string Portfolio)
     {
         var result = await mediator.Send(new GetAssetRevenueQuery(Portfolio));
@@ -125,7 +124,7 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpGet("Invests")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<PaginatedAssetInvestResponse>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedAssetInvestResponse))]
     public async Task<IResult> GetAssetInvestsPaginationAsync([FromQuery] GetAssetInvestPaginationQuery getAssetInvestPaginationQuery)
     {
         var result = await mediator.Send(getAssetInvestPaginationQuery);

@@ -4,7 +4,6 @@ using BudgetFlow.Application.Categories.Commands.DeleteCategory;
 using BudgetFlow.Application.Categories.Commands.UpdateCategory;
 using BudgetFlow.Application.Categories.Queries.GetCategories;
 using BudgetFlow.Application.Common.Extensions;
-using BudgetFlow.Application.Common.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +28,7 @@ public class CategoryController : ControllerBase
     /// <returns></returns>
     [HttpPost]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<int>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
     public async Task<IResult> CreateEntryAsync([FromBody] CreateCategoryCommand createCategoryCommand)
     {
         var result = await mediator.Send(createCategoryCommand);
@@ -44,12 +43,12 @@ public class CategoryController : ControllerBase
     /// <returns></returns>
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<List<CategoryResponse>>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<CategoryResponse>))]
     public async Task<IResult> GetCategoriesAsync()
     {
         var result = await mediator.Send(new GetCategoriesQuery());
         return result.IsSuccess
-                ? Results.Ok(result)
+                ? Results.Ok(result.Value)
                 : result.ToProblemDetails();
     }
 
@@ -60,12 +59,12 @@ public class CategoryController : ControllerBase
     /// <returns></returns>
     [HttpPut]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> UpdateEntryAsync([FromBody] UpdateCategoryCommand updateCategoryCommand)
     {
         var result = await mediator.Send(updateCategoryCommand);
         return result.IsSuccess
-                ? Results.Ok(result)
+                ? Results.Ok(result.Value)
                 : result.ToProblemDetails();
     }
 
@@ -76,12 +75,12 @@ public class CategoryController : ControllerBase
     /// <returns></returns>
     [HttpDelete("{ID}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> DeleteEntryAsync([FromRoute] int ID)
     {
         var result = await mediator.Send(new DeleteCategoryCommand(ID));
         return result.IsSuccess
-                ? Results.Ok(result)
+                ? Results.Ok(result.Value)
                 : result.ToProblemDetails();
     }
 }

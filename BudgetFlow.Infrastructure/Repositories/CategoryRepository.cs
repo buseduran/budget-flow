@@ -53,4 +53,17 @@ public class CategoryRepository : ICategoryRepository
                 .Where(e => e.ID == ID)
                 .ExecuteDeleteAsync() > 0;
     }
+
+    public async Task<CategoryResponse> GetCategoryByIdAsync(int ID)
+    {
+        return await context.Categories
+            .Where(c => c.ID == ID)
+            .Select(c => new CategoryResponse
+            {
+                ID = c.ID,
+                Name = c.Name,
+                Color = c.Color
+            })
+            .FirstOrDefaultAsync();
+    }
 }

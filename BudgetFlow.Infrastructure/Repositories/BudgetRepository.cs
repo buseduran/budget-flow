@@ -60,7 +60,7 @@ public class BudgetRepository : IBudgetRepository
         return new PaginatedList<EntryResponse>(entriesResponse, count, Page, PageSize);
     }
 
-    public async Task<GroupedEntriesResponse> GetGroupedEntriesAsync(int userID, string Range)
+    public async Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(int userID, string Range)
     {
         var startDate = GetDateForRange.GetStartDateForRange(Range);
         var endDate = DateTime.UtcNow;
@@ -71,7 +71,7 @@ public class BudgetRepository : IBudgetRepository
             .Where(e => e.UserID == userID &&
                        ((e.Date >= startDate && e.Date <= endDate) || (e.Date >= previousStartDate && e.Date <= previousEndDate)))
             .Include(c => c.Category)
-            .GroupBy(e => new { e.CategoryID, e.Category.Name, e.Category.Color, e.Type, Period = e.Date >= startDate ? "Current" : "Previous" })
+            .GroupBy(e => new { e.CategoryID, e.Category.Name, e.Category.Color, e.Category.Type, Period = e.Date >= startDate ? "Current" : "Previous" })
             .Select(g => new
             {
                 g.Key.CategoryID,
@@ -97,7 +97,7 @@ public class BudgetRepository : IBudgetRepository
 
         var incomes = entryDictionary
             .Where(e => e.Key.Type == EntryType.Income)
-            .Select(e => new GroupedEntry
+            .Select(e => new AnalysisEntry
             {
                 CategoryID = e.Key.CategoryID,
                 CategoryName = e.Value.Name,
@@ -108,7 +108,7 @@ public class BudgetRepository : IBudgetRepository
 
         var expenses = entryDictionary
             .Where(e => e.Key.Type == EntryType.Expense)
-            .Select(e => new GroupedEntry
+            .Select(e => new AnalysisEntry
             {
                 CategoryID = e.Key.CategoryID,
                 CategoryName = e.Value.Name,
@@ -141,7 +141,7 @@ public class BudgetRepository : IBudgetRepository
             (currentExpenseTotal - previousExpenseTotal) / previousExpenseTotal * 100;
         #endregion
 
-        return new GroupedEntriesResponse
+        return new AnalysisEntriesResponse
         {
             Incomes = incomes,
             Expenses = expenses,
@@ -163,7 +163,7 @@ public class BudgetRepository : IBudgetRepository
                 Name = e.Name,
                 Amount = e.Amount,
                 Date = e.Date,
-                Type = e.Type,
+                Type = e.Category.Type,
                 CategoryName = e.Category.Name
             })
             .ToListAsync();
