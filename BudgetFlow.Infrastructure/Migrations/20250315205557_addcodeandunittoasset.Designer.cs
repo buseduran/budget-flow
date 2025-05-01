@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BudgetFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(BudgetContext))]
-    [Migration("20250315205557_addcodeandunittoasset")]
-    partial class addcodeandunittoasset
+    [Migration("20250315205557_AddCodeAndUnitToAsset")]
+    partial class AddCodeAndUnitToAsset
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
