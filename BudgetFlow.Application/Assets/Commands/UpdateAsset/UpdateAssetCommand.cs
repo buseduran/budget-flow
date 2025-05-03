@@ -2,6 +2,7 @@
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -44,7 +45,7 @@ public class UpdateAssetCommand : IRequest<Result<bool>>
 
             return result
                 ? Result.Success(true)
-                : Result.Failure<bool>("Failed to update Asset");
+                : Result.Failure<bool>(AssetErrors.AssetUpdateFailed);
         }
     }
 }

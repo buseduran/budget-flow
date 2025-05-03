@@ -1,6 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Interfaces.Services;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 
 namespace BudgetFlow.Application.Auth.Commands.UpdateAccount;
@@ -29,7 +30,7 @@ public class UpdateAccountCommand : IRequest<Result<bool>>
                 result = await userRepository.UpdateWithoutPassword(request.Name, request.OldEmail, request.Email);
                 return result
                      ? Result.Success(true)
-                     : Result.Failure<bool>("Failed to update user");
+                     : Result.Failure<bool>(UserErrors.UpdateFailed);
             }
 
             request.Password = passwordHasher.Hash(request.Password);
@@ -37,7 +38,7 @@ public class UpdateAccountCommand : IRequest<Result<bool>>
 
             return result
                  ? Result.Success(true)
-                 : Result.Failure<bool>("Failed to update user");
+                 : Result.Failure<bool>(UserErrors.UpdateFailed);
         }
     }
 }

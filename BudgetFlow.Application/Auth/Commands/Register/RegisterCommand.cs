@@ -4,6 +4,7 @@ using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 
 namespace BudgetFlow.Application.Auth.Commands.Register;
@@ -27,9 +28,12 @@ public class RegisterCommand : IRequest<Result<bool>>
         public async Task<Result<bool>> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
             if (request.User.Password != request.User.ConfirmPassword)
-            {
-                return Result.Failure<bool>("Passwords do not match");
-            }
+                return Result.Failure<bool>(UserErrors.PasswordsDoNotMatch);
+
+            var userExist = await userRepository.GetByEmailAsync(request.User.Email);
+            if (userExist != null)
+                return Result.Failure<bool>(UserErrors.UserAlreadyExists);
+
             User user = new User()
             {
                 Name = request.User.Name,
@@ -43,17 +47,17 @@ public class RegisterCommand : IRequest<Result<bool>>
                 {
                     Balance = 0,
                     UserId = userID,
-                    Currency = CurrencyType.USD // default currency is USD
+                    Currency = CurrencyType.TRY // default currency is TRY
                 };
                 var result = await walletRepository.CreateWalletAsync(wallet);
                 if (!result)
                 {
-                    return Result.Failure<bool>("Failed to create wallet");
+                    return Result.Failure<bool>(WalletErrors.CreationFailed);
                 }
             }
             else
             {
-                return Result.Failure<bool>("Failed to create user");
+                return Result.Failure<bool>(UserErrors.CreationFailed);
             }
 
             return Result.Success(true);

@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 
 namespace BudgetFlow.Application.Assets.Queries.GetAssetRate;
@@ -22,9 +23,8 @@ public class GetAssetRateQuery : IRequest<Result<AssetRateResponse>>
         {
             var rate = await assetRepository.GetAssetRateAsync(request.ID);
             if (rate == null)
-            {
-                return Result.Failure<AssetRateResponse>("No Asset found");
-            }
+                return Result.Failure<AssetRateResponse>(AssetErrors.AssetRateNotFound);
+
             var response = new AssetRateResponse
             {
                 BuyPrice = rate.BuyPrice,

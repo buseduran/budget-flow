@@ -5,6 +5,7 @@ using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -39,11 +40,11 @@ public class CreateEntryCommand : IRequest<Result<bool>>
             //check wallet if the balance is enough
             var wallet = await walletRepository.GetWalletAsync(userID);
             if ((category.Type == EntryType.Expense) && (wallet.Balance < Math.Abs(mappedEntry.Amount)))
-                return Result.Failure<bool>("Hesap bakiyesi yetersiz");
+                return Result.Failure<bool>(WalletErrors.InsufficientBalance);
 
             var entryResult = await budgetRepository.CreateEntryAsync(mappedEntry);
             if (!entryResult)
-                return Result.Failure<bool>("Kayıt başarısız.");
+                return Result.Failure<bool>(EntryErrors.CreationFailed);
 
             if (category.Type == EntryType.Income)
                 mappedEntry.Amount = Math.Abs(mappedEntry.Amount);
@@ -52,7 +53,7 @@ public class CreateEntryCommand : IRequest<Result<bool>>
 
             var result = await walletRepository.UpdateWalletAsync(mappedEntry.UserID, mappedEntry.Amount);
             if (!result)
-                return Result.Failure<bool>("Hesap bakiyesi güncellenemedi.");
+                return Result.Failure<bool>(WalletErrors.UpdateFailed);
 
             return Result.Success(true);
         }

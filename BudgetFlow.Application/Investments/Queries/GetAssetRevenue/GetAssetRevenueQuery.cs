@@ -1,6 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -29,7 +30,7 @@ public class GetAssetRevenueQuery : IRequest<Result<List<Dictionary<string, obje
             var result = await investmentRepository.GetAssetRevenueAsync(request.Portfolio, userID);
             return result != null
                 ? Result.Success(result)
-                : Result.Failure<List<Dictionary<string, object>>>("No data found"); ;
+                : Result.Failure<List<Dictionary<string, object>>>(InvestmentErrors.InvestmentNotFound); ;
         }
     }
 }

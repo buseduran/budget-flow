@@ -170,4 +170,10 @@ public class BudgetRepository : IBudgetRepository
 
         return entries;
     }
+
+    public async Task<bool> CheckEntryByCategory(int CategoryID)
+    {
+        return await context.Entries
+            .AnyAsync(e => e.CategoryID == CategoryID);
+    }
 }

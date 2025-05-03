@@ -1,6 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -24,7 +25,7 @@ public class GetPortfoliosQuery : IRequest<Result<List<PortfolioResponse>>>
             var result = await portfolioRepository.GetPortfoliosAsync(UserID);
             return result != null
                 ? Result.Success(result)
-                : Result.Failure<List<PortfolioResponse>>("Portfolios not found");
+                : Result.Failure<List<PortfolioResponse>>(PortfolioErrors.PortfolioNotFound);
         }
     }
 }

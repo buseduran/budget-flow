@@ -4,6 +4,7 @@ using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -57,13 +58,13 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                         var userAssetResult = await assetRepository.UpdateUserAssetAsync(UserAsset.ID, UserAsset.Amount, UserAsset.Balance);
                         if (!userAssetResult)
                         {
-                            return Result.Failure<bool>("User asset could not be updated.");
+                            return Result.Failure<bool>(UserAssetErrors.UserAssetUpdateFailed);
                         }
 
                         var walletUpdateResult = await walletRepository.UpdateWalletAsync(getCurrentUser.GetCurrentUserID(), investment.CurrencyAmount);
                         if (!walletUpdateResult)
                         {
-                            return Result.Failure<bool>("Wallet could not be updated.");
+                            return Result.Failure<bool>(WalletErrors.UpdateFailed);
                         }
                     }
                 }
@@ -71,20 +72,20 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                 {
                     if (UserAsset.Amount < investment.UnitAmount)
                     {
-                        return Result.Failure<bool>("Not enough asset amount.");
+                        return Result.Failure<bool>(UserAssetErrors.NotEnoughAssetAmount);
                     }
                     UserAsset.Amount -= investment.UnitAmount;
                     UserAsset.Balance -= investment.CurrencyAmount;
                     var userAssetResult = await assetRepository.UpdateUserAssetAsync(UserAsset.ID, UserAsset.Amount, UserAsset.Balance);
                     if (!userAssetResult)
                     {
-                        return Result.Failure<bool>("User asset could not be updated.");
+                        return Result.Failure<bool>(UserAssetErrors.UserAssetUpdateFailed);
                     }
 
                     var walletUpdateResult = await walletRepository.UpdateWalletAsync(getCurrentUser.GetCurrentUserID(), -investment.CurrencyAmount);
                     if (!walletUpdateResult)
                     {
-                        return Result.Failure<bool>("Wallet could not be updated.");
+                        return Result.Failure<bool>(WalletErrors.UpdateFailed);
                     }
                 }
             }
@@ -103,25 +104,25 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                         });
                         if (!result)
                         {
-                            return Result.Failure<bool>("User asset could not be created.");
+                            return Result.Failure<bool>(UserAssetErrors.CreationFailed);
                         }
                         var walletUpdateResult = await walletRepository.UpdateWalletAsync(getCurrentUser.GetCurrentUserID(), -investment.CurrencyAmount);
                         if (!walletUpdateResult)
                         {
-                            return Result.Failure<bool>("Wallet could not be updated.");
+                            return Result.Failure<bool>(WalletErrors.UpdateFailed);
                         }
                     }
                 }
                 else
                 {
-                    return Result.Failure<bool>("There is no balance for this asset.");
+                    return Result.Failure<bool>(WalletErrors.NoBalanceForAsset);
                 }
             }
 
             var investmentResult = await investmentRepository.CreateInvestmentAsync(investment);
             if (!investmentResult)
             {
-                return Result.Failure<bool>("Investment could not be saved.");
+                return Result.Failure<bool>(InvestmentErrors.CreationFailed);
             }
             #endregion
 

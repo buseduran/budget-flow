@@ -2,6 +2,7 @@
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -41,7 +42,7 @@ public class CreateAssetCommand : IRequest<Result<bool>>
             var result = await assetRepository.CreateAssetAsync(asset);
             return result
                 ? Result.Success(true)
-                : Result.Failure<bool>("Failed to create Asset");
+                : Result.Failure<bool>(AssetErrors.CreationFailed);
         }
     }
 }

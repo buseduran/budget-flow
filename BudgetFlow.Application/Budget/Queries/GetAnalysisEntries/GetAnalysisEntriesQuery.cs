@@ -1,6 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -29,7 +30,7 @@ public class GetAnalysisEntriesQuery : IRequest<Result<AnalysisEntriesResponse>>
             var entries = await budgetRepository.GetAnalysisEntriesAsync(userID, request.Range);
             return entries != null
                 ? Result.Success(entries)
-                : Result.Failure<AnalysisEntriesResponse>("Failed to retrieve grouped entries.");
+                : Result.Failure<AnalysisEntriesResponse>(EntryErrors.AnalysisEntriesRetrievalFailed);
         }
     }
 }

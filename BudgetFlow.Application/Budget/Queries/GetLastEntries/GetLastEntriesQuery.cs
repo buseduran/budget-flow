@@ -1,6 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -23,7 +24,7 @@ public class GetLastEntriesQuery : IRequest<Result<List<LastEntryResponse>>>
             var entries = await budgetRepository.GetLastFiveEntriesAsync(userID);
             return entries != null
                 ? Result.Success(entries)
-                : Result.Failure<List<LastEntryResponse>>("Failed to get last entries");
+                : Result.Failure<List<LastEntryResponse>>(EntryErrors.LatestEntriesRetrievalFailed);
         }
     }
 }

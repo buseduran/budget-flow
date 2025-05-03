@@ -1,6 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -25,7 +26,7 @@ public class GetEntryPaginationQuery : IRequest<Result<PaginatedList<EntryRespon
             int userID = getCurrentUser.GetCurrentUserID();
             var result = await budgetRepository.GetPaginatedAsync(request.Page, request.PageSize, userID);
             if (result == null)
-                return Result.Failure<PaginatedList<EntryResponse>>("No entries found.");
+                return Result.Failure<PaginatedList<EntryResponse>>(EntryErrors.EntryNotFound);
 
             return Result.Success(result);
         }

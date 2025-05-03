@@ -1,6 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -27,7 +28,7 @@ public class GetAssetInvestPaginationQuery : IRequest<Result<PaginatedAssetInves
             var result = await investmentRepository.GetAssetInvestPaginationAsync(userID, request.Portfolio, request.Asset, request.Page, request.PageSize);
             return result != null
                 ? Result.Success(result)
-                : Result.Failure<PaginatedAssetInvestResponse>("No investments found for this asset");
+                : Result.Failure<PaginatedAssetInvestResponse>(InvestmentErrors.InvestmentNotFound);
         }
     }
 }

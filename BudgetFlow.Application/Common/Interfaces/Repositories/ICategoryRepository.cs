@@ -9,5 +9,4 @@ public interface ICategoryRepository
     Task<CategoryResponse> GetCategoryByIdAsync(int ID);    
     Task<bool> UpdateCategoryAsync(int ID, string Color);
     Task<bool> DeleteCategoryAsync(int ID);
-
 }
