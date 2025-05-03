@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 
 namespace BudgetFlow.Application.Categories.Commands.UpdateCategory;
@@ -22,7 +23,7 @@ public class UpdateCategoryCommand : IRequest<Result<bool>>
             var result = await categoryRepository.UpdateCategoryAsync(request.ID, request.Color);
             return result
                 ? Result.Success(true)
-                : Result.Failure<bool>("Failed to update category");
+                : Result.Failure<bool>(CategoryErrors.UpdateFailed);
         }
     }
 }

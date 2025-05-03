@@ -1,6 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -30,11 +31,11 @@ public class LogoutCommand : IRequest<Result<bool>>
             GetCurrentUser getCurrentUser = new(httpContextAccessor);
             int userID = getCurrentUser.GetCurrentUserID();
             if (userID == 0)
-                return Result.Failure<bool>("User not found");
+                return Result.Failure<bool>(UserErrors.UserNotFound);
 
             var revokeResult = await userRepository.RevokeToken(userID);
             if (!revokeResult)
-                return Result.Failure<bool>("Logout failed");
+                return Result.Failure<bool>(UserErrors.LogoutFailed);
 
             return Result.Success(true);
         }

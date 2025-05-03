@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 
 namespace BudgetFlow.Application.Budget.Commands.DeleteEntry;
@@ -22,7 +23,7 @@ public class DeleteEntryCommand : IRequest<Result<bool>>
             var result = await budgetRepository.DeleteEntryAsync(request.ID);
             if (!result)
             {
-                return Result.Failure<bool>("Failed to delete the entry.");
+                return Result.Failure<bool>(EntryErrors.EntryDeletionFailed);
             }
             return Result.Success(true);
         }

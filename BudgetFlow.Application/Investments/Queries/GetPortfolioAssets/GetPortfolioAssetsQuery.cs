@@ -1,6 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -28,7 +29,7 @@ public class GetPortfolioAssetsQuery : IRequest<Result<PortfolioAssetResponse>>
 
             return investments != null
                 ? Result.Success(investments)
-                : Result.Failure<PortfolioAssetResponse>("Failed to get Investments");
+                : Result.Failure<PortfolioAssetResponse>(InvestmentErrors.InvestmentNotFound);
         }
     }
 }

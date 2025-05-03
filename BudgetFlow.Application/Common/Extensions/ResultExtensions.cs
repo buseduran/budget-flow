@@ -1,4 +1,5 @@
 ﻿using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Domain.Errors;
 using Microsoft.AspNetCore.Http;
 using HttpResults = Microsoft.AspNetCore.Http.Results;
 
@@ -19,7 +20,7 @@ public static class ResultExtensions
             type: "https://tools.ietf.org/html/rfc9110#section-15.5.1",
             extensions: new Dictionary<string, object>
             {
-                { "error", result.Error ?? "Unknown error" }
+                { "error", result.Error ?? BaseErrors.UnknownError }
             }
         );
     }
@@ -34,7 +35,7 @@ public static class ResultExtensions
             type: "https://tools.ietf.org/html/rfc9110#section-15.5.1",
             extensions: new Dictionary<string, object>
             {
-                { "error", result.Error ?? "Unknown error" }
+                { "error", result.Error ?? BaseErrors.UnknownError }
             }
         );
     }

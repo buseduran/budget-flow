@@ -12,4 +12,5 @@ public interface IBudgetRepository
     Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID);
     Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(int userID, string Range);
     Task<List<LastEntryResponse>> GetLastFiveEntriesAsync(int userID);
+    Task<bool> CheckEntryByCategory(int CategoryID);
 }

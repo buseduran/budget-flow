@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 
 namespace BudgetFlow.Application.Investments.Queries.GetInvestments;
@@ -23,7 +24,7 @@ public class GetInvestmentsQuery : IRequest<Result<List<InvestmentResponse>>>
 
             return investments != null
                 ? Result.Success(investments)
-                : Result.Failure<List<InvestmentResponse>>("Failed to get Investments");
+                : Result.Failure<List<InvestmentResponse>>(InvestmentErrors.InvestmentNotFound);
         }
     }
 }

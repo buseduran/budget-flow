@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 
 namespace BudgetFlow.Application.Categories.Queries.GetCategories;
@@ -17,7 +18,7 @@ public class GetCategoriesQuery : IRequest<Result<List<CategoryResponse>>>
             var categories = await categoryRepository.GetCategoriesAsync();
             return categories != null
                 ? Result.Success(categories.ToList())
-                : Result.Failure<List<CategoryResponse>>("Failed to retrieve categories");
+                : Result.Failure<List<CategoryResponse>>(CategoryErrors.CategoryNotFound);
         }
     }
 }

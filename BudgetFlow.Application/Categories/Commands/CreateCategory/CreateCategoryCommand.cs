@@ -3,6 +3,7 @@ using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -26,7 +27,7 @@ public class CreateCategoryCommand : IRequest<Result<int>>
         {
             GetCurrentUser getCurrentUser = new(httpContextAccessor);
             if (string.IsNullOrEmpty(request.Name) || string.IsNullOrEmpty(request.Color))
-                return Result.Failure<int>("Category Name and Color cannot be empty.");
+                return Result.Failure<int>(CategoryErrors.NameOrColorCannotBeEmpty);
 
             Category categoryDto = new Category
             {
@@ -36,6 +37,9 @@ public class CreateCategoryCommand : IRequest<Result<int>>
                 Type = request.Type
             };
             var response = await categoryRepository.CreateCategoryAsync(categoryDto);
+            if (response == 0)
+                return Result.Failure<int>(CategoryErrors.CreationFailed);
+
             return Result.Success(response);
         }
     }

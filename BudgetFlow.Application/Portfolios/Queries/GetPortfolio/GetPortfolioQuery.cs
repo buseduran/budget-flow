@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 
 namespace BudgetFlow.Application.Portfolios.Queries.GetPortfolio;
@@ -22,7 +23,7 @@ public class GetPortfolioQuery : IRequest<Result<PortfolioResponse>>
             var portfolio = await portfolioRepository.GetPortfolioAsync(request.Name);
             return portfolio != null
                 ? Result.Success(portfolio)
-                : Result.Failure<PortfolioResponse>("Portfolio not found");
+                : Result.Failure<PortfolioResponse>(PortfolioErrors.PortfolioNotFound);
         }
     }
 }

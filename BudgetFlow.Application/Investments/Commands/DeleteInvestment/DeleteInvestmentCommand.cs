@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 
 namespace BudgetFlow.Application.Investments.Commands.DeleteInvestment;
@@ -21,13 +22,13 @@ public class DeleteInvestmentCommand : IRequest<Result<bool>>
         {
             if (request.ID <= 0)
             {
-                return Result.Failure<bool>("Invalid Investment ID");
+                return Result.Failure<bool>(InvestmentErrors.InvalidInvestmentId);
             }
 
             var result = await investmentRepository.DeleteInvestmentAsync(request.ID);
             return result
                 ? Result.Success(result)
-                : Result.Failure<bool>("Failed to delete investment");
+                : Result.Failure<bool>(InvestmentErrors.InvestmentDeletionFailed);
         }
     }
 }

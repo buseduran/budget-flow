@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 
 namespace BudgetFlow.Application.Assets.Queries.GetAssets;
@@ -17,7 +18,7 @@ public class GetAssetsQuery : IRequest<Result<List<AssetResponse>>>
             var assetList = await assetRepository.GetAssetsAsync();
 
             if (assetList == null)
-                return Result.Failure<List<AssetResponse>>("No Assets found");
+                return Result.Failure<List<AssetResponse>>(AssetErrors.AssetNotFound);
 
             return Result.Success(assetList);
         }

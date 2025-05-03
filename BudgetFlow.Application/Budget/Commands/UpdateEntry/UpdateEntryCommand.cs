@@ -1,6 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 
 namespace BudgetFlow.Application.Budget.Commands.UpdateEntry;
@@ -20,7 +21,7 @@ public class UpdateEntryCommand : IRequest<Result<bool>>
             var result = await budgetRepository.UpdateEntryAsync(request.ID, request.Entry);
             if (!result)
             {
-                return Result.Failure<bool>("Failed to update entry");
+                return Result.Failure<bool>(EntryErrors.EntryUpdateFailed);
             }
             return Result.Success(true);
         }

@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Domain.Errors;
 using MediatR;
 
 namespace BudgetFlow.Application.Portfolios.Commands.DeletePortfolio;
@@ -23,7 +24,7 @@ public class DeletePortfolioCommand : IRequest<Result<bool>>
             var result = await portfolioRepository.DeletePortfolioAsync(request.ID);
             return result
             ? Result.Success(result)
-            : Result.Failure<bool>("Error deleting portfolio");
+            : Result.Failure<bool>(PortfolioErrors.PortfolioDeletionFailed);
         }
     }
 }
