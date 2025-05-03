@@ -57,7 +57,7 @@ namespace BudgetFlow.Application.Auth.Commands.Refresh
                     HttpOnly = true,
                     Secure = true,
                     SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddMinutes(60)
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(3)
                 });
 
                 #endregion
