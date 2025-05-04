@@ -1,13 +1,12 @@
-﻿using BudgetFlow.Domain.Entities;
+﻿using BudgetFlow.Application.Categories;
+using BudgetFlow.Domain.Enums;
 
 namespace BudgetFlow.Application.Budget;
 public class AnalysisEntry
 {
-    public int CategoryID { get; set; }
-    public Category Category { get; set; }
-    public string CategoryName { get; set; }
+    public CategoryResponse Category { get; set; }
     public decimal Amount { get; set; }
-    public string Color { get; set; }
+    public CurrencyType Currency { get; set; }
 }
 public class AnalysisEntriesResponse
 {

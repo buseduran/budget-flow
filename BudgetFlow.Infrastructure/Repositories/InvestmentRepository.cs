@@ -194,6 +194,8 @@ public class InvestmentRepository : IInvestmentRepository
              })
              .ToListAsync();
 
+
+        // TODO : null check
         var assetInvestMainResponse = await context.Investments
             .Where(e => e.PortfolioId == PortfolioID && e.AssetId == AssetID)
             .GroupBy(e => new { e.AssetId, e.Asset.Name, e.Asset.Code, e.Asset.Unit, e.Asset.Symbol })
