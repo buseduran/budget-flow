@@ -16,18 +16,22 @@ public class GetAnalysisEntriesQuery : IRequest<Result<AnalysisEntriesResponse>>
     public class GetAnalysisEntriesQueryHandler : IRequestHandler<GetAnalysisEntriesQuery, Result<AnalysisEntriesResponse>>
     {
         private readonly IBudgetRepository budgetRepository;
+        private readonly IUserRepository userRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
-        public GetAnalysisEntriesQueryHandler(IBudgetRepository budgetRepository, IHttpContextAccessor httpContextAccessor)
+        public GetAnalysisEntriesQueryHandler(IBudgetRepository budgetRepository, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository)
         {
             this.budgetRepository = budgetRepository;
             this.httpContextAccessor = httpContextAccessor;
+            this.userRepository = userRepository;
         }
         public async Task<Result<AnalysisEntriesResponse>> Handle(GetAnalysisEntriesQuery request, CancellationToken cancellationToken)
         {
             GetCurrentUser getCurrentUser = new(httpContextAccessor);
             int userID = getCurrentUser.GetCurrentUserID();
 
-            var entries = await budgetRepository.GetAnalysisEntriesAsync(userID, request.Range);
+            var currency = await userRepository.GetUserCurrencyAsync(userID);
+
+            var entries = await budgetRepository.GetAnalysisEntriesAsync(userID, request.Range, currency);
             return entries != null
                 ? Result.Success(entries)
                 : Result.Failure<AnalysisEntriesResponse>(EntryErrors.AnalysisEntriesRetrievalFailed);

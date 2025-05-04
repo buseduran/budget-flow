@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BudgetFlow.Application.Budget;
+using BudgetFlow.Application.Categories;
 using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Utils;
@@ -45,22 +46,36 @@ public class BudgetRepository : IBudgetRepository
                 .Where(e => e.ID == ID)
                 .ExecuteDeleteAsync() > 0;
     }
-    public async Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID)
+    public async Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID, CurrencyType currencyType)
     {
         var entries = await context.Entries
             .OrderByDescending(c => c.CreatedAt)
             .Skip((Page - 1) * PageSize)
             .Take(PageSize)
             .Where(u => u.UserID == UserID)
+            .Include(c => c.Category)
+            .Select(e => new EntryResponse
+            {
+                ID = e.ID,
+                Name = e.Name,
+                Amount = e.Amount,
+                Currency = currencyType,
+                Date = e.Date,
+                Category = new CategoryResponse
+                {
+                    ID = e.Category.ID,
+                    Name = e.Category.Name,
+                    Color = e.Category.Color,
+                    Type = e.Category.Type
+                }
+            })
             .ToListAsync();
         var count = await context.Entries.CountAsync();
 
-        var entriesResponse = mapper.Map<List<EntryResponse>>(entries);
-
-        return new PaginatedList<EntryResponse>(entriesResponse, count, Page, PageSize);
+        return new PaginatedList<EntryResponse>(entries, count, Page, PageSize);
     }
 
-    public async Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(int userID, string Range)
+    public async Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(int userID, string Range, CurrencyType currencyType)
     {
         var startDate = GetDateForRange.GetStartDateForRange(Range);
         var endDate = DateTime.UtcNow;
@@ -69,9 +84,25 @@ public class BudgetRepository : IBudgetRepository
 
         var groupedEntries = await context.Entries
             .Where(e => e.UserID == userID &&
-                       ((e.Date >= startDate && e.Date <= endDate) || (e.Date >= previousStartDate && e.Date <= previousEndDate)))
-            .Include(c => c.Category)
-            .GroupBy(e => new { e.CategoryID, e.Category.Name, e.Category.Color, e.Category.Type, Period = e.Date >= startDate ? "Current" : "Previous" })
+                       ((e.Date >= startDate && e.Date <= endDate) ||
+                        (e.Date >= previousStartDate && e.Date <= previousEndDate)))
+            .Select(e => new
+            {
+                e.Amount,
+                e.CategoryID,
+                e.Category.Name,
+                e.Category.Color,
+                e.Category.Type,
+                Period = (e.Date >= startDate && e.Date <= endDate) ? "Current" : "Previous"
+            })
+            .GroupBy(e => new
+            {
+                e.CategoryID,
+                e.Name,
+                e.Color,
+                e.Type,
+                e.Period
+            })
             .Select(g => new
             {
                 g.Key.CategoryID,
@@ -91,6 +122,8 @@ public class BudgetRepository : IBudgetRepository
                 {
                     Name = g.Key.Name,
                     Color = g.Key.Color,
+                    Type = g.Key.Type,
+                    CategoryID = g.Key.CategoryID,
                     CurrentAmount = g.FirstOrDefault(e => e.Period == "Current")?.Amount ?? 0,
                     PreviousAmount = g.FirstOrDefault(e => e.Period == "Previous")?.Amount ?? 0
                 });
@@ -99,9 +132,14 @@ public class BudgetRepository : IBudgetRepository
             .Where(e => e.Key.Type == EntryType.Income)
             .Select(e => new AnalysisEntry
             {
-                CategoryID = e.Key.CategoryID,
-                CategoryName = e.Value.Name,
-                Color = e.Value.Color,
+                Category = new CategoryResponse
+                {
+                    ID = e.Value.CategoryID,
+                    Name = e.Value.Name,
+                    Color = e.Value.Color,
+                    Type = e.Key.Type
+                },
+                Currency = currencyType,
                 Amount = e.Value.CurrentAmount
             })
             .ToList();
@@ -110,9 +148,14 @@ public class BudgetRepository : IBudgetRepository
             .Where(e => e.Key.Type == EntryType.Expense)
             .Select(e => new AnalysisEntry
             {
-                CategoryID = e.Key.CategoryID,
-                CategoryName = e.Value.Name,
-                Color = e.Value.Color,
+                Category = new CategoryResponse
+                {
+                    ID = e.Value.CategoryID,
+                    Name = e.Value.Name,
+                    Color = e.Value.Color,
+                    Type = e.Key.Type
+                },
+                Currency = currencyType,
                 Amount = e.Value.CurrentAmount
             })
             .ToList();
@@ -150,21 +193,28 @@ public class BudgetRepository : IBudgetRepository
         };
     }
 
-    public async Task<List<LastEntryResponse>> GetLastFiveEntriesAsync(int userID)
+    public async Task<List<LastEntryResponse>> GetLastFiveEntriesAsync(int userID, CurrencyType currencyType)
     {
         var entries = await context.Entries
             .Where(e => e.UserID == userID)
             .Include(e => e.Category)
             .OrderByDescending(e => e.CreatedAt)
             .Take(5)
+            .Include(c => c.Category)
             .Select(e => new LastEntryResponse
             {
                 ID = e.ID,
                 Name = e.Name,
                 Amount = e.Amount,
+                Currency = currencyType,
                 Date = e.Date,
-                Type = e.Category.Type,
-                CategoryName = e.Category.Name
+                Category = new CategoryResponse
+                {
+                    ID = e.Category.ID,
+                    Name = e.Category.Name,
+                    Color = e.Category.Color,
+                    Type = e.Category.Type
+                }
             })
             .ToListAsync();
 

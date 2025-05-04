@@ -98,7 +98,7 @@ namespace BudgetFlow.API.Controllers
         [Route("Analysis")]
         [Produces(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AnalysisEntriesResponse))]
-        public async Task<IResult> GetGroupedEntriesAsync([FromQuery] string Range)
+        public async Task<IResult> GetAnalysisEntriesAsync([FromQuery] string Range)
         {
             var result = await mediator.Send(new GetAnalysisEntriesQuery(Range));
             return result.IsSuccess

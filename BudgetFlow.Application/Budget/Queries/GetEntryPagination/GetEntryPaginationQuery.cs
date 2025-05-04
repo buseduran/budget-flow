@@ -1,6 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Domain.Enums;
 using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -13,18 +14,23 @@ public class GetEntryPaginationQuery : IRequest<Result<PaginatedList<EntryRespon
     public class GetEntryPaginationQueryHandler : IRequestHandler<GetEntryPaginationQuery, Result<PaginatedList<EntryResponse>>>
     {
         private readonly IBudgetRepository budgetRepository;
+        private readonly IUserRepository userRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
-        public GetEntryPaginationQueryHandler(IBudgetRepository budgetRepository, IHttpContextAccessor httpContextAccessor)
+        public GetEntryPaginationQueryHandler(IBudgetRepository budgetRepository, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository)
         {
             this.budgetRepository = budgetRepository;
             this.httpContextAccessor = httpContextAccessor;
+            this.userRepository = userRepository;
         }
 
         public async Task<Result<PaginatedList<EntryResponse>>> Handle(GetEntryPaginationQuery request, CancellationToken cancellationToken)
         {
             GetCurrentUser getCurrentUser = new(httpContextAccessor);
             int userID = getCurrentUser.GetCurrentUserID();
-            var result = await budgetRepository.GetPaginatedAsync(request.Page, request.PageSize, userID);
+
+            var currency = await userRepository.GetUserCurrencyAsync(userID);
+
+            var result = await budgetRepository.GetPaginatedAsync(request.Page, request.PageSize, userID, currency);
             if (result == null)
                 return Result.Failure<PaginatedList<EntryResponse>>(EntryErrors.EntryNotFound);
 
