@@ -14,4 +14,5 @@ public interface IBudgetRepository
     Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(int userID, string Range, CurrencyType currencyType);
     Task<List<LastEntryResponse>> GetLastFiveEntriesAsync(int userID, CurrencyType currencyType);
     Task<bool> CheckEntryByCategory(int CategoryID);
+    Task<EntryResponse> GetEntryByIdAsync(int ID);
 }
