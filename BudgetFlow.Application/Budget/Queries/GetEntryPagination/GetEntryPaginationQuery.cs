@@ -14,13 +14,13 @@ public class GetEntryPaginationQuery : IRequest<Result<PaginatedList<EntryRespon
     public class GetEntryPaginationQueryHandler : IRequestHandler<GetEntryPaginationQuery, Result<PaginatedList<EntryResponse>>>
     {
         private readonly IBudgetRepository budgetRepository;
-        private readonly IUserRepository userRepository;
+        private readonly IWalletRepository walletRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
-        public GetEntryPaginationQueryHandler(IBudgetRepository budgetRepository, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository)
+        public GetEntryPaginationQueryHandler(IBudgetRepository budgetRepository, IHttpContextAccessor httpContextAccessor, IWalletRepository walletRepository)
         {
             this.budgetRepository = budgetRepository;
             this.httpContextAccessor = httpContextAccessor;
-            this.userRepository = userRepository;
+            this.walletRepository = walletRepository;
         }
 
         public async Task<Result<PaginatedList<EntryResponse>>> Handle(GetEntryPaginationQuery request, CancellationToken cancellationToken)
@@ -28,7 +28,7 @@ public class GetEntryPaginationQuery : IRequest<Result<PaginatedList<EntryRespon
             GetCurrentUser getCurrentUser = new(httpContextAccessor);
             int userID = getCurrentUser.GetCurrentUserID();
 
-            var currency = await userRepository.GetUserCurrencyAsync(userID);
+            var currency = await walletRepository.GetUserCurrencyAsync(userID);
 
             var result = await budgetRepository.GetPaginatedAsync(request.Page, request.PageSize, userID, currency);
             if (result == null)

@@ -17,6 +17,4 @@ public interface IUserRepository
     Task<bool> UpdateRefreshToken(RefreshToken refreshToken);
     Task<RefreshToken> GetRefreshTokenByUserID(int userID);
     Task<bool> RevokeToken(int userID);
-    Task<CurrencyType> GetUserCurrencyAsync(int UserID);
-    Task<CurrencyType> UpdateUserCurrencyAsync(int UserID, CurrencyType currencyType);
 }

@@ -3,7 +3,6 @@ using BudgetFlow.Application.Auth;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Domain.Entities;
-using BudgetFlow.Domain.Enums;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -115,26 +114,5 @@ public class UserRepository : IUserRepository
         var userDto = mapper.Map<User>(user);
         context.Users.Update(userDto);
         return await context.SaveChangesAsync() > 0;
-    }
-
-    public async Task<CurrencyType> GetUserCurrencyAsync(int UserID)
-    {
-        var currency = await context.Users
-             .Where(u => u.ID == UserID)
-             .Select(u => u.Wallet.Currency)
-             .FirstOrDefaultAsync();
-        return currency;
-    }
-
-    public async Task<CurrencyType> UpdateUserCurrencyAsync(int UserID, CurrencyType currencyType)
-    {
-        var user = await context.Users
-            .Where(u => u.ID == UserID)
-            .Include(u => u.Wallet)
-            .FirstOrDefaultAsync();
-        if (user == null) return CurrencyType.USD;
-        user.Wallet.Currency = currencyType;
-        await context.SaveChangesAsync();
-        return currencyType;
     }
 }

@@ -11,20 +11,20 @@ public class GetLastEntriesQuery : IRequest<Result<List<LastEntryResponse>>>
     public class GetLastFiveEntriesQueryHandler : IRequestHandler<GetLastEntriesQuery, Result<List<LastEntryResponse>>>
     {
         private readonly IBudgetRepository budgetRepository;
-        private readonly IUserRepository userRepository;
+        private readonly IWalletRepository walletRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
-        public GetLastFiveEntriesQueryHandler(IBudgetRepository budgetRepository, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository)
+        public GetLastFiveEntriesQueryHandler(IBudgetRepository budgetRepository, IHttpContextAccessor httpContextAccessor, IWalletRepository walletRepository)
         {
             this.budgetRepository = budgetRepository;
             this.httpContextAccessor = httpContextAccessor;
-            this.userRepository = userRepository;
+            this.walletRepository = walletRepository;
         }
         public async Task<Result<List<LastEntryResponse>>> Handle(GetLastEntriesQuery request, CancellationToken cancellationToken)
         {
             GetCurrentUser getCurrentUser = new(httpContextAccessor);
             int userID = getCurrentUser.GetCurrentUserID();
 
-            var currency = await userRepository.GetUserCurrencyAsync(userID);
+            var currency = await walletRepository.GetUserCurrencyAsync(userID);
 
             var entries = await budgetRepository.GetLastFiveEntriesAsync(userID, currency);
             return entries != null
