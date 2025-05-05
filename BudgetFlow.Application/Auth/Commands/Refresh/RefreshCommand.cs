@@ -1,7 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Interfaces.Services;
 using BudgetFlow.Application.Common.Results;
-using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -13,6 +12,7 @@ namespace BudgetFlow.Application.Auth.Commands.Refresh
     public sealed record RefreshCommand : IRequest<Result<Response>>
     {
         public sealed record Response(string AccessToken, string RefreshToken);
+        public string RefreshToken { get; set; }
 
         public class RefreshCommandHandler(
             ITokenProvider tokenProvider,
@@ -22,36 +22,33 @@ namespace BudgetFlow.Application.Auth.Commands.Refresh
         {
             public async Task<Result<Response>> Handle(RefreshCommand request, CancellationToken cancellationToken)
             {
-                #region Get UserID
-                var UserID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
-                #endregion
+                #region Check Token Expiration
+                var encodedToken = request.RefreshToken;
+                var decodedToken = Uri.UnescapeDataString(encodedToken);
 
-                #region Check Refresh Token
-
-                var refreshToken = await userRepository.GetRefreshTokenByUserID(UserID);
-                if (refreshToken is null)
+                if (string.IsNullOrEmpty(request.RefreshToken))
                     return Result.Failure<Response>(UserErrors.InvalidRefreshToken);
-                if (refreshToken.Expiration < DateTime.UtcNow)
-                    return Result.Failure<Response>(UserErrors.RefreshTokenExpired);
 
+                var token = await userRepository.GetRefreshToken(decodedToken);
+                if (token is null)
+                    return Result.Failure<Response>(UserErrors.InvalidRefreshToken);
+                if (token.Expiration < DateTime.UtcNow)
+                    return Result.Failure<Response>(UserErrors.RefreshTokenExpired);
                 #endregion
 
-                #region Check User and Create New Tokens
-
-                var user = await userRepository.GetByIdAsync(refreshToken.UserID);
+                #region Get User By Token
+                var user = await userRepository.GetByIdAsync(token.UserID);
                 if (user is null)
                     return Result.Failure<Response>(UserErrors.UserNotFound);
-
-                var newAccessToken = tokenProvider.Create(refreshToken.User);
-                var newRefreshToken = tokenProvider.GenerateRefreshToken();
-
                 #endregion
 
-                #region Update User Tokens
+                #region Create New Tokens
+                var newAccessToken = tokenProvider.Create(token.User);
+                var newRefreshToken = tokenProvider.GenerateRefreshToken();
 
-                refreshToken.Token = newRefreshToken;
-                refreshToken.Expiration = DateTime.UtcNow.AddDays(7);
-                var result = await userRepository.UpdateRefreshToken(refreshToken);
+                token.Token = newRefreshToken;
+                token.Expiration = DateTime.UtcNow.AddDays(7);
+                var result = await userRepository.UpdateRefreshToken(token);
                 if (!result)
                     return Result.Failure<Response>(UserErrors.RefreshTokenUpdateFailed);
 
@@ -62,7 +59,13 @@ namespace BudgetFlow.Application.Auth.Commands.Refresh
                     SameSite = SameSiteMode.Strict,
                     Expires = DateTimeOffset.UtcNow.AddMinutes(configuration.GetValue<int>("Jwt:ExpirationInMinutes"))
                 });
-
+                httpContextAccessor.HttpContext.Response.Cookies.Append("RefreshToken", newRefreshToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTimeOffset.UtcNow.AddDays(7)
+                });
                 #endregion
 
                 return Result.Success(new Response(newAccessToken, newRefreshToken));

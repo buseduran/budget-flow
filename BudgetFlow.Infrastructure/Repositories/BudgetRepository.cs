@@ -226,4 +226,21 @@ public class BudgetRepository : IBudgetRepository
         return await context.Entries
             .AnyAsync(e => e.CategoryID == CategoryID);
     }
+
+    public async Task<EntryResponse> GetEntryByIdAsync(int ID)
+    {
+        var entry = await context.Entries
+            .Include(e => e.Category)
+            .Where(e => e.ID == ID)
+            .Select(e => new EntryResponse
+            {
+                Amount = e.Amount,
+                Category = new CategoryResponse
+                {
+                    Type = e.Category.Type
+                }
+            })
+            .FirstOrDefaultAsync();
+        return entry;
+    }
 }

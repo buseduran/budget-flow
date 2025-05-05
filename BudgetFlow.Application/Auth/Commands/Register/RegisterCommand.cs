@@ -41,24 +41,8 @@ public class RegisterCommand : IRequest<Result<bool>>
                 PasswordHash = passwordHasher.Hash(request.User.Password)
             };
             var userID = await userRepository.CreateAsync(user);
-            if (userID != 0)
-            {
-                Wallet wallet = new Wallet()
-                {
-                    Balance = 0,
-                    UserId = userID,
-                    Currency = CurrencyType.TRY // default currency is TRY
-                };
-                var result = await walletRepository.CreateWalletAsync(wallet);
-                if (!result)
-                {
-                    return Result.Failure<bool>(WalletErrors.CreationFailed);
-                }
-            }
-            else
-            {
+            if (userID is 0)
                 return Result.Failure<bool>(UserErrors.CreationFailed);
-            }
 
             return Result.Success(true);
         }

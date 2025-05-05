@@ -2,5 +2,6 @@
 public enum EntryType
 {
     Income = 0,
-    Expense = 1
+    Expense = 1,
+    OpeningBalance = 2,
 }

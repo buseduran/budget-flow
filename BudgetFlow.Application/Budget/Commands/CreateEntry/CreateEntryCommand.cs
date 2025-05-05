@@ -36,6 +36,8 @@ public class CreateEntryCommand : IRequest<Result<bool>>
             mappedEntry.UserID = userID;
 
             var category = await categoryRepository.GetCategoryByIdAsync(mappedEntry.CategoryID);
+            if(category is null)
+                return Result.Failure<bool>(CategoryErrors.CategoryNotFound);
 
             //check wallet if the balance is enough
             var wallet = await walletRepository.GetWalletAsync(userID);

@@ -7,5 +7,6 @@ public static class WalletErrors
     public static Error UpdateFailed => new("Cüzdan bakiyesi güncellenemedi.");
     public static Error InsufficientBalance => new("Cüzdan bakiyesi yetersiz.");
     public static Error NoBalanceForAsset => new("Bu varlık için bakiye bulunmamaktadır.");
+    public static Error InvalidOpeningBalance => new("Açılış bakiyesi 0'dan büyük olmalı.");
 
 }

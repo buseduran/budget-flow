@@ -3,10 +3,7 @@ using BudgetFlow.Application.Auth.Commands.Logout;
 using BudgetFlow.Application.Auth.Commands.Refresh;
 using BudgetFlow.Application.Auth.Commands.Register;
 using BudgetFlow.Application.Auth.Commands.UpdateAccount;
-using BudgetFlow.Application.Auth.Commands.UpdateUserCurrency;
-using BudgetFlow.Application.Auth.Queries.GetUserCurrency;
 using BudgetFlow.Application.Common.Extensions;
-using BudgetFlow.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -63,9 +60,9 @@ public class AuthController : ControllerBase
     [HttpPost("Refresh")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
-    public async Task<IResult> RefreshAsync()
+    public async Task<IResult> RefreshAsync([FromBody] RefreshCommand refreshCommand)
     {
-        var result = await mediator.Send(new RefreshCommand());
+        var result = await mediator.Send(refreshCommand);
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();
@@ -103,38 +100,5 @@ public class AuthController : ControllerBase
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();
-    }
-
-    /// <summary>
-    /// Get user currency
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("Currency")]
-    [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CurrencyType))]
-    [Authorize]
-    public async Task<IResult> GetUserCurrencyAsync()
-    {
-        var result = await mediator.Send(new GetUserCurrencyQuery());
-        return result.IsSuccess
-            ? Results.Ok(result.Value)
-            : result.ToProblemDetails();
-    }
-
-    /// <summary>
-    /// User currency update
-    /// </summary>
-    /// <param name="updateUserCurrencyCommand"></param>
-    /// <returns></returns>
-    [HttpPut("Currency")]
-    [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
-    [Authorize]
-    public async Task<IResult> UpdateCurrencyAsync([FromBody] UpdateUserCurrencyCommand updateUserCurrencyCommand)
-    {
-        var result = await mediator.Send(updateUserCurrencyCommand);
-        return result.IsSuccess
-        ? Results.Ok(result.Value)
-        : result.ToProblemDetails();
     }
 }

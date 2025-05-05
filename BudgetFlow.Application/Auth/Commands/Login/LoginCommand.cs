@@ -70,6 +70,13 @@ public sealed record LoginCommand(string Email, string Password) : IRequest<Resu
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddMinutes(configuration.GetValue<int>("Jwt:ExpirationInMinutes"))
             });
+            httpContextAccessor.HttpContext.Response.Cookies.Append("RefreshToken", refreshToken.Token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddDays(7)
+            });
 
             return Result.Success(new Response(accessToken, refreshToken.Token));
         }
