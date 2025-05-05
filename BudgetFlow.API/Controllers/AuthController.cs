@@ -60,9 +60,9 @@ public class AuthController : ControllerBase
     [HttpPost("Refresh")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
-    public async Task<IResult> RefreshAsync()
+    public async Task<IResult> RefreshAsync([FromBody] RefreshCommand refreshCommand)
     {
-        var result = await mediator.Send(new RefreshCommand());
+        var result = await mediator.Send(refreshCommand);
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();
