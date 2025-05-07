@@ -1,16 +1,37 @@
-﻿using BudgetFlow.Application.Common.Models;
-using BudgetFlow.Domain.Entities;
+﻿using BudgetFlow.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using BudgetFlow.Infrastructure.Persistence.Interceptors;
+using System.Reflection;
+using BudgetFlow.Application.Common.Models;
 
 namespace BudgetFlow.Infrastructure.Contexts;
-public class BudgetContext(IConfiguration configuration) : DbContext
+
+public class BudgetContext : DbContext
 {
-    private readonly string connectionString = configuration.GetConnectionString("DbConnection");
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql(connectionString);
+    private readonly IConfiguration configuration;
+    private readonly AuditInterceptor auditInterceptor;
+
+    public BudgetContext(DbContextOptions<BudgetContext> options, IConfiguration configuration, AuditInterceptor auditInterceptor)
+        : base(options)
+    {
+        this.configuration = configuration;
+        this.auditInterceptor = auditInterceptor;
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            var connectionString = configuration.GetConnectionString("DbConnection");
+            optionsBuilder.UseNpgsql(connectionString);
+        }
+
+        optionsBuilder.AddInterceptors(auditInterceptor);
+    }
 
     public DbSet<User> Users { get; set; }
-    public DbSet<Log> Logs { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Entry> Entries { get; set; }
     public DbSet<Category> Categories { get; set; }
@@ -22,11 +43,16 @@ public class BudgetContext(IConfiguration configuration) : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
         modelBuilder.Entity<User>()
-            .HasIndex(User => User.Email)
+            .HasIndex(x => x.Email)
             .IsUnique();
+
         modelBuilder.Entity<Portfolio>()
-            .HasIndex(Portfolio => Portfolio.Name)
+            .HasIndex(x => x.Name)
             .IsUnique();
+
+        base.OnModelCreating(modelBuilder);
     }
 }

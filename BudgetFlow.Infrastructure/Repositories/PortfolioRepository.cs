@@ -31,9 +31,12 @@ public class PortfolioRepository : IPortfolioRepository
     }
     public async Task<bool> DeletePortfolioAsync(int ID)
     {
-        return await context.Portfolios
-                .Where(e => e.ID == ID)
-                .ExecuteDeleteAsync() > 0;
+        var portfolio = await context.Portfolios.FindAsync(ID);
+        if (portfolio is null) return false;
+
+        context.Portfolios.Remove(portfolio);
+        await context.SaveChangesAsync();
+        return true;
     }
 
     public async Task<bool> UpdatePortfolioAsync(int ID, PortfolioDto Portfolio)
