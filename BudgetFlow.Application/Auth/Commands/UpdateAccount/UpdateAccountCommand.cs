@@ -27,7 +27,7 @@ public class UpdateAccountCommand : IRequest<Result<bool>>
             bool result;
             if (String.IsNullOrWhiteSpace(request.Password))
             {
-                result = await userRepository.UpdateWithoutPassword(request.Name, request.OldEmail, request.Email);
+                result = await userRepository.UpdateWithoutPasswordAsync(request.Name, request.OldEmail, request.Email);
                 return result
                      ? Result.Success(true)
                      : Result.Failure<bool>(UserErrors.UpdateFailed);

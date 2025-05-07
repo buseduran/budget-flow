@@ -1,7 +1,8 @@
-using BudgetFlow.API.Middlewares;
+﻿using BudgetFlow.API.Middlewares;
 using BudgetFlow.Application;
 using BudgetFlow.Infrastructure;
 using BudgetFlow.Infrastructure.Contexts;
+using BudgetFlow.Infrastructure.Persistence.Interceptors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -13,19 +14,24 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Serilog
 builder.Host.UseSerilog((context, loggerConfig) =>
 {
     loggerConfig.ReadFrom.Configuration(context.Configuration);
 });
 
+// Controllers
 builder.Services.AddControllers();
 
-builder.Services.AddInfrastructure();
+// App + Infra
 builder.Services.AddApplication();
+builder.Services.AddInfrastructure();
 
+// Middlewares
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+// 🔐 JWT Authentication
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -59,7 +65,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-
+// 🧩 Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o =>
 {
@@ -94,8 +100,16 @@ builder.Services.AddSwaggerGen(o =>
     o.AddSecurityRequirement(securityRequirements);
 });
 
-builder.Services.AddEntityFrameworkNpgsql().AddDbContext<BudgetContext>();
+// 🔌 BudgetContext DI + Configurable Npgsql
+builder.Services.AddDbContext<BudgetContext>((sp, options) =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
 
+    var connectionString = configuration.GetConnectionString("DbConnection");
+    options.UseNpgsql(connectionString);
+});
+
+// 🌐 CORS
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy => policy
@@ -104,8 +118,13 @@ builder.Services.AddCors(options =>
                     .AllowAnyHeader());
 });
 
+// ============================
+// 🛠️ APP BUILD & PIPELINE
+// ============================
+
 var app = builder.Build();
 
+// 🔃 Auto Migration
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -113,25 +132,17 @@ using (var scope = app.Services.CreateScope())
     context.Database.Migrate();
 }
 
-// Configure the HTTP request pipeline.
+// Dev Tools
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
-
-//app.UseHttpsRedirection();
-if (app.Environment.IsDevelopment())
-{
     app.UseHttpsRedirection();
 }
 
 app.UseExceptionHandler();
-
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

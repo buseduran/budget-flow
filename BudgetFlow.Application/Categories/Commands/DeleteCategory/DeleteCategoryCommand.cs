@@ -27,7 +27,7 @@ public class DeleteCategoryCommand : IRequest<Result<bool>>
 
             #region Check if there is an existing entry 
 
-            var budget = await budgetRepository.CheckEntryByCategory(request.ID);
+            var budget = await budgetRepository.CheckEntryByCategoryAsync(request.ID);
             if (budget)
                 return Result.Failure<bool>(CategoryErrors.CannotDeleteCategoryWithEntries);
 

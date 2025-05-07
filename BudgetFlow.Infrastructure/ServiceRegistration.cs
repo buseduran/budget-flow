@@ -1,4 +1,5 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Infrastructure.Persistence.Interceptors;
 using BudgetFlow.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,5 +17,8 @@ public static class ServiceRegistration
         services.AddScoped<IInvestmentRepository, InvestmentRepository>();
         services.AddScoped<IPortfolioRepository, PortfolioRepository>();
         services.AddScoped<IWalletRepository, WalletRepository>();
+
+        //AuditInterceptor kaydı
+        services.AddScoped<AuditInterceptor>();
     }
 }

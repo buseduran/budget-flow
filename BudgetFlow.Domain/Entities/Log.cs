@@ -1,11 +1,13 @@
-﻿using BudgetFlow.Domain.Common;
+﻿namespace BudgetFlow.Domain.Entities;
 
-namespace BudgetFlow.Domain.Entities;
-public class Log : BaseEntity
+public class AuditLog
 {
-    public string Action { get; set; }
-    public DateTime TimeStamp { get; set; }
-
-    public int UserID { get; set; }
-    public User User { get; set; }
+    public int ID { get; set; }
+    public string TableName { get; set; }
+    public string Action { get; set; } // Insert, Update, Delete
+    public string PrimaryKey { get; set; }
+    public string OldValues { get; set; }
+    public string NewValues { get; set; }
+    public int UserID { get; set; } 
+    public DateTime Timestamp { get; set; }
 }

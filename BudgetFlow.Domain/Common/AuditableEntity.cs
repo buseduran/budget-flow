@@ -1,10 +1,9 @@
-﻿
-namespace BudgetFlow.Domain.Common;
+﻿namespace BudgetFlow.Domain.Common;
 
-public class AuditableEntity : IAuditableEntity
+public abstract class AuditableEntity : IAuditableEntity
 {
-    DateTime IAuditableEntity.CreatedAt { get; set; }
-    string IAuditableEntity.CreatedBy { get; set; }
-    DateTime IAuditableEntity.UpdatedAt { get; set; }
-    string IAuditableEntity.UpdatedBy { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public int CreatedBy { get; set; }
+    public DateTime UpdatedAt { get; set; }
+    public int UpdatedBy { get; set; }
 }

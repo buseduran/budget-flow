@@ -2,8 +2,9 @@
 using BudgetFlow.Application.Categories.Commands.CreateCategory;
 using BudgetFlow.Application.Categories.Commands.DeleteCategory;
 using BudgetFlow.Application.Categories.Commands.UpdateCategory;
-using BudgetFlow.Application.Categories.Queries.GetCategories;
+using BudgetFlow.Application.Categories.Queries.GetCategoryPagination;
 using BudgetFlow.Application.Common.Extensions;
+using BudgetFlow.Application.Common.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -43,10 +44,10 @@ public class CategoryController : ControllerBase
     /// <returns></returns>
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<CategoryResponse>))]
-    public async Task<IResult> GetCategoriesAsync()
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<CategoryResponse>))]
+    public async Task<IResult> GetCategoriesAsync([FromQuery] GetCategoryPaginationQuery getCategoryPaginationQuery)
     {
-        var result = await mediator.Send(new GetCategoriesQuery());
+        var result = await mediator.Send(getCategoryPaginationQuery);
         return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();

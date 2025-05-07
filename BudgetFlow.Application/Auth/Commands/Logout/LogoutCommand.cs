@@ -33,7 +33,7 @@ public class LogoutCommand : IRequest<Result<bool>>
             if (userID == 0)
                 return Result.Failure<bool>(UserErrors.UserNotFound);
 
-            var revokeResult = await userRepository.RevokeToken(userID);
+            var revokeResult = await userRepository.RevokeTokenAsync(userID);
             if (!revokeResult)
                 return Result.Failure<bool>(UserErrors.LogoutFailed);
 

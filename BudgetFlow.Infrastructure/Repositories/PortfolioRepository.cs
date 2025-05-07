@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Application.Portfolios;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure.Contexts;
@@ -30,9 +31,12 @@ public class PortfolioRepository : IPortfolioRepository
     }
     public async Task<bool> DeletePortfolioAsync(int ID)
     {
-        return await context.Portfolios
-                .Where(e => e.ID == ID)
-                .ExecuteDeleteAsync() > 0;
+        var portfolio = await context.Portfolios.FindAsync(ID);
+        if (portfolio is null) return false;
+
+        context.Portfolios.Remove(portfolio);
+        await context.SaveChangesAsync();
+        return true;
     }
 
     public async Task<bool> UpdatePortfolioAsync(int ID, PortfolioDto Portfolio)
@@ -48,7 +52,7 @@ public class PortfolioRepository : IPortfolioRepository
         return await context.SaveChangesAsync() > 0;
     }
 
-    public async Task<List<PortfolioResponse>> GetPortfoliosAsync(int userID)
+    public async Task<PaginatedList<PortfolioResponse>> GetPortfoliosAsync(int Page, int PageSize, int userID)
     {
         var userAssets = await context.UserAssets
             .Where(u => u.UserId == userID)
@@ -61,30 +65,34 @@ public class PortfolioRepository : IPortfolioRepository
             .OrderByDescending(p => p.UpdatedAt)
             .ToListAsync();
 
-        var result = portfolios.Select(p =>
-        {
-            var portfolioAssetIds = p.Investments
-                .Select(i => i.AssetId)
-                .Distinct()
-                .ToList();
-
-            var matchingUserAssets = userAssets
-                .Where(ua => portfolioAssetIds.Contains(ua.AssetId))
-                .ToList();
-
-            var totalInvested = matchingUserAssets
-                .Sum(ua => ua.Balance);
-
-            return new PortfolioResponse
+        var result = portfolios
+            .Skip((Page - 1) * PageSize)
+            .Take(PageSize)
+            .Select(p =>
             {
-                ID = p.ID,
-                Name = p.Name,
-                Description = p.Description,
-                TotalInvested = totalInvested,
-            };
-        }).ToList();
+                var portfolioAssetIds = p.Investments
+                    .Select(i => i.AssetId)
+                    .Distinct()
+                    .ToList();
 
-        return result;
+                var matchingUserAssets = userAssets
+                    .Where(ua => portfolioAssetIds.Contains(ua.AssetId))
+                    .ToList();
+
+                var totalInvested = matchingUserAssets
+                    .Sum(ua => ua.Balance);
+
+                return new PortfolioResponse
+                {
+                    ID = p.ID,
+                    Name = p.Name,
+                    Description = p.Description,
+                    TotalInvested = totalInvested,
+                };
+            }).ToList();
+        var count = await context.Portfolios.CountAsync(p => p.UserID == userID);
+
+        return new PaginatedList<PortfolioResponse>(result, count, Page, PageSize);
     }
 
     public async Task<PortfolioResponse> GetPortfolioAsync(string Name)

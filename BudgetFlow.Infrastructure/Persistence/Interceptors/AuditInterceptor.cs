@@ -1,31 +1,95 @@
-﻿using Microsoft.EntityFrameworkCore.Diagnostics;
+﻿using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Domain.Common;
+using BudgetFlow.Domain.Entities;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using System.Text.Json;
 
 namespace BudgetFlow.Infrastructure.Persistence.Interceptors;
 
-public class AuditInterceptor:SaveChangesInterceptor
+public class AuditInterceptor : SaveChangesInterceptor
 {
-   //public override async Task<int> SaveChangesAsync(
-   //    SaveChangesEventData eventData,
-   //    CancellationToken cancellationToken = default)
-   // {
-   //     var entries = eventData.Context.ChangeTracker.Entries()
-   //         .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
-   //     foreach (var entry in entries)
-   //     {
-   //         if (entry.Entity is IAuditableEntity auditableEntity)
-   //         {
-   //             if (entry.State == EntityState.Added)
-   //             {
-   //                 auditableEntity.CreatedAt = DateTime.UtcNow;
-   //             }
-   //             else
-   //             {
-   //                 entry.Property(nameof(IAuditableEntity.CreatedAt)).IsModified = false;
-   //             }
-   //             auditableEntity.UpdatedAt = DateTime.UtcNow;
-   //         }
-   //     }
-   //     return await base.SavedChangesAsync(eventData, cancellationToken);
-   // }
-}
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly List<(EntityEntry Entry, AuditLog Log, EntityState OriginalState)> _pendingLogs = new();
 
+    public AuditInterceptor(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
+        DbContextEventData eventData,
+        InterceptionResult<int> result,
+        CancellationToken cancellationToken = default)
+    {
+        var context = eventData.Context;
+        if (context == null) return base.SavingChangesAsync(eventData, result, cancellationToken);
+
+        var userID = new GetCurrentUser(_httpContextAccessor).GetCurrentUserID();
+
+        _pendingLogs.Clear();
+
+        var entries = context.ChangeTracker.Entries()
+            .Where(e =>
+                e.Entity is IAuditableEntity &&
+                e.Entity is not AuditLog &&
+                (e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted));
+
+        foreach (var entry in entries)
+        {
+            var auditLog = new AuditLog
+            {
+                TableName = entry.Entity.GetType().Name,
+                Action = entry.State.ToString(),
+                UserID = userID,
+                Timestamp = DateTime.UtcNow,
+                OldValues = null,
+                NewValues = null
+            };
+
+            _pendingLogs.Add((entry, auditLog, entry.State));
+        }
+
+        return base.SavingChangesAsync(eventData, result, cancellationToken);
+    }
+
+    public override async ValueTask<int> SavedChangesAsync(
+        SaveChangesCompletedEventData eventData,
+        int result,
+        CancellationToken cancellationToken = default)
+    {
+        var context = eventData.Context;
+        if (context == null || !_pendingLogs.Any()) return await base.SavedChangesAsync(eventData, result, cancellationToken);
+
+        foreach (var (entry, log, originalState) in _pendingLogs)
+        {
+            var pk = entry.Properties.FirstOrDefault(p => p.Metadata.IsPrimaryKey())?.CurrentValue;
+            log.PrimaryKey = pk?.ToString() ?? "";
+
+            if (originalState != EntityState.Deleted)
+            {
+                log.NewValues = SerializeProperties(entry.CurrentValues.Properties, entry.CurrentValues);
+            }
+
+            if (originalState != EntityState.Added)
+            {
+                log.OldValues = SerializeProperties(entry.OriginalValues.Properties, entry.OriginalValues);
+            }
+        }
+
+        context.Set<AuditLog>().AddRange(_pendingLogs.Select(x => x.Log));
+        await context.SaveChangesAsync(cancellationToken); 
+
+        _pendingLogs.Clear();
+
+        return await base.SavedChangesAsync(eventData, result, cancellationToken);
+    }
+
+    private static string SerializeProperties(IEnumerable<Microsoft.EntityFrameworkCore.Metadata.IProperty> props, PropertyValues values)
+    {
+        var dict = props.ToDictionary(p => p.Name, p => values[p.Name]);
+        return JsonSerializer.Serialize(dict);
+    }
+}

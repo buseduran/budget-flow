@@ -3,10 +3,10 @@ using BudgetFlow.Application.Assets.Commands.CreateAsset;
 using BudgetFlow.Application.Assets.Commands.DeleteAsset;
 using BudgetFlow.Application.Assets.Commands.SyncAsset;
 using BudgetFlow.Application.Assets.Commands.UpdateAsset;
+using BudgetFlow.Application.Assets.Queries.GetAssetPagination;
 using BudgetFlow.Application.Assets.Queries.GetAssetRate;
-using BudgetFlow.Application.Assets.Queries.GetAssets;
 using BudgetFlow.Application.Common.Extensions;
-using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Application.Common.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +25,7 @@ public class AssetController : ControllerBase
     }
 
     /// <summary>
-    /// Creates an Asset. 
+    /// Create an Asset. 
     /// </summary>
     /// <param name="createAssetCommand"></param>
     /// <returns></returns>
@@ -42,7 +42,7 @@ public class AssetController : ControllerBase
     }
 
     /// <summary>
-    /// Updates an Asset. 
+    /// Update an Asset. 
     /// </summary>
     /// <param name="updateAssetCommand"></param>
     /// <returns></returns>
@@ -59,7 +59,7 @@ public class AssetController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes an Asset. 
+    /// Delete an Asset. 
     /// </summary>
     /// <param name="ID"></param>
     /// <returns></returns>
@@ -75,22 +75,22 @@ public class AssetController : ControllerBase
     }
 
     /// <summary>
-    /// Gets All Assets. 
+    /// Get Paginated Assets. 
     /// </summary>
     /// <returns></returns>
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AssetResponse>))]
-    public async Task<IResult> GetAssetsPaginationAsync()
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<AssetResponse>))]
+    public async Task<IResult> GetAssetsPaginationAsync([FromQuery] GetAssetPaginationQuery getAssetPaginationQuery)
     {
-        var result = await mediator.Send(new GetAssetsQuery());
+        var result = await mediator.Send(getAssetPaginationQuery);
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();
     }
 
     /// <summary>
-    /// Gets Asset Rate. 
+    /// Get Asset Rate. 
     /// </summary>
     /// <returns></returns>
     [HttpGet("Rate/{ID}")]
@@ -105,7 +105,7 @@ public class AssetController : ControllerBase
     }
 
     /// <summary>
-    /// Creates an Asset. 
+    /// Create an Asset. 
     /// </summary>
     /// <param name="createAssetCommand"></param>
     /// <returns></returns>

@@ -1,5 +1,5 @@
 ﻿namespace BudgetFlow.Domain.Common;
-public class BaseEntity
+public class BaseEntity:IAuditableEntity
 {
     public int ID { get; set; }
     public DateTime CreatedAt { get; set; }
