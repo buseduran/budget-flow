@@ -32,18 +32,26 @@ public class CreateEntryCommand : IRequest<Result<bool>>
         public async Task<Result<bool>> Handle(CreateEntryCommand request, CancellationToken cancellationToken)
         {
             var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
+
+            #region Check user has a wallet
+            var wallet = await walletRepository.GetWalletAsync(userID);
+            if (wallet is null)
+                return Result.Failure<bool>(WalletErrors.WalletNotFound);
+            #endregion
+
             var mappedEntry = mapper.Map<Entry>(request.Entry);
             mappedEntry.UserID = userID;
 
             var category = await categoryRepository.GetCategoryByIdAsync(mappedEntry.CategoryID);
-            if(category is null)
+            if (category is null)
                 return Result.Failure<bool>(CategoryErrors.CategoryNotFound);
 
-            //check wallet if the balance is enough
-            var wallet = await walletRepository.GetWalletAsync(userID);
+            #region Check user's wallet balance is enough
             if ((category.Type == EntryType.Expense) && (wallet.Balance < Math.Abs(mappedEntry.Amount)))
                 return Result.Failure<bool>(WalletErrors.InsufficientBalance);
+            #endregion
 
+            #region Create entry and Update wallet
             var entryResult = await budgetRepository.CreateEntryAsync(mappedEntry);
             if (!entryResult)
                 return Result.Failure<bool>(EntryErrors.CreationFailed);
@@ -56,6 +64,7 @@ public class CreateEntryCommand : IRequest<Result<bool>>
             var result = await walletRepository.UpdateWalletAsync(mappedEntry.UserID, mappedEntry.Amount);
             if (!result)
                 return Result.Failure<bool>(WalletErrors.UpdateFailed);
+            #endregion
 
             return Result.Success(true);
         }
