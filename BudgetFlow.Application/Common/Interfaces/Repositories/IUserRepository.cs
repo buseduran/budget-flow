@@ -10,11 +10,11 @@ public interface IUserRepository
     Task<UserResponse> GetByIdAsync(int ID);
     Task<UserResponse> GetByEmailAsync(string email);
     Task<bool> UpdateAsync(string Name, string OldEmail, string Email, string PasswordHash);
-    Task<bool> UpdateWithoutPassword(string Name, string OldEmail, string Email);
+    Task<bool> UpdateWithoutPasswordAsync(string Name, string OldEmail, string Email);
     Task<bool> DeleteAsync(int ID);
-    Task<bool> CreateRefreshToken(RefreshToken refreshToken);
-    Task<RefreshToken> GetRefreshToken(string token);
-    Task<bool> UpdateRefreshToken(RefreshToken refreshToken);
-    Task<RefreshToken> GetRefreshTokenByUserID(int userID);
-    Task<bool> RevokeToken(int userID);
+    Task<bool> CreateRefreshTokenAsync(RefreshToken refreshToken);
+    Task<RefreshToken> GetRefreshTokenAsync(string token);
+    Task<bool> UpdateRefreshTokenAsync(RefreshToken refreshToken);
+    Task<RefreshToken> GetRefreshTokenByUserIDAsync(int userID);
+    Task<bool> RevokeTokenAsync(int userID);
 }

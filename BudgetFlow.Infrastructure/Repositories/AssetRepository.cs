@@ -38,9 +38,12 @@ public class AssetRepository : IAssetRepository
     }
     public async Task<bool> DeleteAssetAsync(int ID)
     {
-        return await context.Assets
-                .Where(e => e.ID == ID)
-                .ExecuteDeleteAsync() > 0;
+        var asset = await context.Assets.FindAsync(ID);
+        if (asset is null) return false;
+
+        context.Assets.Remove(asset);
+        await context.SaveChangesAsync();
+        return true;
     }
 
     public async Task<PaginatedList<AssetResponse>> GetAssetsAsync(int Page, int PageSize)

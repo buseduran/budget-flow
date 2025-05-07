@@ -63,31 +63,31 @@ public class UserRepository : IUserRepository
         context.Users.Update(userDto);
         return await context.SaveChangesAsync() > 0;
     }
-    public async Task<bool> CreateRefreshToken(RefreshToken refreshToken)
+    public async Task<bool> CreateRefreshTokenAsync(RefreshToken refreshToken)
     {
         context.RefreshTokens.Add(refreshToken);
         return await context.SaveChangesAsync() > 0;
     }
-    public async Task<RefreshToken> GetRefreshToken(string token)
+    public async Task<RefreshToken> GetRefreshTokenAsync(string token)
     {
         RefreshToken refreshToken = await context.RefreshTokens
             .Include(t => t.User)
             .FirstOrDefaultAsync(t => t.Token == token);
         return refreshToken;
     }
-    public async Task<bool> UpdateRefreshToken(RefreshToken refreshToken)
+    public async Task<bool> UpdateRefreshTokenAsync(RefreshToken refreshToken)
     {
         context.RefreshTokens.Update(refreshToken);
         return await context.SaveChangesAsync() > 0;
     }
-    public async Task<RefreshToken> GetRefreshTokenByUserID(int userID)
+    public async Task<RefreshToken> GetRefreshTokenByUserIDAsync(int userID)
     {
         RefreshToken refreshToken = await context.RefreshTokens
             .Include(t => t.User)
             .FirstOrDefaultAsync(t => t.UserID == userID);
         return refreshToken;
     }
-    public async Task<bool> RevokeToken(int userID)
+    public async Task<bool> RevokeTokenAsync(int userID)
     {
         var count = await context.RefreshTokens
                             .Where(t => t.UserID == userID)
@@ -101,8 +101,7 @@ public class UserRepository : IUserRepository
                    .ExecuteDeleteAsync();
         return true;
     }
-
-    public async Task<bool> UpdateWithoutPassword(string Name, string OldEmail, string Email)
+    public async Task<bool> UpdateWithoutPasswordAsync(string Name, string OldEmail, string Email)
     {
         var user = await context.Users
             .Where(u => u.Email == OldEmail).FirstOrDefaultAsync();

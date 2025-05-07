@@ -13,6 +13,6 @@ public interface IBudgetRepository
     Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID, CurrencyType currencyType);
     Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(int userID, string Range, CurrencyType currencyType);
     Task<List<LastEntryResponse>> GetLastFiveEntriesAsync(int userID, CurrencyType currencyType);
-    Task<bool> CheckEntryByCategory(int CategoryID);
+    Task<bool> CheckEntryByCategoryAsync(int CategoryID);
     Task<EntryResponse> GetEntryByIdAsync(int ID);
 }

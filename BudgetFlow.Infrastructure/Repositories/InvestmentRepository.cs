@@ -29,9 +29,12 @@ public class InvestmentRepository : IInvestmentRepository
 
     public async Task<bool> DeleteInvestmentAsync(int ID)
     {
-        return await context.Investments
-              .Where(e => e.ID == ID)
-              .ExecuteDeleteAsync() > 0;
+        var investment = await context.Investments.FindAsync(ID);
+        if (investment is null) return false;
+
+        context.Investments.Remove(investment);
+        await context.SaveChangesAsync();
+        return true;
     }
 
     public async Task<bool> UpdateInvestmentAsync(int ID, InvestmentDto Investment)

@@ -29,10 +29,10 @@ public sealed record LoginCommand(string Email, string Password) : IRequest<Resu
             if (!passwordHasher.Verify(request.Password, user.PasswordHash))
                 return Result.Failure<Response>(UserErrors.InvalidPassword);
 
-            var refreshToken = await userRepository.GetRefreshTokenByUserID(user.ID);
+            var refreshToken = await userRepository.GetRefreshTokenByUserIDAsync(user.ID);
             if (refreshToken is not null)
             {
-                var revokeResult = await userRepository.RevokeToken(user.ID);
+                var revokeResult = await userRepository.RevokeTokenAsync(user.ID);
 
                 if (!revokeResult)
                     return Result.Failure<Response>(UserErrors.RefreshTokenRevokeFailed);
@@ -43,7 +43,7 @@ public sealed record LoginCommand(string Email, string Password) : IRequest<Resu
                 refreshToken.ID = Guid.NewGuid();
                 refreshToken.Token = tokenProvider.GenerateRefreshToken();
                 refreshToken.Expiration = DateTime.UtcNow.AddDays(7);
-                await userRepository.CreateRefreshToken(refreshToken);
+                await userRepository.CreateRefreshTokenAsync(refreshToken);
                 #endregion
             }
             else
@@ -58,7 +58,7 @@ public sealed record LoginCommand(string Email, string Password) : IRequest<Resu
                     UserID = userDto.ID,
                     Expiration = DateTime.UtcNow.AddDays(7)
                 };
-                var refreshTokenResult = await userRepository.CreateRefreshToken(refreshToken);
+                var refreshTokenResult = await userRepository.CreateRefreshTokenAsync(refreshToken);
                 if (!refreshTokenResult)
                     return Result.Failure<Response>(UserErrors.RefreshTokenCreationFailed);
                 #endregion

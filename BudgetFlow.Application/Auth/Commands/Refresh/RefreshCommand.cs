@@ -29,7 +29,7 @@ namespace BudgetFlow.Application.Auth.Commands.Refresh
                 if (string.IsNullOrEmpty(request.RefreshToken))
                     return Result.Failure<Response>(UserErrors.InvalidRefreshToken);
 
-                var token = await userRepository.GetRefreshToken(decodedToken);
+                var token = await userRepository.GetRefreshTokenAsync(decodedToken);
                 if (token is null)
                     return Result.Failure<Response>(UserErrors.InvalidRefreshToken);
                 if (token.Expiration < DateTime.UtcNow)
@@ -48,7 +48,7 @@ namespace BudgetFlow.Application.Auth.Commands.Refresh
 
                 token.Token = newRefreshToken;
                 token.Expiration = DateTime.UtcNow.AddDays(7);
-                var result = await userRepository.UpdateRefreshToken(token);
+                var result = await userRepository.UpdateRefreshTokenAsync(token);
                 if (!result)
                     return Result.Failure<Response>(UserErrors.RefreshTokenUpdateFailed);
 

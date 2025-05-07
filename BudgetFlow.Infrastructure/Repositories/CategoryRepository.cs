@@ -55,9 +55,12 @@ public class CategoryRepository : ICategoryRepository
 
     public async Task<bool> DeleteCategoryAsync(int ID)
     {
-        return await context.Categories
-                .Where(e => e.ID == ID)
-                .ExecuteDeleteAsync() > 0;
+        var category = await context.Categories.FindAsync(ID);
+        if (category is null) return false;
+
+        context.Categories.Remove(category);
+        await context.SaveChangesAsync();
+        return true;
     }
 
     public async Task<CategoryResponse> GetCategoryByIdAsync(int ID)

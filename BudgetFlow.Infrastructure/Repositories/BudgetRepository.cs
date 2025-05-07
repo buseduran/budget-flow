@@ -42,9 +42,12 @@ public class BudgetRepository : IBudgetRepository
 
     public async Task<bool> DeleteEntryAsync(int ID)
     {
-        return await context.Entries
-                .Where(e => e.ID == ID)
-                .ExecuteDeleteAsync() > 0;
+        var entry = await context.Entries.FindAsync(ID);
+        if (entry is null) return false;
+
+        context.Entries.Remove(entry);
+        await context.SaveChangesAsync();
+        return true;
     }
     public async Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID, CurrencyType currencyType)
     {
@@ -221,7 +224,7 @@ public class BudgetRepository : IBudgetRepository
         return entries;
     }
 
-    public async Task<bool> CheckEntryByCategory(int CategoryID)
+    public async Task<bool> CheckEntryByCategoryAsync(int CategoryID)
     {
         return await context.Entries
             .AnyAsync(e => e.CategoryID == CategoryID);
