@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Categories;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -23,10 +24,12 @@ public class CategoryRepository : ICategoryRepository
         return Category.ID;
     }
 
-    public async Task<IEnumerable<CategoryResponse>> GetCategoriesAsync()
+    public async Task<PaginatedList<CategoryResponse>> GetCategoriesAsync(int Page, int PageSize)
     {
-        return await context.Categories
+        var categories = await context.Categories
             .OrderByDescending(c => c.CreatedAt)
+            .Skip((Page - 1) * PageSize)
+            .Take(PageSize)
             .Select(c => new CategoryResponse
             {
                 ID = c.ID,
@@ -35,6 +38,8 @@ public class CategoryRepository : ICategoryRepository
                 Type = c.Type
             })
             .ToListAsync();
+        var count = await context.Categories.CountAsync();
+        return new PaginatedList<CategoryResponse>(categories, count, Page, PageSize);
     }
 
     public async Task<bool> UpdateCategoryAsync(int ID, string Color)

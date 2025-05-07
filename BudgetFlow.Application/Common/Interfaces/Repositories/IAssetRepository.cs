@@ -1,4 +1,5 @@
 ﻿using BudgetFlow.Application.Assets;
+using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Entities;
 
@@ -8,7 +9,7 @@ public interface IAssetRepository
     Task<bool> CreateAssetAsync(Asset Asset);
     Task<bool> UpdateAssetAsync(Asset Asset);
     Task<bool> DeleteAssetAsync(int ID);
-    Task<List<AssetResponse>> GetAssetsAsync();
+    Task<PaginatedList<AssetResponse>> GetAssetsAsync(int Page, int PageSize);
     Task<AssetResponse> GetAssetAsync(int ID);
     Task<AssetRateResponse> GetAssetRateAsync(int ID);
     Task<UserAssetResponse> GetUserAssetAsync(int UserID, int AssetID);

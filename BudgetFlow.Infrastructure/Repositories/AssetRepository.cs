@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BudgetFlow.Application.Assets;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure.Contexts;
@@ -42,15 +43,28 @@ public class AssetRepository : IAssetRepository
                 .ExecuteDeleteAsync() > 0;
     }
 
-    public async Task<List<AssetResponse>> GetAssetsAsync()
+    public async Task<PaginatedList<AssetResponse>> GetAssetsAsync(int Page, int PageSize)
     {
         var assets = await context.Assets
             .OrderByDescending(c => c.CreatedAt)
+            .Skip((Page - 1) * PageSize)
+            .Take(PageSize)
+            .Select(e => new AssetResponse
+            {
+                ID = e.ID,
+                Name = e.Name,
+                AssetType = e.AssetType,
+                BuyPrice = e.BuyPrice,
+                SellPrice = e.SellPrice,
+                Description = e.Description,
+                Symbol = e.Symbol,
+                Code = e.Code,
+                Unit = e.Unit
+            })
             .ToListAsync();
         var count = await context.Assets.CountAsync();
 
-        var assetsResponse = mapper.Map<List<AssetResponse>>(assets);
-        return assetsResponse;
+        return new PaginatedList<AssetResponse>(assets, count, Page, PageSize);
     }
 
     public async Task<AssetResponse> GetAssetAsync(int ID)
