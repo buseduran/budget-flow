@@ -1,7 +1,9 @@
-﻿using BudgetFlow.Application.Auth.Commands.Login;
+﻿using BudgetFlow.Application.Auth.Commands.ForgotPassword;
+using BudgetFlow.Application.Auth.Commands.Login;
 using BudgetFlow.Application.Auth.Commands.Logout;
 using BudgetFlow.Application.Auth.Commands.Refresh;
 using BudgetFlow.Application.Auth.Commands.Register;
+using BudgetFlow.Application.Auth.Commands.ResetPassword;
 using BudgetFlow.Application.Auth.Commands.UpdateAccount;
 using BudgetFlow.Application.Common.Extensions;
 using MediatR;
@@ -97,6 +99,38 @@ public class AuthController : ControllerBase
     public async Task<IResult> UpdateAccountAsync([FromBody] UpdateAccountCommand updateAccountCommand)
     {
         var result = await mediator.Send(updateAccountCommand);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Forgot Password  
+    /// </summary>
+    /// <param name="logoutCommand"></param>
+    /// <returns></returns>
+    [HttpPost("ForgotPassword")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    public async Task<IResult> ForgotPasswordAsync([FromBody] ForgotPasswordCommand forgotPasswordCommand)
+    {
+        var result = await mediator.Send(forgotPasswordCommand);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Reset Password  
+    /// </summary>
+    /// <param name="logoutCommand"></param>
+    /// <returns></returns>
+    [HttpPost("ResetPassword")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    public async Task<IResult> ResetPasswordAsync([FromBody] ResetPasswordCommand resetPasswordCommand)
+    {
+        var result = await mediator.Send(resetPasswordCommand);
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();

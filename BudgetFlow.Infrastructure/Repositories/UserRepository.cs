@@ -114,4 +114,13 @@ public class UserRepository : IUserRepository
         context.Users.Update(userDto);
         return await context.SaveChangesAsync() > 0;
     }
+
+    public async Task<User> FindByEmailAsync(string email)
+    {
+        var user = await context.Users
+            .Where(u => u.Email == email)
+            .FirstOrDefaultAsync();
+        if (user == null) return null;
+        return user;
+    }
 }

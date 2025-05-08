@@ -5,4 +5,6 @@ public interface ITokenProvider
 {
     string Create(User user);
     string GenerateRefreshToken();
+    string GeneratePasswordResetToken(User user);
+    bool VerifyPasswordResetToken(int userId, string token);
 }

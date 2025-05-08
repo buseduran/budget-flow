@@ -1,7 +1,6 @@
 ﻿using BudgetFlow.Application.Auth;
 using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Domain.Entities;
-using BudgetFlow.Domain.Enums;
 
 namespace BudgetFlow.Application.Common.Interfaces.Repositories;
 public interface IUserRepository
@@ -17,4 +16,5 @@ public interface IUserRepository
     Task<bool> UpdateRefreshTokenAsync(RefreshToken refreshToken);
     Task<RefreshToken> GetRefreshTokenByUserIDAsync(int userID);
     Task<bool> RevokeTokenAsync(int userID);
+    Task<User> FindByEmailAsync(string email);
 }

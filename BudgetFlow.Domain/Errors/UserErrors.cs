@@ -15,6 +15,9 @@ public static class UserErrors
     public static Error RefreshTokenCreationFailed => new("Yenileme token'ı oluşturulamadı.");
     public static Error LogoutFailed => new("Çıkış işlemi başarısız.");
     public static Error InvalidRefreshToken => new("Geçersiz yenileme token'ı.");
+    public static Error InvalidToken => new("Geçersiz token.");
     public static Error RefreshTokenExpired => new("Yenileme token'ı süresi dolmuş.");
     public static Error RefreshTokenUpdateFailed => new("Yenileme token'ı güncellenemedi.");
+    public static Error PasswordCannotBeEmpty => new("Şifre boş olamaz.");
+    public static Error EmailCannotBeEmpty => new("Email boş olamaz.");
 }
