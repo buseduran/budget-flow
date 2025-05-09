@@ -43,4 +43,60 @@ public sealed class TokenProvider(IConfiguration configuration) : ITokenProvider
     {
         return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
     }
+
+    public string GeneratePasswordResetToken(User user)
+    {
+        string secretKey = configuration["Jwt:Secret"];
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        var expirationMinutes = configuration.GetValue<int>("Jwt:PasswordResetExpirationInMinutes");
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new[]
+            {
+            new Claim(JwtRegisteredClaimNames.Sub, user.ID.ToString()),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim("purpose", "reset_password") // sadece şifre sıfırlama için
+        }),
+            Expires = DateTime.UtcNow.AddMinutes(expirationMinutes),
+            SigningCredentials = credentials,
+            Issuer = configuration["Jwt:Issuer"],
+            Audience = configuration["Jwt:Audience"]
+        };
+
+        var handler = new JsonWebTokenHandler();
+        var token = handler.CreateToken(tokenDescriptor);
+        return token.ToString();
+    }
+
+    public bool VerifyPasswordResetToken(int userId, string token)
+    {
+        var handler = new JsonWebTokenHandler();
+        var secretKey = configuration["Jwt:Secret"];
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidIssuer = configuration["Jwt:Issuer"],
+            ValidAudience = configuration["Jwt:Audience"],
+            IssuerSigningKey = key,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+
+        var result = handler.ValidateTokenAsync(token, validationParameters).Result;
+        if (!result.IsValid)
+            return false;
+
+        var claims = result.ClaimsIdentity.Claims;
+        var subClaim = claims.FirstOrDefault(c => c.Type == "sub");
+
+        return subClaim?.Value == userId.ToString();
+    }
+
 }

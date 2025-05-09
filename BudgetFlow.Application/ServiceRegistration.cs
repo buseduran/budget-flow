@@ -25,6 +25,7 @@ public static class ServiceRegistration
         services.AddSingleton<ITokenProvider, TokenProvider>();
 
         services.AddScoped<IStockScraper, StockScraper>();
+        services.AddScoped<IEmailService, EmailService>();
 
         services.AddQuartz(q =>
         {

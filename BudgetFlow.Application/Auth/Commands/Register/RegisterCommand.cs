@@ -3,7 +3,6 @@ using BudgetFlow.Application.Common.Interfaces.Services;
 using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Domain.Entities;
-using BudgetFlow.Domain.Enums;
 using BudgetFlow.Domain.Errors;
 using MediatR;
 
@@ -15,13 +14,11 @@ public class RegisterCommand : IRequest<Result<bool>>
     public class CreateUserCommandHandler : IRequestHandler<RegisterCommand, Result<bool>>
     {
         private readonly IUserRepository userRepository;
-        private readonly IWalletRepository walletRepository;
         private readonly IPasswordHasher passwordHasher;
 
-        public CreateUserCommandHandler(IUserRepository userRepository, IWalletRepository walletRepository, IPasswordHasher passwordHasher)
+        public CreateUserCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher)
         {
             this.userRepository = userRepository;
-            this.walletRepository = walletRepository;
             this.passwordHasher = passwordHasher;
         }
 
