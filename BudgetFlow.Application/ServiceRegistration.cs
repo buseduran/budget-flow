@@ -23,7 +23,7 @@ public static class ServiceRegistration
 
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<ITokenProvider, TokenProvider>();
-        services.AddSingleton<ITokenBlacklistService, TokenBlackListService>();
+        services.AddSingleton<ITokenBlacklistService, TokenBlacklistService>();
 
         services.AddScoped<IStockScraper, StockScraper>();
         services.AddScoped<IEmailService, EmailService>();

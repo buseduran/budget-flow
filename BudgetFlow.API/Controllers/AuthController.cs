@@ -1,8 +1,10 @@
-﻿using BudgetFlow.Application.Auth.Commands.ForgotPassword;
+﻿using BudgetFlow.Application.Auth.Commands.ConfirmEmail;
+using BudgetFlow.Application.Auth.Commands.ForgotPassword;
 using BudgetFlow.Application.Auth.Commands.Login;
 using BudgetFlow.Application.Auth.Commands.Logout;
 using BudgetFlow.Application.Auth.Commands.Refresh;
 using BudgetFlow.Application.Auth.Commands.Register;
+using BudgetFlow.Application.Auth.Commands.ResendConfirmEmail;
 using BudgetFlow.Application.Auth.Commands.ResetPassword;
 using BudgetFlow.Application.Auth.Commands.UpdateAccount;
 using BudgetFlow.Application.Common.Extensions;
@@ -107,7 +109,7 @@ public class AuthController : ControllerBase
     /// <summary>
     /// Forgot Password  
     /// </summary>
-    /// <param name="logoutCommand"></param>
+    /// <param name="forgotPasswordCommand"></param>
     /// <returns></returns>
     [HttpPost("ForgotPassword")]
     [Produces(MediaTypeNames.Application.Json)]
@@ -123,7 +125,7 @@ public class AuthController : ControllerBase
     /// <summary>
     /// Reset Password  
     /// </summary>
-    /// <param name="logoutCommand"></param>
+    /// <param name="resetPasswordCommand"></param>
     /// <returns></returns>
     [HttpPost("ResetPassword")]
     [Produces(MediaTypeNames.Application.Json)]
@@ -131,6 +133,38 @@ public class AuthController : ControllerBase
     public async Task<IResult> ResetPasswordAsync([FromBody] ResetPasswordCommand resetPasswordCommand)
     {
         var result = await mediator.Send(resetPasswordCommand);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Confirm Email  
+    /// </summary>
+    /// <param name="confirmEmailCommand"></param>
+    /// <returns></returns>
+    [HttpPost("ConfirmEmail")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    public async Task<IResult> ConfirmEmailAsync([FromBody] ConfirmEmailCommand confirmEmailCommand)
+    {
+        var result = await mediator.Send(confirmEmailCommand);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Resend Confirm Email  
+    /// </summary>
+    /// <param name="resendConfirmEmailCommand"></param>
+    /// <returns></returns>
+    [HttpPost("ResendConfirmEmail")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    public async Task<IResult> ResendConfirmEmailAsync([FromBody] ResendConfirmEmailCommand resendConfirmEmailCommand)
+    {
+        var result = await mediator.Send(resendConfirmEmailCommand);
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();

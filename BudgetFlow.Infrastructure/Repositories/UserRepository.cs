@@ -123,4 +123,15 @@ public class UserRepository : IUserRepository
         if (user == null) return null;
         return user;
     }
+
+    public async Task<bool> ConfirmEmailAsync(string email, bool IsEmailConfirmed)
+    {
+        var user = await context.Users
+            .Where(u => u.Email == email).FirstOrDefaultAsync();
+        if (user == null) return false;
+        user.IsEmailConfirmed = IsEmailConfirmed;
+        var userDto = mapper.Map<User>(user);
+        context.Users.Update(userDto);
+        return await context.SaveChangesAsync() > 0;
+    }
 }

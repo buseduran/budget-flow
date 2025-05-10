@@ -53,7 +53,7 @@ public class ForgotPasswordCommand : IRequest<Result<bool>>
             var resetLink = uriBuilder.ToString();
 
             #region Html şablonu okunur 
-            var templatePath = Path.Combine(AppContext.BaseDirectory, "Resources", "Templates", "EmailTemplate.html");
+            var templatePath = Path.Combine(AppContext.BaseDirectory, "Resources", "Templates", "EmailPasswordTemplate.html");
             var emailTemplate = File.ReadAllText(templatePath, Encoding.UTF8);
 
             var emailBody = emailTemplate.Replace("{{resetLink}}", resetLink);

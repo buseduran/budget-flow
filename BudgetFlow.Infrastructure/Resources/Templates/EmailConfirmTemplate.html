@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Şifre Sıfırlama Talebi</title>
+    <title>Hesap Doğrulama</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -37,7 +37,7 @@
         .button {
             font-size: 14px;
             background-color: #000000;
-            color: white !important; 
+            color: white !important;
             padding: 12px 20px;
             text-decoration: none;
             border-radius: 6px;
@@ -47,14 +47,14 @@
 
             .button:link,
             .button:visited {
-                color: white !important; 
+                color: white !important;
                 text-decoration: none;
             }
+
             .button:active {
-                color: white !important; 
+                color: white !important;
                 background-color: #333333;
             }
-
 
             .button:hover {
                 color: white;
@@ -75,19 +75,18 @@
 </head>
 <body>
     <div class="email-container">
-        <h2>Şifre Sıfırlama Talebi</h2>
+        <h2>Hesabınızı Doğrulayın</h2>
         <p>Merhaba,</p>
-        <p>Hesabınızla ilgili şifre sıfırlama işlemini başlattınız. Aşağıdaki butona tıklayarak yeni şifrenizi oluşturabilirsiniz:</p>
+        <p>Hesabınızı aktif hale getirmek için aşağıdaki butona tıklayarak e-posta adresinizi doğrulayabilirsiniz:</p>
 
-        <a href="{{resetLink}}" class="button">Şifrenizi Sıfırlayın</a>
+        <a href="{{confirmationLink}}" class="button">E-Posta Adresimi Doğrula</a>
 
-        <p>Eğer şifre sıfırlama talebinde bulunmadıysanız, bu e-postayı dikkate almayabilirsiniz.</p>
+        <p>Eğer bu talebi siz yapmadıysanız, bu e-postayı dikkate almayabilirsiniz. Linki kimseyle paylaşmayın.</p>
 
         <div class="footer">
             <hr style="border: 0; border-top: 1px solid #ddd; width: 50%; margin: 20px auto;">
             2025 BudgetFlow, Tüm Hakları Saklıdır. &copy; | <span>&#x2728;</span> <a href="https://dev.budgetflowapp.com/">budgetflowapp.com</a>
         </div>
-
     </div>
 </body>
 </html>

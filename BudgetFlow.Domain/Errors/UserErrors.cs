@@ -21,4 +21,7 @@ public static class UserErrors
     public static Error PasswordCannotBeEmpty => new("Şifre boş olamaz.");
     public static Error EmailCannotBeEmpty => new("Email boş olamaz.");
     public static Error TokenAlreadyUsed => new("Token zaten kullanılmış.");
+    public static Error EmailConfirmationFailed => new("E-posta doğrulama işlemi başarısız.");
+    public static Error EmailAlreadyConfirmed => new("E-posta doğrulama daha önce yapılmış.");
+    public static Error EmailConfirmationMailFailed => new("Kayıt başarılı ama e-posta gönderilemedi. Lütfen daha sonra tekrar deneyin.");
 }

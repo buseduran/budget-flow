@@ -17,4 +17,5 @@ public interface IUserRepository
     Task<RefreshToken> GetRefreshTokenByUserIDAsync(int userID);
     Task<bool> RevokeTokenAsync(int userID);
     Task<User> FindByEmailAsync(string email);
+    Task<bool> ConfirmEmailAsync(string email, bool IsEmailConfirmed);
 }
