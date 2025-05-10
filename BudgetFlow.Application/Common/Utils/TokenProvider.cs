@@ -98,5 +98,4 @@ public sealed class TokenProvider(IConfiguration configuration) : ITokenProvider
 
         return subClaim?.Value == userId.ToString();
     }
-
 }

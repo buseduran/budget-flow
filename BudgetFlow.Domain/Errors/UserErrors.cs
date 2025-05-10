@@ -20,4 +20,5 @@ public static class UserErrors
     public static Error RefreshTokenUpdateFailed => new("Yenileme token'ı güncellenemedi.");
     public static Error PasswordCannotBeEmpty => new("Şifre boş olamaz.");
     public static Error EmailCannotBeEmpty => new("Email boş olamaz.");
+    public static Error TokenAlreadyUsed => new("Token zaten kullanılmış.");
 }
