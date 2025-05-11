@@ -8,9 +8,9 @@ using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using static BudgetFlow.Application.Auth.Commands.Login.LoginCommand;
+using static BudgetFlow.Application.Users.Commands.Login.LoginCommand;
 
-namespace BudgetFlow.Application.Auth.Commands.Login;
+namespace BudgetFlow.Application.Users.Commands.Login;
 public sealed record LoginCommand(string Email, string Password) : IRequest<Result<Response>>
 {
     public sealed record Response(string AccessToken, string RefreshToken);

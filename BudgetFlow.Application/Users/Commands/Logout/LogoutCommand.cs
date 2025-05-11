@@ -5,7 +5,7 @@ using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace BudgetFlow.Application.Auth.Commands.Logout;
+namespace BudgetFlow.Application.Users.Commands.Logout;
 public class LogoutCommand : IRequest<Result<bool>>
 {
     public class LogoutCommandHandler : IRequestHandler<LogoutCommand, Result<bool>>

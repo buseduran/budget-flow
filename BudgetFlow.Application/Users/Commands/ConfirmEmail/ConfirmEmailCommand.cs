@@ -5,7 +5,7 @@ using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Errors;
 using MediatR;
 
-namespace BudgetFlow.Application.Auth.Commands.ConfirmEmail;
+namespace BudgetFlow.Application.Users.Commands.ConfirmEmail;
 public class ConfirmEmailCommand : IRequest<Result<bool>>
 {
     public string Token { get; set; }

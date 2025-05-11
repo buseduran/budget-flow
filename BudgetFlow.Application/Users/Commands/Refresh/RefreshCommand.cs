@@ -5,9 +5,9 @@ using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using static BudgetFlow.Application.Auth.Commands.Refresh.RefreshCommand;
+using static BudgetFlow.Application.Users.Commands.Refresh.RefreshCommand;
 
-namespace BudgetFlow.Application.Auth.Commands.Refresh
+namespace BudgetFlow.Application.Users.Commands.Refresh
 {
     public sealed record RefreshCommand : IRequest<Result<Response>>
     {

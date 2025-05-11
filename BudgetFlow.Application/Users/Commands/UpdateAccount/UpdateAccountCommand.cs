@@ -4,7 +4,7 @@ using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Domain.Errors;
 using MediatR;
 
-namespace BudgetFlow.Application.Auth.Commands.UpdateAccount;
+namespace BudgetFlow.Application.Users.Commands.UpdateAccount;
 public class UpdateAccountCommand : IRequest<Result<bool>>
 {
     public string Name { get; set; }

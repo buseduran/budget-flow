@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using BudgetFlow.Application.Auth;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Users;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using BudgetFlow.Infrastructure.Contexts;

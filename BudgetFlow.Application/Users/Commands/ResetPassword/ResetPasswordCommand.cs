@@ -5,7 +5,7 @@ using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Errors;
 using MediatR;
 
-namespace BudgetFlow.Application.Auth.Commands.ResetPassword;
+namespace BudgetFlow.Application.Users.Commands.ResetPassword;
 public class ResetPasswordCommand : IRequest<Result<bool>>
 {
     public string Token { get; set; }

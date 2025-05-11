@@ -8,7 +8,7 @@ using BudgetFlow.Domain.Errors;
 using MediatR;
 using System.Text;
 
-namespace BudgetFlow.Application.Auth.Commands.Register;
+namespace BudgetFlow.Application.Users.Commands.Register;
 public class RegisterCommand : IRequest<Result<bool>>
 {
     public UserRegisterModel User { get; set; }

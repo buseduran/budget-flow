@@ -1,30 +1,28 @@
-﻿using BudgetFlow.Application.Auth.Commands.ConfirmEmail;
-using BudgetFlow.Application.Auth.Commands.ForgotPassword;
-using BudgetFlow.Application.Auth.Commands.Login;
-using BudgetFlow.Application.Auth.Commands.Logout;
-using BudgetFlow.Application.Auth.Commands.Refresh;
-using BudgetFlow.Application.Auth.Commands.Register;
-using BudgetFlow.Application.Auth.Commands.ResendConfirmEmail;
-using BudgetFlow.Application.Auth.Commands.ResetPassword;
-using BudgetFlow.Application.Auth.Commands.UpdateAccount;
-using BudgetFlow.Application.Budget.Queries.GetEntryPagination;
-using BudgetFlow.Application.Budget;
-using BudgetFlow.Application.Common.Extensions;
+﻿using BudgetFlow.Application.Common.Extensions;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Users;
+using BudgetFlow.Application.Users.Commands.ConfirmEmail;
+using BudgetFlow.Application.Users.Commands.ForgotPassword;
+using BudgetFlow.Application.Users.Commands.Login;
+using BudgetFlow.Application.Users.Commands.Logout;
+using BudgetFlow.Application.Users.Commands.Refresh;
+using BudgetFlow.Application.Users.Commands.Register;
+using BudgetFlow.Application.Users.Commands.ResendConfirmEmail;
+using BudgetFlow.Application.Users.Commands.ResetPassword;
+using BudgetFlow.Application.Users.Commands.UpdateAccount;
+using BudgetFlow.Application.Users.Queries.GetLogPagination;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
-using BudgetFlow.Application.Auth.Queries.GetLogPagination;
-using BudgetFlow.Application.Auth;
 
 namespace BudgetFlow.API.Controllers;
 [ApiController]
 [Route("[controller]")]
-public class AuthController : ControllerBase
+public class UserController : ControllerBase
 {
     private readonly IMediator mediator;
-    public AuthController(IMediator mediator)
+    public UserController(IMediator mediator)
     {
         this.mediator = mediator;
     }

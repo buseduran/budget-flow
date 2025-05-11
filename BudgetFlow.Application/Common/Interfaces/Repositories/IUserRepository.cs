@@ -1,6 +1,6 @@
-﻿using BudgetFlow.Application.Auth;
-using BudgetFlow.Application.Common.Models;
+﻿using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Users;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 

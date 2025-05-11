@@ -7,7 +7,7 @@ using BudgetFlow.Domain.Errors;
 using MediatR;
 using System.Text;
 
-namespace BudgetFlow.Application.Auth.Commands.ForgotPassword;
+namespace BudgetFlow.Application.Users.Commands.ForgotPassword;
 public class ForgotPasswordCommand : IRequest<Result<bool>>
 {
     public ForgotPasswordDto ForgotPassword { get; set; }

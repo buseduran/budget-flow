@@ -7,8 +7,8 @@ using BudgetFlow.Domain.Errors;
 using MediatR;
 using System.Text;
 
-namespace BudgetFlow.Application.Auth.Commands.ResendConfirmEmail;
-public class ResendConfirmEmailCommand:IRequest<Result<bool>>
+namespace BudgetFlow.Application.Users.Commands.ResendConfirmEmail;
+public class ResendConfirmEmailCommand : IRequest<Result<bool>>
 {
     public string Email { get; set; }
     public string ClientUri { get; set; }

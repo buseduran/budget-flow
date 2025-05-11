@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using BudgetFlow.Application.Auth;
 using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Models;
+using BudgetFlow.Application.Users;
 using BudgetFlow.Domain.Entities;
 
 namespace BudgetFlow.Application.Common.Mappers;

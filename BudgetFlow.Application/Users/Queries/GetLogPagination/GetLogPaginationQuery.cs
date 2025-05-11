@@ -6,7 +6,7 @@ using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace BudgetFlow.Application.Auth.Queries.GetLogPagination;
+namespace BudgetFlow.Application.Users.Queries.GetLogPagination;
 public class GetLogPaginationQuery : IRequest<Result<PaginatedList<LogResponse>>>
 {
     public int Page { get; set; } = 1;
