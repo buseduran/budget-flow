@@ -1,4 +1,5 @@
-﻿using BudgetFlow.Domain.Shared;
+﻿using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Shared;
 
 namespace BudgetFlow.Domain.Errors;
 

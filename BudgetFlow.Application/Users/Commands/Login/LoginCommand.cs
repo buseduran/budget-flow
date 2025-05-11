@@ -45,7 +45,7 @@ public sealed record LoginCommand(string Email, string Password) : IRequest<Resu
                     return Result.Failure<Response>(UserErrors.RefreshTokenRevokeFailed);
 
                 #region Create Refresh Token
-                accessToken = tokenProvider.Create(refreshToken.User);
+                accessToken = await tokenProvider.Create(refreshToken.User);
 
                 refreshToken.ID = Guid.NewGuid();
                 refreshToken.Token = tokenProvider.GenerateRefreshToken();
@@ -57,7 +57,7 @@ public sealed record LoginCommand(string Email, string Password) : IRequest<Resu
             {
                 #region Create Tokens
                 var userDto = mapper.Map<User>(user);
-                accessToken = tokenProvider.Create(userDto);
+                accessToken = await tokenProvider.Create(userDto);
 
                 refreshToken = new RefreshToken
                 {

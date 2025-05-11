@@ -22,7 +22,7 @@ public static class ServiceRegistration
         services.AddHttpContextAccessor();
 
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
-        services.AddSingleton<ITokenProvider, TokenProvider>();
+        services.AddScoped<ITokenProvider, TokenProvider>();
         services.AddSingleton<ITokenBlacklistService, TokenBlacklistService>();
 
         services.AddScoped<IStockScraper, StockScraper>();

@@ -1,4 +1,5 @@
-﻿using BudgetFlow.Application.Common.Interfaces.Services;
+﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Interfaces.Services;
 using BudgetFlow.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -8,25 +9,31 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace BudgetFlow.Application.Common.Utils;
-public sealed class TokenProvider(IConfiguration configuration) : ITokenProvider
+public sealed class TokenProvider(IConfiguration configuration, IUserRepository userRepository) : ITokenProvider
 {
-    public string Create(User user)
+    public async Task<string> Create(User user)
     {
         string secretKey = configuration["Jwt:Secret"];
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
+        #region Get roles and append them to Claims
+        var roles = await userRepository.GetUserRolesAsync(user.ID);
+        var claims = new List<Claim>
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.ID.ToString()),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(JwtRegisteredClaimNames.Name, user.Name),
+            new Claim(JwtRegisteredClaimNames.Birthdate,user.CreatedAt.ToString()),
+        };
+        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+        #endregion
+
         var minutes = configuration.GetValue<int>("Jwt:ExpirationInMinutes");
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.ID.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.Name, user.Name),
-                new Claim(JwtRegisteredClaimNames.Birthdate,user.CreatedAt.ToString()),
-            }),
+            Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddMinutes(minutes),
             SigningCredentials = credentials,
             Issuer = configuration["Jwt:Issuer"],

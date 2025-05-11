@@ -5,9 +5,11 @@ using BudgetFlow.Application.Categories.Commands.UpdateCategory;
 using BudgetFlow.Application.Categories.Queries.GetCategoryPagination;
 using BudgetFlow.Application.Common.Extensions;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
 
 namespace BudgetFlow.API.Controllers;
@@ -28,9 +30,10 @@ public class CategoryController : ControllerBase
     /// <param name="createCategoryCommand"></param>
     /// <returns></returns>
     [HttpPost]
+    [Authorize(Roles = $"{Role.Member},{Role.Admin}")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
-    public async Task<IResult> CreateEntryAsync([FromBody] CreateCategoryCommand createCategoryCommand)
+    public async Task<IResult> CreateCategoryAsync([FromBody] CreateCategoryCommand createCategoryCommand)
     {
         var result = await mediator.Send(createCategoryCommand);
         return result.IsSuccess

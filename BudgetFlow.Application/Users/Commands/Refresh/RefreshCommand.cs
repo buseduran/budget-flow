@@ -43,7 +43,7 @@ namespace BudgetFlow.Application.Users.Commands.Refresh
                 #endregion
 
                 #region Create New Tokens
-                var newAccessToken = tokenProvider.Create(token.User);
+                var newAccessToken =await tokenProvider.Create(token.User);
                 var newRefreshToken = tokenProvider.GenerateRefreshToken();
 
                 token.Token = newRefreshToken;

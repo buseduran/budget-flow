@@ -50,6 +50,17 @@ public class RegisterCommand : IRequest<Result<bool>>
             var userID = await userRepository.CreateAsync(user);
             if (userID is 0)
                 return Result.Failure<bool>(UserErrors.CreationFailed);
+
+            #region Create UserRole
+            var userRole = new UserRole()
+            {
+                UserID = userID,
+                RoleID = Role.MemberID // Default role
+            };
+            var userRoleResult = await userRepository.CreateUserRoleAsync(userRole);
+            if (!userRoleResult)
+                return Result.Failure<bool>(UserErrors.UserRoleCreationFailed);
+            #endregion
             else
             {
                 try
@@ -58,7 +69,7 @@ public class RegisterCommand : IRequest<Result<bool>>
                     var token = tokenProvider.GenerateEmailConfirmationToken(user);
                     var confirmationLink = $"{request.ClientUri}?token={token}&email={user.Email}";
 
-                    var templatePath = Path.Combine(AppContext.BaseDirectory, "Resources", "Templates", "EmailConfirmTemplate.html");
+                    var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Resources", "Templates", "EmailConfirmTemplate.html");
                     var emailTemplate = File.ReadAllText(templatePath, Encoding.UTF8);
 
                     var emailBody = emailTemplate.Replace("{{confirmationLink}}", confirmationLink);
@@ -66,11 +77,11 @@ public class RegisterCommand : IRequest<Result<bool>>
                     await emailService.SendEmailAsync(user.Email, emailSubject, emailBody);
                     #endregion
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     return Result.Failure<bool>(UserErrors.EmailConfirmationMailFailed);
                 }
-            }
+            } 
 
             return Result.Success(true);
         }

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Text.Json;
 
-namespace BudgetFlow.Infrastructure.Persistence.Interceptors;
+namespace BudgetFlow.Infrastructure.Common.Persistence.Interceptors;
 
 public class AuditInterceptor : SaveChangesInterceptor
 {
