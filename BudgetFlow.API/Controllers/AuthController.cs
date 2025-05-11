@@ -7,11 +7,16 @@ using BudgetFlow.Application.Auth.Commands.Register;
 using BudgetFlow.Application.Auth.Commands.ResendConfirmEmail;
 using BudgetFlow.Application.Auth.Commands.ResetPassword;
 using BudgetFlow.Application.Auth.Commands.UpdateAccount;
+using BudgetFlow.Application.Budget.Queries.GetEntryPagination;
+using BudgetFlow.Application.Budget;
 using BudgetFlow.Application.Common.Extensions;
+using BudgetFlow.Application.Common.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
+using BudgetFlow.Application.Auth.Queries.GetLogPagination;
+using BudgetFlow.Application.Auth;
 
 namespace BudgetFlow.API.Controllers;
 [ApiController]
@@ -169,4 +174,21 @@ public class AuthController : ControllerBase
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();
     }
+
+    /// <summary>
+    /// Pages a User Logs
+    /// </summary>
+    /// <param name="getEntryPaginationQuery"></param>
+    /// <returns></returns>
+    [HttpGet("Logs")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<LogResponse>))]
+    public async Task<IResult> GetLogsPaginationAsync([FromQuery] GetLogPaginationQuery getLogPaginationQuery)
+    {
+        var result = await mediator.Send(getLogPaginationQuery);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
+    }
+
 }
