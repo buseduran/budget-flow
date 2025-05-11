@@ -1,6 +1,8 @@
 ﻿using BudgetFlow.Application.Auth;
 using BudgetFlow.Application.Common.Models;
+using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Enums;
 
 namespace BudgetFlow.Application.Common.Interfaces.Repositories;
 public interface IUserRepository
@@ -17,4 +19,6 @@ public interface IUserRepository
     Task<RefreshToken> GetRefreshTokenByUserIDAsync(int userID);
     Task<bool> RevokeTokenAsync(int userID);
     Task<User> FindByEmailAsync(string email);
+    Task<bool> ConfirmEmailAsync(string email, bool IsEmailConfirmed);
+    Task<PaginatedList<LogResponse>> GetLogsPaginatedAsync(int page, int pageSize, LogType logType, int userID);
 }

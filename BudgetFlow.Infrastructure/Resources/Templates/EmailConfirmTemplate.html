@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hesap Doğrulama</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            color: #000;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        h2 {
+            color: #000;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .button {
+            font-size: 14px;
+            background-color: #000000;
+            color: white !important;
+            padding: 12px 20px;
+            text-decoration: none;
+            border-radius: 6px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+            .button:link,
+            .button:visited {
+                color: white !important;
+                text-decoration: none;
+            }
+
+            .button:active {
+                color: white !important;
+                background-color: #333333;
+            }
+
+            .button:hover {
+                color: white;
+                background-color: #333333;
+            }
+
+        .footer {
+            font-size: 12px;
+            color: #777;
+            margin-top: 20px;
+        }
+
+            .footer a {
+                color: #000;
+                text-decoration: none;
+            }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h2>Hesabınızı Doğrulayın</h2>
+        <p>Merhaba,</p>
+        <p>Hesabınızı aktif hale getirmek için aşağıdaki butona tıklayarak e-posta adresinizi doğrulayabilirsiniz:</p>
+
+        <a href="{{confirmationLink}}" class="button">E-Posta Adresimi Doğrula</a>
+
+        <p>Eğer bu talebi siz yapmadıysanız, bu e-postayı dikkate almayabilirsiniz. Linki kimseyle paylaşmayın.</p>
+
+        <div class="footer">
+            <hr style="border: 0; border-top: 1px solid #ddd; width: 50%; margin: 20px auto;">
+            2025 BudgetFlow, Tüm Hakları Saklıdır. &copy; | <span>&#x2728;</span> <a href="https://dev.budgetflowapp.com/">budgetflowapp.com</a>
+        </div>
+    </div>
+</body>
+</html>

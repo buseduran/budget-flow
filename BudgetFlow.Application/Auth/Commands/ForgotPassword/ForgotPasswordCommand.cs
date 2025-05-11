@@ -5,6 +5,7 @@ using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Errors;
 using MediatR;
+using System.Text;
 
 namespace BudgetFlow.Application.Auth.Commands.ForgotPassword;
 public class ForgotPasswordCommand : IRequest<Result<bool>>
@@ -51,7 +52,13 @@ public class ForgotPasswordCommand : IRequest<Result<bool>>
             };
             var resetLink = uriBuilder.ToString();
 
-            var emailBody = $"<p>Şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:</p><p><a href='{resetLink}'>Şifre Sıfırlama Bağlantısı</a></p>";
+            #region Html şablonu okunur 
+            var templatePath = Path.Combine(AppContext.BaseDirectory, "Resources", "Templates", "EmailPasswordTemplate.html");
+            var emailTemplate = File.ReadAllText(templatePath, Encoding.UTF8);
+
+            var emailBody = emailTemplate.Replace("{{resetLink}}", resetLink);
+            #endregion
+
             var emailSubject = "Şifre Sıfırlama Talebi";
             await emailService.SendEmailAsync(request.ForgotPassword.Email, emailSubject, emailBody);
 

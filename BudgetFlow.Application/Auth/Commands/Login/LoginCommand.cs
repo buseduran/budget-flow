@@ -26,6 +26,13 @@ public sealed record LoginCommand(string Email, string Password) : IRequest<Resu
                 return Result.Failure<Response>(UserErrors.UserNotFound);
             }
 
+            #region Check User's Email is Confirmed
+            if (!user.IsEmailConfirmed)
+            {
+                return Result.Failure<Response>(UserErrors.EmailConfirmationFailed);
+            }
+            #endregion
+
             if (!passwordHasher.Verify(request.Password, user.PasswordHash))
                 return Result.Failure<Response>(UserErrors.InvalidPassword);
 

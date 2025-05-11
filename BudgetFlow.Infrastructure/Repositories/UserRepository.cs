@@ -2,7 +2,9 @@
 using BudgetFlow.Application.Auth;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Models;
+using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Enums;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -122,5 +124,44 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync();
         if (user == null) return null;
         return user;
+    }
+
+    public async Task<bool> ConfirmEmailAsync(string email, bool IsEmailConfirmed)
+    {
+        var user = await context.Users
+            .Where(u => u.Email == email).FirstOrDefaultAsync();
+        if (user == null) return false;
+        user.IsEmailConfirmed = IsEmailConfirmed;
+        var userDto = mapper.Map<User>(user);
+        context.Users.Update(userDto);
+        return await context.SaveChangesAsync() > 0;
+    }
+
+    public async Task<PaginatedList<LogResponse>> GetLogsPaginatedAsync(int page, int pageSize, LogType logType, int userID)
+    {
+        var query = context.AuditLogs
+            .Where(x => x.UserID == userID)
+            .OrderByDescending(x => x.Timestamp)
+            .AsQueryable();
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Where(x => logType == LogType.All || x.Action == logType.ToString())
+            .Select(x => new LogResponse
+            {
+                ID = x.ID,
+                Action = x.Action,
+                TableName = x.TableName,
+                OldValues = x.OldValues,
+                NewValues = x.NewValues,
+                Timestamp = x.Timestamp,
+                PrimaryKey = x.PrimaryKey,
+            })
+            .ToListAsync();
+        var totalCount = items.Count;
+        var paginatedList = new PaginatedList<LogResponse>(items, totalCount, page, pageSize);
+        return paginatedList;
+
     }
 }

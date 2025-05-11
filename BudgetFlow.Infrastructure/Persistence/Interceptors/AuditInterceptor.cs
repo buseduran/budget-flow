@@ -45,8 +45,13 @@ public class AuditInterceptor : SaveChangesInterceptor
                 Action = entry.State.ToString(),
                 UserID = userID,
                 Timestamp = DateTime.UtcNow,
-                OldValues = null,
-                NewValues = null
+                PrimaryKey = entry.Properties.FirstOrDefault(p => p.Metadata.IsPrimaryKey())?.CurrentValue?.ToString() ?? "",
+                OldValues = entry.State != EntityState.Added
+                    ? SerializeProperties(entry.OriginalValues.Properties, entry.OriginalValues)
+                    : null,
+                NewValues = entry.State != EntityState.Deleted
+                    ? SerializeProperties(entry.CurrentValues.Properties, entry.CurrentValues)
+                    : null
             };
 
             _pendingLogs.Add((entry, auditLog, entry.State));
@@ -68,15 +73,15 @@ public class AuditInterceptor : SaveChangesInterceptor
             var pk = entry.Properties.FirstOrDefault(p => p.Metadata.IsPrimaryKey())?.CurrentValue;
             log.PrimaryKey = pk?.ToString() ?? "";
 
-            if (originalState != EntityState.Deleted)
-            {
-                log.NewValues = SerializeProperties(entry.CurrentValues.Properties, entry.CurrentValues);
-            }
+            //if (originalState != EntityState.Deleted)
+            //{
+            //    log.NewValues = SerializeProperties(entry.CurrentValues.Properties, entry.CurrentValues);
+            //}
 
-            if (originalState != EntityState.Added)
-            {
-                log.OldValues = SerializeProperties(entry.OriginalValues.Properties, entry.OriginalValues);
-            }
+            //if (originalState != EntityState.Added)
+            //{
+            //    log.OldValues = SerializeProperties(entry.OriginalValues.Properties, entry.OriginalValues);
+            //}
         }
 
         context.Set<AuditLog>().AddRange(_pendingLogs.Select(x => x.Log));
