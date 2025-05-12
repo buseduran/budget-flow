@@ -25,4 +25,5 @@ public static class UserErrors
     public static Error EmailAlreadyConfirmed => new("E-posta doğrulama daha önce yapılmış.");
     public static Error EmailConfirmationMailFailed => new("Kayıt başarılı ama e-posta gönderilemedi. Lütfen daha sonra tekrar deneyin.");
     public static Error LogNotFound => new("Log bulunamadı.");
+    public static Error UserRoleCreationFailed => new("Kullanıcı rolü oluşturulamadı.");
 }

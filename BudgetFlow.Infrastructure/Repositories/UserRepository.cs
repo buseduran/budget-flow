@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using BudgetFlow.Application.Auth;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Users;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using BudgetFlow.Infrastructure.Contexts;
@@ -162,6 +162,20 @@ public class UserRepository : IUserRepository
         var totalCount = items.Count;
         var paginatedList = new PaginatedList<LogResponse>(items, totalCount, page, pageSize);
         return paginatedList;
+    }
 
+    public async Task<List<string>> GetUserRolesAsync(int userID)
+    {
+        var roles = await context.UserRoles
+            .Where(x => x.UserID == userID)
+            .Select(x => x.Role.Name)
+            .ToListAsync();
+        return roles;
+    }
+
+    public async Task<bool> CreateUserRoleAsync(UserRole userRole)
+    {
+        context.UserRoles.Add(userRole);
+        return await context.SaveChangesAsync() > 0;
     }
 }

@@ -2,9 +2,7 @@
 using BudgetFlow.Application;
 using BudgetFlow.Infrastructure;
 using BudgetFlow.Infrastructure.Contexts;
-using BudgetFlow.Infrastructure.Persistence.Interceptors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;

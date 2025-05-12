@@ -1,9 +1,9 @@
-﻿using BudgetFlow.Domain.Entities;
+﻿using BudgetFlow.Application.Common.Models;
+using BudgetFlow.Domain.Entities;
+using BudgetFlow.Infrastructure.Common.Persistence.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using BudgetFlow.Infrastructure.Persistence.Interceptors;
 using System.Reflection;
-using BudgetFlow.Application.Common.Models;
 
 namespace BudgetFlow.Infrastructure.Contexts;
 
@@ -40,6 +40,8 @@ public class BudgetContext : DbContext
     public DbSet<Investment> Investments { get; set; }
     public DbSet<Wallet> Wallets { get; set; }
     public DbSet<UserAsset> UserAssets { get; set; }
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<UserRole> UserRoles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

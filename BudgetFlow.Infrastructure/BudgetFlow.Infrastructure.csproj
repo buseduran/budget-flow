@@ -18,12 +18,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="Resources\Templates\EmailPasswordTemplate.html">
+		<Content Include="Common\Resources\Templates\EmailPasswordTemplate.html">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
 	<ItemGroup>
-		<Content Include="Resources\Templates\EmailConfirmTemplate.html">
+		<Content Include="Common\Resources\Templates\EmailConfirmTemplate.html">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>

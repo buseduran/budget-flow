@@ -1,6 +1,6 @@
-﻿using BudgetFlow.Application.Auth;
-using BudgetFlow.Application.Common.Models;
+﻿using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Users;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 
@@ -21,4 +21,6 @@ public interface IUserRepository
     Task<User> FindByEmailAsync(string email);
     Task<bool> ConfirmEmailAsync(string email, bool IsEmailConfirmed);
     Task<PaginatedList<LogResponse>> GetLogsPaginatedAsync(int page, int pageSize, LogType logType, int userID);
+    Task<List<string>> GetUserRolesAsync(int userID);
+    Task<bool> CreateUserRoleAsync(UserRole userRole);
 }
