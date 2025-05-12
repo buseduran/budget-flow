@@ -146,10 +146,10 @@ public class UserController : ControllerBase
     /// </summary>
     /// <param name="confirmEmailCommand"></param>
     /// <returns></returns>
-    [HttpPost("ConfirmEmail")]
+    [HttpGet("ConfirmEmail")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IResult> ConfirmEmailAsync([FromBody] ConfirmEmailCommand confirmEmailCommand)
+    public async Task<IResult> ConfirmEmailAsync([FromQuery] ConfirmEmailCommand confirmEmailCommand)
     {
         var result = await mediator.Send(confirmEmailCommand);
         return result.IsSuccess
@@ -188,5 +188,4 @@ public class UserController : ControllerBase
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();
     }
-
 }

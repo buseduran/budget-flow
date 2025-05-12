@@ -6,29 +6,33 @@ using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Errors;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using System.Text;
 
 namespace BudgetFlow.Application.Users.Commands.Register;
 public class RegisterCommand : IRequest<Result<bool>>
 {
     public UserRegisterModel User { get; set; }
-    public string ClientUri { get; set; }
+    //public string ClientUri { get; set; }
     public class CreateUserCommandHandler : IRequestHandler<RegisterCommand, Result<bool>>
     {
         private readonly IUserRepository userRepository;
         private readonly IPasswordHasher passwordHasher;
         private readonly ITokenProvider tokenProvider;
         private readonly IEmailService emailService;
+        private readonly IConfiguration configuration;
         public CreateUserCommandHandler(
             IUserRepository userRepository,
             IPasswordHasher passwordHasher,
             ITokenProvider tokenProvider,
-            IEmailService emailService)
+            IEmailService emailService,
+            IConfiguration configuration)
         {
             this.userRepository = userRepository;
             this.passwordHasher = passwordHasher;
             this.tokenProvider = tokenProvider;
             this.emailService = emailService;
+            this.configuration = configuration;
         }
 
         public async Task<Result<bool>> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -66,8 +70,10 @@ public class RegisterCommand : IRequest<Result<bool>>
                 try
                 {
                     #region Send e-mail confirmation
+                    var emailConfig = configuration.GetSection("EmailConfiguration");
+
                     var token = tokenProvider.GenerateEmailConfirmationToken(user);
-                    var confirmationLink = $"{request.ClientUri}?token={token}&email={user.Email}";
+                    var confirmationLink = $"{emailConfig["ConfirmURI"]}?token={token}&email={user.Email}";
 
                     var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Resources", "Templates", "EmailConfirmTemplate.html");
                     var emailTemplate = File.ReadAllText(templatePath, Encoding.UTF8);
@@ -81,7 +87,7 @@ public class RegisterCommand : IRequest<Result<bool>>
                 {
                     return Result.Failure<bool>(UserErrors.EmailConfirmationMailFailed);
                 }
-            } 
+            }
 
             return Result.Success(true);
         }

@@ -5,6 +5,7 @@ using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Errors;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using System.Text;
 
 namespace BudgetFlow.Application.Users.Commands.ForgotPassword;
@@ -17,20 +18,21 @@ public class ForgotPasswordCommand : IRequest<Result<bool>>
         private readonly IUserRepository userRepository;
         private readonly ITokenProvider tokenProvider;
         private readonly IEmailService emailService;
+        private readonly IConfiguration configuration;
         public ForgotPasswordCommandHandler(
             IUserRepository userRepository,
             ITokenProvider tokenProvider,
-            IEmailService emailService)
+            IEmailService emailService,
+            IConfiguration configuration)
         {
             this.userRepository = userRepository;
             this.tokenProvider = tokenProvider;
             this.emailService = emailService;
+            this.configuration = configuration;
         }
 
         public async Task<Result<bool>> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(request.ForgotPassword.ClientUri))
-                return Result.Failure<bool>(UserErrors.UserNotFound);
 
             if (string.IsNullOrWhiteSpace(request.ForgotPassword.Email))
                 return Result.Failure<bool>(UserErrors.EmailCannotBeEmpty);
@@ -46,7 +48,9 @@ public class ForgotPasswordCommand : IRequest<Result<bool>>
                 { "token", token },
                 { "email", request.ForgotPassword.Email }
             };
-            var uriBuilder = new UriBuilder(request.ForgotPassword.ClientUri)
+            var emailConfig = configuration.GetSection("EmailConfiguration");
+
+            var uriBuilder = new UriBuilder(emailConfig["ForgotURI"])
             {
                 Query = string.Join("&", parameters.Select(p => $"{p.Key}={p.Value}"))
             };
