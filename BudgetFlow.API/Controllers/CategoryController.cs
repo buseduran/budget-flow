@@ -30,7 +30,6 @@ public class CategoryController : ControllerBase
     /// <param name="createCategoryCommand"></param>
     /// <returns></returns>
     [HttpPost]
-    [Authorize(Roles = $"{Role.Member},{Role.Admin}")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
     public async Task<IResult> CreateCategoryAsync([FromBody] CreateCategoryCommand createCategoryCommand)
