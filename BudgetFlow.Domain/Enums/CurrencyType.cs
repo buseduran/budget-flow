@@ -1,9 +1,9 @@
 ﻿namespace BudgetFlow.Domain.Enums;
 public enum CurrencyType
 {
-    USD = 0,
-    TRY = 1,
-    EUR = 2,
-    GBP = 3
+    USD = 1,
+    TRY = 2,
+    EUR = 3,
+    GBP = 4
 }
 

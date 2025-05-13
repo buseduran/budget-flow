@@ -1,6 +1,6 @@
 ﻿namespace BudgetFlow.Domain.Enums;
 public enum InvestmentType
 {
-    Buy,
-    Sell
+    Buy = 1,
+    Sell = 2
 }

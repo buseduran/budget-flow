@@ -5,11 +5,9 @@ using BudgetFlow.Application.Categories.Commands.UpdateCategory;
 using BudgetFlow.Application.Categories.Queries.GetCategoryPagination;
 using BudgetFlow.Application.Common.Extensions;
 using BudgetFlow.Application.Common.Utils;
-using BudgetFlow.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
 
 namespace BudgetFlow.API.Controllers;

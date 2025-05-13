@@ -26,8 +26,7 @@ public class WalletRepository : IWalletRepository
     public async Task<bool> UpdateWalletAsync(int ID, decimal Amount)
     {
         var wallet = await context.Wallets
-            .Where(wallet => wallet.UserId == ID)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(wallet => wallet.ID == ID);
         if (wallet is null) return false;
 
         wallet.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
@@ -36,41 +35,40 @@ public class WalletRepository : IWalletRepository
         return await context.SaveChangesAsync() > 0;
     }
 
-    public async Task<WalletResponse> GetWalletAsync(int UserID)
+    public async Task<WalletResponse> GetWalletAsync(int WalletID)
     {
         var wallet = await context.Wallets
-            .Where(wallet => wallet.UserId == UserID)
+            .Where(wallet => wallet.ID == WalletID)
             .Select(wallet => new WalletResponse
             {
+                ID = wallet.ID,
                 Balance = wallet.Balance,
                 Currency = wallet.Currency,
-                UserId = wallet.UserId
             })
             .FirstOrDefaultAsync();
+
         return wallet;
     }
 
-    public async Task<bool> UpdateCurrencyAsync(int UserID, CurrencyType Currency)
+    public async Task<bool> UpdateCurrencyAsync(int WalletID, CurrencyType Currency)
     {
         var wallet = await context.Wallets
-            .Where(wallet => wallet.UserId == UserID)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(wallet => wallet.ID == WalletID);
         if (wallet is null) return false;
+
         wallet.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
         wallet.Currency = Currency;
+
         return await context.SaveChangesAsync() > 0;
     }
 
-    public async Task<CurrencyType> GetUserCurrencyAsync(int UserID)
+    public async Task<CurrencyType> GetUserCurrencyAsync(int WalletID)
     {
         var wallet = await context.Wallets
-            .Where(wallet => wallet.UserId == UserID)
-            .Select(wallet => new
-            {
-                wallet.Currency
-            })
+            .Where(wallet => wallet.ID == WalletID)
+            .Select(wallet => wallet.Currency)
             .FirstOrDefaultAsync();
-        if (wallet is null) return CurrencyType.USD;
-        return wallet.Currency;
+
+        return wallet;
     }
 }

@@ -62,7 +62,7 @@ public class CreateWalletCommand : IRequest<Result<bool>>
             {
                 Balance = request.Balance,
                 Currency = request.Currency,
-                UserId= userID
+                //UserId= userID
             };
             var result = await walletRepository.CreateWalletAsync(wallet);
             return result
