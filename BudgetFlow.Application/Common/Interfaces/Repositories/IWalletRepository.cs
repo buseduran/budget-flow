@@ -10,4 +10,7 @@ public interface IWalletRepository
     Task<WalletResponse> GetWalletAsync(int UserID);
     Task<bool> UpdateCurrencyAsync(int UserID, CurrencyType Currency);
     Task<CurrencyType> GetUserCurrencyAsync(int UserID);
+    Task<WalletAssetResponse> GetWalletAssetAsync(int WalletID, int AssetID);
+    Task<bool> CreateWalletAssetAsync(WalletAsset walletAsset);
+    Task<bool> UpdateWalletAssetAsync(int ID, decimal Amount, decimal Balance);
 }

@@ -11,4 +11,3 @@ public class AssetDto
     public string Code { get; set; } //XAU XPT
     public string Unit { get; set; } //gr vs
 }
-

@@ -15,17 +15,24 @@ public class GetAssetInvestPaginationQuery : IRequest<Result<PaginatedAssetInves
     public class GetAssetInvestPaginationQueryHandler : IRequestHandler<GetAssetInvestPaginationQuery, Result<PaginatedAssetInvestResponse>>
     {
         private readonly IInvestmentRepository investmentRepository;
+        private readonly IPortfolioRepository portfolioRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
-        public GetAssetInvestPaginationQueryHandler(IInvestmentRepository investmentRepository, IHttpContextAccessor httpContextAccessor)
+        public GetAssetInvestPaginationQueryHandler(
+            IInvestmentRepository investmentRepository,
+            IHttpContextAccessor httpContextAccessor,
+            IPortfolioRepository portfolioRepository)
         {
             this.investmentRepository = investmentRepository;
             this.httpContextAccessor = httpContextAccessor;
+            this.portfolioRepository = portfolioRepository;
         }
 
         public async Task<Result<PaginatedAssetInvestResponse>> Handle(GetAssetInvestPaginationQuery request, CancellationToken cancellationToken)
         {
             var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
-            var result = await investmentRepository.GetAssetInvestPaginationAsync(userID, request.Portfolio, request.Asset, request.Page, request.PageSize);
+            var portfolio = await portfolioRepository.GetPortfolioByIdAsync(request.Portfolio);
+
+            var result = await investmentRepository.GetAssetInvestPaginationAsync(portfolio.WalletID, request.Portfolio, request.Asset, request.Page, request.PageSize);
             return result != null
                 ? Result.Success(result)
                 : Result.Failure<PaginatedAssetInvestResponse>(InvestmentErrors.InvestmentNotFound);

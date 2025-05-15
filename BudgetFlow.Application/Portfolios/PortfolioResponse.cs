@@ -5,4 +5,5 @@ public class PortfolioResponse
     public string Name { get; set; }
     public string Description { get; set; }
     public decimal TotalInvested { get; set; }
+    public int WalletID { get; set; }
 }

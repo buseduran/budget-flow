@@ -89,37 +89,37 @@ public class AssetRepository : IAssetRepository
         return rate;
     }
 
-    public async Task<UserAssetResponse> GetUserAssetAsync(int UserID, int AssetID)
-    {
-        var userAsset = await context.UserAssets
-            .Where(e => e.UserId == UserID && e.AssetId == AssetID)
-            .Select(e => new UserAssetResponse
-            {
-                ID = e.ID,
-                Amount = e.Amount,
-                Balance = e.Balance,
-                UserId = e.UserId,
-                AssetId = e.AssetId
-            })
-            .FirstOrDefaultAsync();
-        return userAsset;
-    }
-    public async Task<bool> CreateUserAssetAsync(UserAsset userAsset)
-    {
-        userAsset.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-        userAsset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-        await context.UserAssets.AddAsync(userAsset);
-        return await context.SaveChangesAsync() > 0;
-    }
+    //public async Task<WalletAssetResponse> GetUserAssetAsync(int UserID, int AssetID)
+    //{
+    //    var userAsset = await context.UserAssets
+    //        .Where(e => e.UserId == UserID && e.AssetId == AssetID)
+    //        .Select(e => new WalletAssetResponse
+    //        {
+    //            ID = e.ID,
+    //            Amount = e.Amount,
+    //            Balance = e.Balance,
+    //            UserId = e.UserId,
+    //            AssetId = e.AssetId
+    //        })
+    //        .FirstOrDefaultAsync();
+    //    return userAsset;
+    //}
+    //public async Task<bool> CreateUserAssetAsync(UserAsset userAsset)
+    //{
+    //    userAsset.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+    //    userAsset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+    //    await context.UserAssets.AddAsync(userAsset);
+    //    return await context.SaveChangesAsync() > 0;
+    //}
 
-    public async Task<bool> UpdateUserAssetAsync(int ID, decimal Amount, decimal Balance)
-    {
-        var userAsset = await context.UserAssets.FindAsync(ID);
-        userAsset.Amount = Amount;
-        userAsset.Balance = Balance;
-        userAsset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-        return await context.SaveChangesAsync() > 0;
-    }
+    //public async Task<bool> UpdateUserAssetAsync(int ID, decimal Amount, decimal Balance)
+    //{
+    //    var userAsset = await context.UserAssets.FindAsync(ID);
+    //    userAsset.Amount = Amount;
+    //    userAsset.Balance = Balance;
+    //    userAsset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+    //    return await context.SaveChangesAsync() > 0;
+    //}
 
     public Task<AssetResponse> GetByCodeAsync(string AssetCode)
     {

@@ -39,7 +39,7 @@ public class BudgetContext : DbContext
     public DbSet<Portfolio> Portfolios { get; set; }
     public DbSet<Investment> Investments { get; set; }
     public DbSet<Wallet> Wallets { get; set; }
-    public DbSet<UserAsset> UserAssets { get; set; }
+    public DbSet<WalletAsset> WalletAssets { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<UserWallet> UserWallets { get; set; }

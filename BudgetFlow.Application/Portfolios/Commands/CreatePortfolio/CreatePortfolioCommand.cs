@@ -30,10 +30,10 @@ public class CreatePortfolioCommand : IRequest<Result<int>>
             Portfolio portfolio = new()
             {
                 Name = request.Portfolio.Name,
-                Description = request.Portfolio.Description
+                Description = request.Portfolio.Description,
+                WalletID = request.Portfolio.WalletID,
             };
-            GetCurrentUser getCurrentUser = new(httpContextAccessor);
-            portfolio.UserID = getCurrentUser.GetCurrentUserID();
+            portfolio.UserID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
 
             var result = await portfolioRepository.CreatePortfolioAsync(portfolio);
             return result == 0

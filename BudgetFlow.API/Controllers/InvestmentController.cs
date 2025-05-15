@@ -19,7 +19,6 @@ namespace BudgetFlow.API.Controllers;
 public class InvestmentController : ControllerBase
 {
     private readonly IMediator mediator;
-
     public InvestmentController(IMediator mediator)
     {
         this.mediator = mediator;
