@@ -9,9 +9,11 @@ namespace BudgetFlow.Application.Budget.Queries.GetAnalysisEntries;
 public class GetAnalysisEntriesQuery : IRequest<Result<AnalysisEntriesResponse>>
 {
     public string Range { get; set; }
-    public GetAnalysisEntriesQuery(string Range)
+    public int WalletID { get; set; }
+    public GetAnalysisEntriesQuery(string Range, int WalletID)
     {
         this.Range = Range;
+        this.WalletID = WalletID;
     }
     public class GetAnalysisEntriesQueryHandler : IRequestHandler<GetAnalysisEntriesQuery, Result<AnalysisEntriesResponse>>
     {
@@ -31,7 +33,7 @@ public class GetAnalysisEntriesQuery : IRequest<Result<AnalysisEntriesResponse>>
 
             var currency = await walletRepository.GetUserCurrencyAsync(userID);
 
-            var entries = await budgetRepository.GetAnalysisEntriesAsync(userID, request.Range, currency);
+            var entries = await budgetRepository.GetAnalysisEntriesAsync(userID, request.Range, currency, request.WalletID);
             return entries != null
                 ? Result.Success(entries)
                 : Result.Failure<AnalysisEntriesResponse>(EntryErrors.AnalysisEntriesRetrievalFailed);

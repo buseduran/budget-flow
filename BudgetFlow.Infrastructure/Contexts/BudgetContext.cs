@@ -42,6 +42,7 @@ public class BudgetContext : DbContext
     public DbSet<UserAsset> UserAssets { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
+    public DbSet<UserWallet> UserWallets { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

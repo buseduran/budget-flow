@@ -14,16 +14,18 @@ public class WalletRepository : IWalletRepository
         this.context = context;
     }
 
-    public async Task<bool> CreateWalletAsync(Wallet Wallet)
+    public async Task<int> CreateWalletAsync(Wallet wallet, bool saveChanges = true)
     {
-        Wallet.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-        Wallet.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+        wallet.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+        wallet.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
-        await context.Wallets.AddAsync(Wallet);
-        return await context.SaveChangesAsync() > 0;
+        await context.Wallets.AddAsync(wallet);
+        if (saveChanges)
+            await context.SaveChangesAsync();
+        return wallet.ID;
     }
 
-    public async Task<bool> UpdateWalletAsync(int ID, decimal Amount)
+    public async Task<bool> UpdateWalletAsync(int ID, decimal Amount, bool saveChanges = true)
     {
         var wallet = await context.Wallets
             .FirstOrDefaultAsync(wallet => wallet.ID == ID);
@@ -31,8 +33,10 @@ public class WalletRepository : IWalletRepository
 
         wallet.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
         wallet.Balance += Amount;
+        if (saveChanges)
+            await context.SaveChangesAsync();
 
-        return await context.SaveChangesAsync() > 0;
+        return true;
     }
 
     public async Task<WalletResponse> GetWalletAsync(int WalletID)
@@ -49,7 +53,6 @@ public class WalletRepository : IWalletRepository
 
         return wallet;
     }
-
     public async Task<bool> UpdateCurrencyAsync(int WalletID, CurrencyType Currency)
     {
         var wallet = await context.Wallets

@@ -27,6 +27,7 @@ public static class ServiceRegistration
 
         services.AddScoped<IStockScraper, StockScraper>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IWalletAuthService, WalletAuthService>();
 
         services.AddQuartz(q =>
         {

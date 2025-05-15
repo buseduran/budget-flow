@@ -1,7 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
-using BudgetFlow.Domain.Enums;
 using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -11,6 +10,7 @@ public class GetEntryPaginationQuery : IRequest<Result<PaginatedList<EntryRespon
 {
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 50;
+    public int WalletID { get; set; }
     public class GetEntryPaginationQueryHandler : IRequestHandler<GetEntryPaginationQuery, Result<PaginatedList<EntryResponse>>>
     {
         private readonly IBudgetRepository budgetRepository;
@@ -30,7 +30,7 @@ public class GetEntryPaginationQuery : IRequest<Result<PaginatedList<EntryRespon
 
             var currency = await walletRepository.GetUserCurrencyAsync(userID);
 
-            var result = await budgetRepository.GetPaginatedAsync(request.Page, request.PageSize, userID, currency);
+            var result = await budgetRepository.GetPaginatedAsync(request.Page, request.PageSize, userID, currency, request.WalletID);
             if (result == null)
                 return Result.Failure<PaginatedList<EntryResponse>>(EntryErrors.EntryNotFound);
 

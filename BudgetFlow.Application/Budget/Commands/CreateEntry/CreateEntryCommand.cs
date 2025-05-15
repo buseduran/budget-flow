@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using BudgetFlow.Application.Common.Dtos;
+using BudgetFlow.Application.Common.Interfaces;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
@@ -17,26 +19,42 @@ public class CreateEntryCommand : IRequest<Result<bool>>
     {
         private readonly IBudgetRepository budgetRepository;
         private readonly IWalletRepository walletRepository;
+        private readonly IUserWalletRepository userWalletRepository;
         private readonly ICategoryRepository categoryRepository;
         private readonly IMapper mapper;
         private readonly IHttpContextAccessor httpContextAccessor;
-        public CreateEntryCommandHandler(IBudgetRepository budgetRepository, IWalletRepository walletRepository, ICategoryRepository categoryRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        private readonly IWalletAuthService walletAuthService;
+        private readonly IUnitOfWork unitOfWork;
+        public CreateEntryCommandHandler(
+            IBudgetRepository budgetRepository,
+            IWalletRepository walletRepository,
+            IUserWalletRepository userWalletRepository,
+            ICategoryRepository categoryRepository,
+            IMapper mapper,
+            IHttpContextAccessor httpContextAccessor,
+            IWalletAuthService walletAuthService,
+            IUnitOfWork unitOfWork)
         {
             this.budgetRepository = budgetRepository;
             this.walletRepository = walletRepository;
+            this.userWalletRepository = userWalletRepository;
             this.categoryRepository = categoryRepository;
             this.mapper = mapper;
             this.httpContextAccessor = httpContextAccessor;
+            this.walletAuthService = walletAuthService;
+            this.unitOfWork = unitOfWork;
         }
 
         public async Task<Result<bool>> Handle(CreateEntryCommand request, CancellationToken cancellationToken)
         {
             var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
 
-            #region Check user has a wallet
-            var wallet = await walletRepository.GetWalletAsync(userID);
+            #region Check user has a wallet and user's role for this wallet
+            var wallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(request.Entry.WalletID, userID);
             if (wallet is null)
                 return Result.Failure<bool>(WalletErrors.WalletNotFound);
+
+            await walletAuthService.EnsureUserHasAccessAsync(request.Entry.WalletID, userID, WalletRole.Owner);
             #endregion
 
             var mappedEntry = mapper.Map<Entry>(request.Entry);
@@ -47,26 +65,36 @@ public class CreateEntryCommand : IRequest<Result<bool>>
                 return Result.Failure<bool>(CategoryErrors.CategoryNotFound);
 
             #region Check user's wallet balance is enough
-            if ((category.Type == EntryType.Expense) && (wallet.Balance < Math.Abs(mappedEntry.Amount)))
+            if ((category.Type == EntryType.Expense) && (wallet.Wallet.Balance < Math.Abs(mappedEntry.Amount)))
                 return Result.Failure<bool>(WalletErrors.InsufficientBalance);
             #endregion
 
             #region Create entry and Update wallet
-            var entryResult = await budgetRepository.CreateEntryAsync(mappedEntry);
-            if (!entryResult)
-                return Result.Failure<bool>(EntryErrors.CreationFailed);
+            await unitOfWork.BeginTransactionAsync();
+            try
+            {
+                // Entry ekle
+                var entryResult = await budgetRepository.CreateEntryAsync(mappedEntry, saveChanges: false);
 
-            if (category.Type == EntryType.Income)
-                mappedEntry.Amount = Math.Abs(mappedEntry.Amount);
-            else
-                mappedEntry.Amount = -Math.Abs(mappedEntry.Amount);
+                // Miktarı kategori tipine göre ayarla
+                mappedEntry.Amount = category.Type == EntryType.Income
+                    ? Math.Abs(mappedEntry.Amount)
+                    : -Math.Abs(mappedEntry.Amount);
 
-            var result = await walletRepository.UpdateWalletAsync(mappedEntry.UserID, mappedEntry.Amount);
-            if (!result)
-                return Result.Failure<bool>(WalletErrors.UpdateFailed);
+                // Cüzdan güncelle
+                var result = await walletRepository.UpdateWalletAsync(wallet.WalletID, mappedEntry.Amount, saveChanges: false);
+
+                await unitOfWork.SaveChangesAsync();
+                await unitOfWork.CommitAsync();
+
+                return Result.Success(true);
+            }
+            catch (Exception ex)
+            {
+                await unitOfWork.RollbackAsync();
+                return Result.Failure<bool>(GeneralErrors.FromMessage(ex.Message));
+            }
             #endregion
-
-            return Result.Success(true);
         }
     }
 }

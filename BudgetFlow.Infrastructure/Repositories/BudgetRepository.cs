@@ -19,16 +19,18 @@ public class BudgetRepository : IBudgetRepository
         this.context = context;
         this.mapper = mapper;
     }
-    public async Task<bool> CreateEntryAsync(Entry Entry)
+    public async Task<bool> CreateEntryAsync(Entry Entry, bool saveChanges = true)
     {
         Entry.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
         Entry.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
         Entry.Date = DateTime.SpecifyKind(Entry.Date, DateTimeKind.Utc);
 
         await context.Entries.AddAsync(Entry);
-        return await context.SaveChangesAsync() > 0;
+        if (saveChanges)
+            await context.SaveChangesAsync();
+        return true;
     }
-    public async Task<bool> UpdateEntryAsync(int ID, EntryDto Entry)
+    public async Task<bool> UpdateEntryAsync(int ID, EntryDto Entry, bool saveChanges = true)
     {
         var entry = await context.Entries.FindAsync(ID);
         if (entry is null) return false;
@@ -49,13 +51,13 @@ public class BudgetRepository : IBudgetRepository
         await context.SaveChangesAsync();
         return true;
     }
-    public async Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID, CurrencyType currencyType)
+    public async Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID, CurrencyType currencyType, int walletID)
     {
         var entries = await context.Entries
             .OrderByDescending(c => c.CreatedAt)
             .Skip((Page - 1) * PageSize)
             .Take(PageSize)
-            .Where(u => u.UserID == UserID)
+            .Where(u => u.UserID == UserID && u.WalletID == walletID)
             .Include(c => c.Category)
             .Select(e => new EntryResponse
             {
@@ -78,7 +80,7 @@ public class BudgetRepository : IBudgetRepository
         return new PaginatedList<EntryResponse>(entries, count, Page, PageSize);
     }
 
-    public async Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(int userID, string Range, CurrencyType currencyType)
+    public async Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(int userID, string Range, CurrencyType currencyType, int walletID)
     {
         var startDate = GetDateForRange.GetStartDateForRange(Range);
         var endDate = DateTime.UtcNow;
@@ -87,6 +89,7 @@ public class BudgetRepository : IBudgetRepository
 
         var groupedEntries = await context.Entries
             .Where(e => e.UserID == userID &&
+                        e.WalletID == walletID &&
                        ((e.Date >= startDate && e.Date <= endDate) ||
                         (e.Date >= previousStartDate && e.Date <= previousEndDate)))
             .Select(e => new
@@ -196,10 +199,10 @@ public class BudgetRepository : IBudgetRepository
         };
     }
 
-    public async Task<List<LastEntryResponse>> GetLastFiveEntriesAsync(int userID, CurrencyType currencyType)
+    public async Task<List<LastEntryResponse>> GetLastFiveEntriesAsync(int userID, CurrencyType currencyType, int walletID)
     {
         var entries = await context.Entries
-            .Where(e => e.UserID == userID)
+            .Where(e => e.UserID == userID && e.WalletID == walletID)
             .Include(e => e.Category)
             .OrderByDescending(e => e.CreatedAt)
             .Take(5)

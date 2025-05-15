@@ -1,6 +1,8 @@
-﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+﻿using BudgetFlow.Application.Common.Interfaces;
+using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Interfaces.Services;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Infrastructure.Common.Persistence;
 using BudgetFlow.Infrastructure.Common.Persistence.Interceptors;
 using BudgetFlow.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,8 +21,10 @@ public static class ServiceRegistration
         services.AddScoped<IInvestmentRepository, InvestmentRepository>();
         services.AddScoped<IPortfolioRepository, PortfolioRepository>();
         services.AddScoped<IWalletRepository, WalletRepository>();
+        services.AddScoped<IUserWalletRepository, UserWalletRepository>();
 
         services.AddScoped<ITokenProvider, TokenProvider>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         //AuditInterceptor kaydı
         services.AddScoped<AuditInterceptor>();

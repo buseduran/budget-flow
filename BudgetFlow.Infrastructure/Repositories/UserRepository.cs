@@ -37,9 +37,28 @@ public class UserRepository : IUserRepository
 
     public async Task<UserResponse> GetByIdAsync(int ID)
     {
-        var user = await context.Users.FindAsync(ID);
-        if (user == null) return null;
-        var response = mapper.Map<UserResponse>(user);
+        var user = await context.Users
+         .Include(u => u.UserWallets)
+             .ThenInclude(uw => uw.Wallet)
+         .FirstOrDefaultAsync(u => u.ID == ID);
+
+        if (user is null) return null;
+
+        var response = new UserResponse
+        {
+            ID = user.ID,
+            Name = user.Name,
+            Email = user.Email,
+            IsEmailConfirmed = user.IsEmailConfirmed,
+            Wallets = user.UserWallets.Select(uw => new UserWalletResponse
+            {
+                WalletID = uw.WalletID,
+                Role = uw.Role,
+                Balance = uw.Wallet.Balance,
+                Currency = uw.Wallet.Currency.ToString()
+            }).ToList()
+        };
+
         return response;
     }
 
