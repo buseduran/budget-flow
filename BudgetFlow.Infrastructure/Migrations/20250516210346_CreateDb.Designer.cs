@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BudgetFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(BudgetContext))]
-    [Migration("20250406212022_adduserassetstable")]
-    partial class adduserassetstable
+    [Migration("20250516210346_CreateDb")]
+    partial class CreateDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,7 +35,6 @@ namespace BudgetFlow.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Token")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("UserID")
@@ -56,36 +55,31 @@ namespace BudgetFlow.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
-                    b.Property<int>("AssetTypeId")
+                    b.Property<int>("AssetType")
                         .HasColumnType("integer");
 
                     b.Property<decimal>("BuyPrice")
                         .HasColumnType("numeric");
 
                     b.Property<string>("Code")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<decimal>("SellPrice")
                         .HasColumnType("numeric");
 
                     b.Property<string>("Symbol")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Unit")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -93,12 +87,10 @@ namespace BudgetFlow.Infrastructure.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("AssetTypeId");
-
                     b.ToTable("Assets");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.AssetType", b =>
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.AuditLog", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -106,22 +98,30 @@ namespace BudgetFlow.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
+                    b.Property<string>("Action")
                         .HasColumnType("text");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
+                    b.Property<string>("NewValues")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<string>("OldValues")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PrimaryKey")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TableName")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("integer");
 
                     b.HasKey("ID");
 
-                    b.ToTable("AssetTypes");
+                    b.ToTable("AuditLogs");
                 });
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.Category", b =>
@@ -133,15 +133,16 @@ namespace BudgetFlow.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<string>("Color")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -177,11 +178,7 @@ namespace BudgetFlow.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -189,11 +186,16 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Property<int>("UserID")
                         .HasColumnType("integer");
 
+                    b.Property<int>("WalletID")
+                        .HasColumnType("integer");
+
                     b.HasKey("ID");
 
                     b.HasIndex("CategoryID");
 
                     b.HasIndex("UserID");
+
+                    b.HasIndex("WalletID");
 
                     b.ToTable("Entries");
                 });
@@ -219,14 +221,10 @@ namespace BudgetFlow.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("PortfolioId")
                         .HasColumnType("integer");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
@@ -246,37 +244,6 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.ToTable("Investments");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.Log", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("Logs");
-                });
-
             modelBuilder.Entity("BudgetFlow.Domain.Entities.Portfolio", b =>
                 {
                     b.Property<int>("ID")
@@ -289,17 +256,18 @@ namespace BudgetFlow.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("UserID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("WalletID")
                         .HasColumnType("integer");
 
                     b.HasKey("ID");
@@ -309,7 +277,39 @@ namespace BudgetFlow.Infrastructure.Migrations
 
                     b.HasIndex("UserID");
 
+                    b.HasIndex("WalletID");
+
                     b.ToTable("Portfolios");
+                });
+
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.Role", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            ID = 1,
+                            Name = "Admin"
+                        },
+                        new
+                        {
+                            ID = 2,
+                            Name = "Member"
+                        });
                 });
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.User", b =>
@@ -324,29 +324,49 @@ namespace BudgetFlow.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsEmailConfirmed")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("WalletID")
+                        .HasColumnType("integer");
 
                     b.HasKey("ID");
 
                     b.HasIndex("Email")
                         .IsUnique();
 
+                    b.HasIndex("WalletID");
+
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.UserAsset", b =>
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.UserRole", b =>
+                {
+                    b.Property<int>("UserID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RoleID")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserID", "RoleID");
+
+                    b.HasIndex("RoleID");
+
+                    b.ToTable("UserRoles");
+                });
+
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.UserWallet", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -354,31 +374,28 @@ namespace BudgetFlow.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("AssetId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("numeric");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
+                    b.Property<int>("UserID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("WalletID")
                         .HasColumnType("integer");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("AssetId");
+                    b.HasIndex("UserID");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("WalletID");
 
-                    b.ToTable("UserAssets");
+                    b.ToTable("UserWallets");
                 });
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.Wallet", b =>
@@ -401,15 +418,44 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
+                    b.HasKey("ID");
+
+                    b.ToTable("Wallets");
+                });
+
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.WalletAsset", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("AssetId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("WalletId")
                         .HasColumnType("integer");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("AssetId");
 
-                    b.ToTable("Wallets");
+                    b.HasIndex("WalletId");
+
+                    b.ToTable("WalletAssets");
                 });
 
             modelBuilder.Entity("BudgetFlow.Application.Common.Models.RefreshToken", b =>
@@ -421,17 +467,6 @@ namespace BudgetFlow.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.Asset", b =>
-                {
-                    b.HasOne("BudgetFlow.Domain.Entities.AssetType", "AssetType")
-                        .WithMany("Assets")
-                        .HasForeignKey("AssetTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AssetType");
                 });
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.Category", b =>
@@ -459,9 +494,17 @@ namespace BudgetFlow.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("BudgetFlow.Domain.Entities.Wallet", "Wallet")
+                        .WithMany()
+                        .HasForeignKey("WalletID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Category");
 
                     b.Navigation("User");
+
+                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.Investment", b =>
@@ -483,17 +526,6 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Navigation("Portfolio");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.Log", b =>
-                {
-                    b.HasOne("BudgetFlow.Domain.Entities.User", "User")
-                        .WithMany("Logs")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("BudgetFlow.Domain.Entities.Portfolio", b =>
                 {
                     b.HasOne("BudgetFlow.Domain.Entities.User", "User")
@@ -502,10 +534,63 @@ namespace BudgetFlow.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("BudgetFlow.Domain.Entities.Wallet", "Wallet")
+                        .WithMany()
+                        .HasForeignKey("WalletID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("Wallet");
+                });
+
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.User", b =>
+                {
+                    b.HasOne("BudgetFlow.Domain.Entities.Wallet", null)
+                        .WithMany("User")
+                        .HasForeignKey("WalletID");
+                });
+
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.UserRole", b =>
+                {
+                    b.HasOne("BudgetFlow.Domain.Entities.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BudgetFlow.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.UserAsset", b =>
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.UserWallet", b =>
+                {
+                    b.HasOne("BudgetFlow.Domain.Entities.User", "User")
+                        .WithMany("UserWallets")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BudgetFlow.Domain.Entities.Wallet", "Wallet")
+                        .WithMany()
+                        .HasForeignKey("WalletID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("Wallet");
+                });
+
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.WalletAsset", b =>
                 {
                     b.HasOne("BudgetFlow.Domain.Entities.Asset", "Asset")
                         .WithMany()
@@ -513,36 +598,20 @@ namespace BudgetFlow.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BudgetFlow.Domain.Entities.User", "User")
+                    b.HasOne("BudgetFlow.Domain.Entities.Wallet", "Wallet")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("WalletId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Asset");
 
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.Wallet", b =>
-                {
-                    b.HasOne("BudgetFlow.Domain.Entities.User", "User")
-                        .WithOne("Wallet")
-                        .HasForeignKey("BudgetFlow.Domain.Entities.Wallet", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
+                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.Asset", b =>
                 {
                     b.Navigation("Investments");
-                });
-
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.AssetType", b =>
-                {
-                    b.Navigation("Assets");
                 });
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.Portfolio", b =>
@@ -552,12 +621,14 @@ namespace BudgetFlow.Infrastructure.Migrations
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.User", b =>
                 {
-                    b.Navigation("Logs");
-
                     b.Navigation("Portfolios");
 
-                    b.Navigation("Wallet")
-                        .IsRequired();
+                    b.Navigation("UserWallets");
+                });
+
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.Wallet", b =>
+                {
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }
