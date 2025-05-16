@@ -1,4 +1,5 @@
 ﻿using BudgetFlow.Application.Categories;
+using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Enums;
 
 namespace BudgetFlow.Application.Budget;

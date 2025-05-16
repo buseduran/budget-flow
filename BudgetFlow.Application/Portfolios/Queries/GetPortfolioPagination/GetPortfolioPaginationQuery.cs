@@ -10,6 +10,7 @@ public class GetPortfolioPaginationQuery : IRequest<Result<PaginatedList<Portfol
 {
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 50;
+    public int WalletID { get; set; }
     public class GetPortfolioPaginationQueryHandler : IRequestHandler<GetPortfolioPaginationQuery, Result<PaginatedList<PortfolioResponse>>>
     {
         private readonly IPortfolioRepository portfolioRepository;
@@ -21,10 +22,9 @@ public class GetPortfolioPaginationQuery : IRequest<Result<PaginatedList<Portfol
         }
         public async Task<Result<PaginatedList<PortfolioResponse>>> Handle(GetPortfolioPaginationQuery request, CancellationToken cancellationToken)
         {
-            GetCurrentUser getCurrentUser = new(httpContextAccessor);
-            int UserID = getCurrentUser.GetCurrentUserID();
+            int userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
 
-            var result = await portfolioRepository.GetPortfoliosAsync(request.Page, request.PageSize, UserID);
+            var result = await portfolioRepository.GetPortfoliosAsync(request.Page, request.PageSize, userID, request.WalletID);
             return result != null
                 ? Result.Success(result)
                 : Result.Failure<PaginatedList<PortfolioResponse>>(PortfolioErrors.PortfolioNotFound);

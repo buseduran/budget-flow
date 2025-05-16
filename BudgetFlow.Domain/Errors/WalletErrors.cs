@@ -9,5 +9,8 @@ public static class WalletErrors
     public static Error InsufficientBalance => new("Cüzdan bakiyesi yetersiz.");
     public static Error NoBalanceForAsset => new("Bu varlık için bakiye bulunmamaktadır.");
     public static Error InvalidOpeningBalance => new("Açılış bakiyesi 0'dan büyük olmalı.");
-
+    public static Error UserNotFoundInWallet => new("Cüzdan kullanıcısı bulunamadı.");
+    public static Error UserIsNotOwner => new("Bu işlemi gerçekleştirmek için gerekli yetkiye sahip değilsiniz.");
+    public static Error UserWalletCreationFailed => new("Cüzdan kullanıcı ilişkisi oluşturulurken bir hata oluştu.");
+    public static Error UserWalletAlreadyExists => new("Kullanıcının zaten bir cüzdanı bulunmaktadır.");
 }

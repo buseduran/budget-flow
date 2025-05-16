@@ -8,5 +8,7 @@ public class Portfolio : BaseEntity
 
     public int UserID { get; set; }
     public User User { get; set; }
+    public int WalletID { get; set; }
+    public Wallet Wallet { get; set; }
     public ICollection<Investment> Investments { get; set; }
 }

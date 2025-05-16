@@ -3,6 +3,7 @@ using System;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BudgetFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(BudgetContext))]
-    partial class BudgetContextModelSnapshot : ModelSnapshot
+    [Migration("20250514130926_AddUserWallet")]
+    partial class AddUserWallet
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -264,17 +267,12 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Property<int>("UserID")
                         .HasColumnType("integer");
 
-                    b.Property<int>("WalletID")
-                        .HasColumnType("integer");
-
                     b.HasKey("ID");
 
                     b.HasIndex("Name")
                         .IsUnique();
 
                     b.HasIndex("UserID");
-
-                    b.HasIndex("WalletID");
 
                     b.ToTable("Portfolios");
                 });
@@ -348,6 +346,41 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.UserAsset", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("AssetId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("AssetId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserAssets");
+                });
+
             modelBuilder.Entity("BudgetFlow.Domain.Entities.UserRole", b =>
                 {
                     b.Property<int>("UserID")
@@ -418,41 +451,6 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Wallets");
-                });
-
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.WalletAsset", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("AssetId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("WalletId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("AssetId");
-
-                    b.HasIndex("WalletId");
-
-                    b.ToTable("WalletAssets");
                 });
 
             modelBuilder.Entity("BudgetFlow.Application.Common.Models.RefreshToken", b =>
@@ -531,15 +529,7 @@ namespace BudgetFlow.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BudgetFlow.Domain.Entities.Wallet", "Wallet")
-                        .WithMany()
-                        .HasForeignKey("WalletID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("User");
-
-                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.User", b =>
@@ -547,6 +537,25 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.HasOne("BudgetFlow.Domain.Entities.Wallet", null)
                         .WithMany("User")
                         .HasForeignKey("WalletID");
+                });
+
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.UserAsset", b =>
+                {
+                    b.HasOne("BudgetFlow.Domain.Entities.Asset", "Asset")
+                        .WithMany()
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BudgetFlow.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Asset");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.UserRole", b =>
@@ -583,25 +592,6 @@ namespace BudgetFlow.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-
-                    b.Navigation("Wallet");
-                });
-
-            modelBuilder.Entity("BudgetFlow.Domain.Entities.WalletAsset", b =>
-                {
-                    b.HasOne("BudgetFlow.Domain.Entities.Asset", "Asset")
-                        .WithMany()
-                        .HasForeignKey("AssetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BudgetFlow.Domain.Entities.Wallet", "Wallet")
-                        .WithMany()
-                        .HasForeignKey("WalletId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Asset");
 
                     b.Navigation("Wallet");
                 });

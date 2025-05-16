@@ -1,4 +1,5 @@
-﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+﻿using BudgetFlow.Application.Common.Interfaces;
+using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
@@ -19,55 +20,90 @@ public class CreateWalletCommand : IRequest<Result<bool>>
         private readonly IBudgetRepository budgetRepository;
         private readonly ICategoryRepository categoryRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
-        public CreateWalletCommandHandler(IWalletRepository walletRepository, IBudgetRepository budgetRepository, IHttpContextAccessor httpContextAccessor, ICategoryRepository categoryRepository)
+        private readonly IUserWalletRepository userWalletRepository;
+        private readonly IUnitOfWork unitOfWork;
+        public CreateWalletCommandHandler(
+            IWalletRepository walletRepository,
+            IBudgetRepository budgetRepository,
+            IHttpContextAccessor httpContextAccessor,
+            ICategoryRepository categoryRepository,
+            IUserWalletRepository userWalletRepository,
+            IUnitOfWork unitOfWork)
         {
             this.walletRepository = walletRepository;
             this.budgetRepository = budgetRepository;
             this.httpContextAccessor = httpContextAccessor;
             this.categoryRepository = categoryRepository;
+            this.userWalletRepository = userWalletRepository;
+            this.unitOfWork = unitOfWork;
         }
         public async Task<Result<bool>> Handle(CreateWalletCommand request, CancellationToken cancellationToken)
         {
-            if (request.Balance <= 0)
+            if (request.Balance < 0)
                 return Result.Failure<bool>(WalletErrors.InvalidOpeningBalance);
 
             var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
 
-            #region Başlangıç bakiyesi ilk Entry olarak kaydedilir
-            var category = new Category
-            {
-                Name = "Başlangıç Bakiyesi",
-                Color = "#000000",
-                Type = EntryType.OpeningBalance,
-                UserID = userID
-            };
-            var categoryResult = await categoryRepository.CreateCategoryAsync(category);
-            if (categoryResult is 0)
-                return Result.Failure<bool>(CategoryErrors.CreationFailed);
+            var hasExistingOwnerWallet = await userWalletRepository.GetUserWalletByRoleAsync(userID, WalletRole.Owner);
+            if (hasExistingOwnerWallet is not null)
+                return Result.Failure<bool>(WalletErrors.UserWalletAlreadyExists);
 
-            var entry = new Entry
+            await unitOfWork.BeginTransactionAsync();
+            try
             {
-                Name = "Başlangıç Bakiyesi",
-                Amount = request.Balance,
-                Date = DateTime.UtcNow,
-                CategoryID = categoryResult,
-                UserID = userID,
-            };
-            var entryResult = await budgetRepository.CreateEntryAsync(entry);
-            if (!entryResult)
-                return Result.Failure<bool>(EntryErrors.CreationFailed);
-            #endregion
+                // Kategori oluştur
+                var category = new Category
+                {
+                    Name = "Başlangıç Bakiyesi",
+                    Color = "#000000",
+                    Type = EntryType.OpeningBalance,
+                    UserID = userID
+                };
+                await categoryRepository.CreateCategoryAsync(category, saveChanges: false);
 
-            var wallet = new Wallet
+                // Cüzdan oluştur
+                var wallet = new Wallet
+                {
+                    Balance = request.Balance,
+                    Currency = request.Currency,
+                };
+                await walletRepository.CreateWalletAsync(wallet, saveChanges: false);
+
+                // İlk SaveChanges — Category ve Wallet ID’leri garanti altına alınır
+                await unitOfWork.SaveChangesAsync();
+
+                // Kullanıcı-Cüzdan ilişkisi
+                var userWallet = new UserWallet
+                {
+                    UserID = userID,
+                    WalletID = wallet.ID,
+                    Role = WalletRole.Owner
+                };
+                var userWalletCreated = await userWalletRepository.CreateAsync(userWallet, saveChanges: false);
+
+                // Entry oluştur
+                var entry = new Entry
+                {
+                    Name = "Başlangıç Bakiyesi",
+                    Amount = request.Balance,
+                    Date = DateTime.UtcNow,
+                    CategoryID = category.ID,
+                    UserID = userID,
+                    WalletID = wallet.ID
+                };
+                var entryResult = await budgetRepository.CreateEntryAsync(entry, saveChanges: false);
+
+                // Final save
+                await unitOfWork.SaveChangesAsync();
+                await unitOfWork.CommitAsync();
+
+                return Result.Success(true);
+            }
+            catch (Exception ex)
             {
-                Balance = request.Balance,
-                Currency = request.Currency,
-                UserId= userID
-            };
-            var result = await walletRepository.CreateWalletAsync(wallet);
-            return result
-                ? Result.Success(true)
-                : Result.Failure<bool>(WalletErrors.CreationFailed);
+                await unitOfWork.RollbackAsync();
+                return Result.Failure<bool>(GeneralErrors.FromMessage(ex.Message));
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 namespace BudgetFlow.Application.Budget.Queries.GetLastEntries;
 public class GetLastEntriesQuery : IRequest<Result<List<LastEntryResponse>>>
 {
+    public int WalletID { get; set; }
     public class GetLastFiveEntriesQueryHandler : IRequestHandler<GetLastEntriesQuery, Result<List<LastEntryResponse>>>
     {
         private readonly IBudgetRepository budgetRepository;
@@ -26,7 +27,7 @@ public class GetLastEntriesQuery : IRequest<Result<List<LastEntryResponse>>>
 
             var currency = await walletRepository.GetUserCurrencyAsync(userID);
 
-            var entries = await budgetRepository.GetLastFiveEntriesAsync(userID, currency);
+            var entries = await budgetRepository.GetLastFiveEntriesAsync(userID, currency, request.WalletID);
             return entries != null
                 ? Result.Success(entries)
                 : Result.Failure<List<LastEntryResponse>>(EntryErrors.LatestEntriesRetrievalFailed);

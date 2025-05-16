@@ -14,13 +14,14 @@ public class CategoryRepository : ICategoryRepository
         this.context = context;
     }
 
-    public async Task<int> CreateCategoryAsync(Category Category)
+    public async Task<int> CreateCategoryAsync(Category Category, bool saveChanges = true)
     {
         Category.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
         Category.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
         await context.Categories.AddAsync(Category);
-        await context.SaveChangesAsync();
+        if (saveChanges)
+            await context.SaveChangesAsync();
         return Category.ID;
     }
 

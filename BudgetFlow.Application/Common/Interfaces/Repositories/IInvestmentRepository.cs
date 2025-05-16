@@ -11,5 +11,5 @@ public interface IInvestmentRepository
     Task<List<InvestmentResponse>> GetInvestmentsAsync(int PortfolioID);
     Task<PortfolioAssetResponse> GetAssetInvestmentsAsync(string Portfolio, int userID);
     Task<List<Dictionary<string, object>>> GetAssetRevenueAsync(string Portfolio, int UserID);
-    Task<PaginatedAssetInvestResponse> GetAssetInvestPaginationAsync(int UserID, int PortfolioID, int AssetID, int Page, int PageSize);
+    Task<PaginatedAssetInvestResponse> GetAssetInvestPaginationAsync(int WalletID, int PortfolioID, int AssetID, int Page, int PageSize);
 }

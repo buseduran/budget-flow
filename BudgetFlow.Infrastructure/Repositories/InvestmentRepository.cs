@@ -75,6 +75,10 @@ public class InvestmentRepository : IInvestmentRepository
                 p.ID
             }).FirstOrDefaultAsync();
 
+        var walletID = await context.Portfolios
+           .Where(p => p.Name == portfolio)
+           .Select(p => p.WalletID).FirstOrDefaultAsync();
+
         var investmentsRaw = await context.Investments
             .Where(e => e.Portfolio.Name == portfolio)
             .GroupBy(e => new
@@ -100,8 +104,8 @@ public class InvestmentRepository : IInvestmentRepository
             })
             .ToListAsync();
 
-        var userAssets = await context.UserAssets
-            .Where(u => u.UserId == userID)
+        var userAssets = await context.WalletAssets
+            .Where(u => u.WalletId == walletID)
             .ToListAsync();
 
         var investments = investmentsRaw
@@ -177,7 +181,7 @@ public class InvestmentRepository : IInvestmentRepository
         return transformedData;
     }
 
-    public async Task<PaginatedAssetInvestResponse> GetAssetInvestPaginationAsync(int UserID, int PortfolioID, int AssetID, int Page, int PageSize)
+    public async Task<PaginatedAssetInvestResponse> GetAssetInvestPaginationAsync(int WalletID, int PortfolioID, int AssetID, int Page, int PageSize)
     {
         var investments = await context.Investments
              .Where(e => e.PortfolioId == PortfolioID && e.AssetId == AssetID)
@@ -197,7 +201,6 @@ public class InvestmentRepository : IInvestmentRepository
              })
              .ToListAsync();
 
-
         // TODO : null check
         var assetInvestMainResponse = await context.Investments
             .Where(e => e.PortfolioId == PortfolioID && e.AssetId == AssetID)
@@ -211,8 +214,8 @@ public class InvestmentRepository : IInvestmentRepository
                 g.Key.Symbol,
             }).FirstOrDefaultAsync();
 
-        var userAsset = await context.UserAssets
-            .Where(u => u.AssetId == AssetID && u.UserId == UserID)
+        var userAsset = await context.WalletAssets
+            .Where(u => u.AssetId == AssetID && u.WalletId == WalletID)
             .Select(u => new
             {
                 u.Amount,

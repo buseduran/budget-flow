@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Application.Portfolios;
@@ -39,27 +38,26 @@ public class PortfolioRepository : IPortfolioRepository
         return true;
     }
 
-    public async Task<bool> UpdatePortfolioAsync(int ID, PortfolioDto Portfolio)
+    public async Task<bool> UpdatePortfolioAsync(int ID, string Name, string Description)
     {
         var portfolio = await context.Portfolios.FindAsync(ID);
         if (portfolio is null) return false;
 
-        portfolio.Name = Portfolio.Name;
-        portfolio.Description = Portfolio.Description;
-
+        portfolio.Name = Name;
+        portfolio.Description = Description;
         portfolio.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
         return await context.SaveChangesAsync() > 0;
     }
 
-    public async Task<PaginatedList<PortfolioResponse>> GetPortfoliosAsync(int Page, int PageSize, int userID)
+    public async Task<PaginatedList<PortfolioResponse>> GetPortfoliosAsync(int Page, int PageSize, int userID, int WalletID)
     {
-        var userAssets = await context.UserAssets
-            .Where(u => u.UserId == userID)
+        var walletAssets = await context.WalletAssets
+            .Where(u => u.WalletId == WalletID)
             .ToListAsync();
 
         var portfolios = await context.Portfolios
-            .Where(p => p.UserID == userID)
+            .Where(p => p.UserID == userID && p.WalletID == WalletID)
             .Include(p => p.Investments)
             .ThenInclude(i => i.Asset)
             .OrderByDescending(p => p.UpdatedAt)
@@ -75,7 +73,7 @@ public class PortfolioRepository : IPortfolioRepository
                     .Distinct()
                     .ToList();
 
-                var matchingUserAssets = userAssets
+                var matchingUserAssets = walletAssets
                     .Where(ua => portfolioAssetIds.Contains(ua.AssetId))
                     .ToList();
 
@@ -105,7 +103,25 @@ public class PortfolioRepository : IPortfolioRepository
                  ID = e.ID,
                  Name = e.Name,
                  Description = e.Description,
-                 TotalInvested = e.Investments.Sum(i => i.UnitAmount)
+                 TotalInvested = e.Investments.Sum(i => i.UnitAmount),
+                 WalletID = e.WalletID,
+             })
+             .FirstOrDefaultAsync();
+        return portfolio;
+    }
+
+    public async Task<PortfolioResponse> GetPortfolioByIdAsync(int ID)
+    {
+        var portfolio = await context.Portfolios
+             .Where(e => e.ID == ID)
+             .Include(e => e.Investments)
+             .Select(e => new PortfolioResponse
+             {
+                 ID = e.ID,
+                 Name = e.Name,
+                 Description = e.Description,
+                 TotalInvested = e.Investments.Sum(i => i.UnitAmount),
+                 WalletID = e.WalletID,
              })
              .FirstOrDefaultAsync();
         return portfolio;
