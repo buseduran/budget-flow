@@ -1,4 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Extensions;
+using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Portfolios.Queries.GetPortfolioPagination;
+using BudgetFlow.Application.Portfolios;
 using BudgetFlow.Application.Wallets.Commands.CreateWallet;
 using BudgetFlow.Application.Wallets.Commands.UpdateCurrency;
 using BudgetFlow.Application.Wallets.Queries.GetUserCurrency;
@@ -7,6 +10,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
+using BudgetFlow.Application.Investments;
+using BudgetFlow.Application.Wallets.Queries.GetWalletPagination;
 
 namespace BudgetFlow.API.Controllers;
 [ApiController]
@@ -34,6 +39,21 @@ public class WalletController : ControllerBase
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Get Paginated Wallets. 
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<WalletResponse>))]
+    public async Task<IResult> GetWalletsAsync([FromQuery] GetWalletPaginationQuery getWalletPaginationQuery)
+    {
+        var result = await mediator.Send(getWalletPaginationQuery);
+        return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : result.ToProblemDetails();
     }
 
     /// <summary>
