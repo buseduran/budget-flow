@@ -92,20 +92,24 @@ public class WalletRepository : IWalletRepository
         return walletAsset;
     }
 
-    public async Task<bool> CreateWalletAssetAsync(WalletAsset walletAsset)
+    public async Task<bool> CreateWalletAssetAsync(WalletAsset walletAsset, bool saveChanges = true)
     {
         walletAsset.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
         walletAsset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
         await context.WalletAssets.AddAsync(walletAsset);
-        return await context.SaveChangesAsync() > 0;
+        if (saveChanges)
+            await context.SaveChangesAsync();
+        return true;
     }
-    public async Task<bool> UpdateWalletAssetAsync(int ID, decimal Amount, decimal Balance)
+    public async Task<bool> UpdateWalletAssetAsync(int ID, decimal Amount, decimal Balance, bool saveChanges = true)
     {
         var userAsset = await context.WalletAssets.FindAsync(ID);
         userAsset.Amount = Amount;
         userAsset.Balance = Balance;
         userAsset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-        return await context.SaveChangesAsync() > 0;
+        if (saveChanges)
+            await context.SaveChangesAsync();
+        return true;
     }
 
     public async Task<PaginatedList<WalletResponse>> GetWalletsAsync(int page, int pageSize, int userID)

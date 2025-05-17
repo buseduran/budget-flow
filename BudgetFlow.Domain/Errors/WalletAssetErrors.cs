@@ -10,6 +10,7 @@ public static class WalletAssetErrors
     public static Error InsufficientBalance => new("Yetersiz bakiye.");
     public static Error NoBalanceForAsset => new("Bu varlık için bakiye bulunmamaktadır.");
     public static Error NotEnoughAssetAmount => new("Yeterli varlık miktarı bulunmamaktadır.");
+    public static Error NotFound => new("Cüzdan varlığı bulunamadı.");
 
 }
 

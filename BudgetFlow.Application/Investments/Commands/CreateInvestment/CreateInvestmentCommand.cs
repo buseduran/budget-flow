@@ -1,4 +1,5 @@
 ﻿using BudgetFlow.Application.Common.Dtos;
+using BudgetFlow.Application.Common.Interfaces;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
@@ -20,128 +21,117 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
         private readonly IAssetRepository assetRepository;
         private readonly IPortfolioRepository portfolioRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly IUnitOfWork unitOfWork;
+
         public CreateInvestmentCommandHandler(
             IInvestmentRepository investmentRepository,
             IWalletRepository walletRepository,
             IUserWalletRepository userWalletRepository,
             IAssetRepository assetRepository,
-            IHttpContextAccessor httpContextAccessor)
+            IPortfolioRepository portfolioRepository,
+            IHttpContextAccessor httpContextAccessor,
+            IUnitOfWork unitOfWork)
         {
             this.investmentRepository = investmentRepository;
             this.walletRepository = walletRepository;
             this.userWalletRepository = userWalletRepository;
             this.assetRepository = assetRepository;
+            this.portfolioRepository = portfolioRepository;
             this.httpContextAccessor = httpContextAccessor;
+            this.unitOfWork = unitOfWork;
         }
 
         public async Task<Result<bool>> Handle(CreateInvestmentCommand request, CancellationToken cancellationToken)
         {
-            #region Save Investment
+            var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
+            var portfolio = await portfolioRepository.GetPortfolioByIdAsync(request.Investment.PortfolioId);
+            if (portfolio is null)
+                return Result.Failure<bool>(PortfolioErrors.PortfolioNotFound);
+
+            var wallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(portfolio.WalletID, userID);
+            if (wallet is null)
+                return Result.Failure<bool>(WalletErrors.WalletNotFound);
+
+            var asset = await assetRepository.GetAssetAsync(request.Investment.AssetId);
             var investment = new Investment
             {
                 AssetId = request.Investment.AssetId,
-                CurrencyAmount = request.Investment.CurrencyAmount,
                 UnitAmount = request.Investment.UnitAmount,
                 Description = request.Investment.Description,
                 Date = DateTime.SpecifyKind(request.Investment.Date, DateTimeKind.Utc),
                 PortfolioId = request.Investment.PortfolioId,
                 Type = request.Investment.Type
             };
-            var asset = await assetRepository.GetAssetAsync(investment.AssetId);
-            investment.CurrencyAmount = investment.Type == InvestmentType.Buy
-                                        ? investment.UnitAmount * asset.BuyPrice
-                                        : investment.UnitAmount * asset.SellPrice;
 
-            var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
-            var portfolio = await portfolioRepository.GetPortfolioByIdAsync(request.Investment.PortfolioId);
+            investment.CurrencyAmount = investment.Type == InvestmentType.Buy
+                ? investment.UnitAmount * asset.BuyPrice
+                : investment.UnitAmount * asset.SellPrice;
+
             var walletAsset = await walletRepository.GetWalletAssetAsync(portfolio.WalletID, investment.AssetId);
 
-            var wallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(portfolio.WalletID, userID);
-            if (wallet is null)
-                return Result.Failure<bool>(WalletErrors.WalletNotFound);
-
-            if (walletAsset is not null)
+            await unitOfWork.BeginTransactionAsync();
+            try
             {
-                if (investment.Type == InvestmentType.Buy)
+                if (walletAsset is not null)
                 {
-                    if (wallet.Wallet.Balance > investment.CurrencyAmount)
+                    if (investment.Type == InvestmentType.Buy)
                     {
-                        walletAsset.Amount += investment.UnitAmount;
-                        walletAsset.Balance += investment.CurrencyAmount;
-                        
-                        var walletAssetResult = await walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance);
-                        if (!walletAssetResult)
-                        {
-                            return Result.Failure<bool>(WalletAssetErrors.UserAssetUpdateFailed);
-                        }
+                        if (wallet.Wallet.Balance < investment.CurrencyAmount)
+                            return Result.Failure<bool>(WalletErrors.InsufficientBalance);
 
-                        var walletUpdateResult = await walletRepository.UpdateWalletAsync(userID, investment.CurrencyAmount);
-                        if (!walletUpdateResult)
-                        {
-                            return Result.Failure<bool>(WalletErrors.UpdateFailed);
-                        }
+                        walletAsset.Amount += investment.UnitAmount;
+                        walletAsset.Balance = walletAsset.Amount * asset.SellPrice;
+
+                        var walletAssetUpdate = await walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
+                        var walletUpdate = await walletRepository.UpdateWalletAsync(userID, -investment.CurrencyAmount, saveChanges: false);
+                    }
+                    else
+                    {
+                        if (walletAsset.Amount < investment.UnitAmount || walletAsset.Balance < investment.CurrencyAmount)
+                            return Result.Failure<bool>(WalletAssetErrors.NotEnoughAssetAmount);
+
+                        walletAsset.Amount -= investment.UnitAmount;
+                        walletAsset.Balance = walletAsset.Amount * asset.SellPrice;
+
+                        var walletAssetUpdate = await walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
+                        var walletUpdate = await walletRepository.UpdateWalletAsync(userID, investment.CurrencyAmount, saveChanges: false);
                     }
                 }
                 else
                 {
-                    if (walletAsset.Amount < investment.UnitAmount)
+                    if (investment.Type == InvestmentType.Buy)
                     {
-                        return Result.Failure<bool>(WalletAssetErrors.NotEnoughAssetAmount);
-                    }
-                    walletAsset.Amount -= investment.UnitAmount;
-                    walletAsset.Balance -= investment.CurrencyAmount;
-                    var userAssetResult = await walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance);
-                    if (!userAssetResult)
-                    {
-                        return Result.Failure<bool>(WalletAssetErrors.UserAssetUpdateFailed);
-                    }
+                        if (wallet.Wallet.Balance < investment.CurrencyAmount)
+                            return Result.Failure<bool>(WalletErrors.InsufficientBalance);
 
-                    var walletUpdateResult = await walletRepository.UpdateWalletAsync(userID, -investment.CurrencyAmount);
-                    if (!walletUpdateResult)
-                    {
-                        return Result.Failure<bool>(WalletErrors.UpdateFailed);
-                    }
-                }
-            }
-            else
-            {
-                if (investment.Type == InvestmentType.Buy)
-                {
-                    if (wallet.Wallet.Balance > investment.CurrencyAmount)
-                    {
-                        var result = await walletRepository.CreateWalletAssetAsync(new WalletAsset
+                        var createResult = await walletRepository.CreateWalletAssetAsync(new WalletAsset
                         {
                             WalletId = portfolio.WalletID,
                             AssetId = investment.AssetId,
-                            Amount = investment.Type == InvestmentType.Buy ? investment.UnitAmount : -investment.UnitAmount,
-                            Balance = investment.Type == InvestmentType.Buy ? investment.CurrencyAmount : -investment.CurrencyAmount
-                        });
+                            Amount = investment.UnitAmount,
+                            Balance = investment.CurrencyAmount
+                        }, saveChanges: false);
 
-                        if (!result)
-                        {
-                            return Result.Failure<bool>(WalletAssetErrors.CreationFailed);
-                        }
-                        var walletUpdateResult = await walletRepository.UpdateWalletAsync(userID, -investment.CurrencyAmount);
-                        if (!walletUpdateResult)
-                        {
-                            return Result.Failure<bool>(WalletErrors.UpdateFailed);
-                        }
+                        var walletUpdate = await walletRepository.UpdateWalletAsync(userID, -investment.CurrencyAmount, saveChanges: false);
+                    }
+                    else
+                    {
+                        return Result.Failure<bool>(WalletErrors.NoBalanceForAsset);
                     }
                 }
-                else
-                {
-                    return Result.Failure<bool>(WalletErrors.NoBalanceForAsset);
-                }
-            }
 
-            var investmentResult = await investmentRepository.CreateInvestmentAsync(investment);
-            if (!investmentResult)
+                var investmentResult = await investmentRepository.CreateInvestmentAsync(investment, saveChanges: false);
+
+                await unitOfWork.SaveChangesAsync();
+                await unitOfWork.CommitAsync();
+
+                return Result.Success(true);
+            }
+            catch (Exception ex)
             {
-                return Result.Failure<bool>(InvestmentErrors.CreationFailed);
+                await unitOfWork.RollbackAsync();
+                return Result.Failure<bool>(GeneralErrors.FromMessage(ex.Message));
             }
-            #endregion
-
-            return Result.Success(true);
         }
     }
 }

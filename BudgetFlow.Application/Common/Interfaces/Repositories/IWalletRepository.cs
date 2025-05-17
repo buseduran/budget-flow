@@ -12,7 +12,7 @@ public interface IWalletRepository
     Task<bool> UpdateCurrencyAsync(int UserID, CurrencyType Currency);
     Task<CurrencyType> GetUserCurrencyAsync(int UserID);
     Task<WalletAssetResponse> GetWalletAssetAsync(int WalletID, int AssetID);
-    Task<bool> CreateWalletAssetAsync(WalletAsset walletAsset);
-    Task<bool> UpdateWalletAssetAsync(int ID, decimal Amount, decimal Balance);
+    Task<bool> CreateWalletAssetAsync(WalletAsset walletAsset, bool saveChanges = true);
+    Task<bool> UpdateWalletAssetAsync(int ID, decimal Amount, decimal Balance, bool saveChanges = true);
     Task<PaginatedList<WalletResponse>> GetWalletsAsync(int Page, int PageSize, int UserID);
 }
