@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.IdentityModel.Tokens.Jwt;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 
@@ -97,6 +98,10 @@ builder.Services.AddSwaggerGen(o =>
         }
     };
     o.AddSecurityRequirement(securityRequirements);
+
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    o.IncludeXmlComments(xmlPath);
 });
 
 // 🔌 BudgetContext DI + Configurable Npgsql
@@ -139,9 +144,14 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "BudgetFlow API V1");
+        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None); // 🔒 Controller uçları kapalı
+    });
     app.UseHttpsRedirection();
 }
+
 
 app.UseExceptionHandler();
 app.UseCors();
