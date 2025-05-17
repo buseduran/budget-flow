@@ -18,7 +18,7 @@ public class InvestmentRepository : IInvestmentRepository
         this.mapper = mapper;
     }
 
-    public async Task<bool> CreateInvestmentAsync(Investment Investment)
+    public async Task<bool> CreateInvestmentAsync(Investment Investment, bool saveChanges = true)
     {
         Investment.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
         Investment.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
@@ -240,5 +240,26 @@ public class InvestmentRepository : IInvestmentRepository
             },
             AssetInvests = new PaginatedList<AssetInvestResponse>(investments, count, Page, PageSize)
         };
+    }
+
+    public async Task<InvestmentResponse> GetInvestmentByIdAsync(int ID)
+    {
+        var investment = await context.Investments
+            .Where(e => e.ID == ID)
+            .Include(e => e.Asset)
+            .Select(i => new InvestmentResponse
+            {
+                ID = i.ID,
+                Name = i.Asset.Name,
+                CurrencyAmount = i.CurrencyAmount,
+                UnitAmount = i.UnitAmount,
+                Description = i.Description,
+                CreatedAt = i.CreatedAt,
+                UpdatedAt = i.UpdatedAt,
+                AssetID = i.AssetId,
+                PortfolioID = i.PortfolioId,
+                Type = i.Type,
+            }).FirstOrDefaultAsync();
+        return investment;
     }
 }
