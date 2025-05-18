@@ -42,7 +42,11 @@ public class InvestmentRepository : IInvestmentRepository
         var investment = await context.Investments.FindAsync(ID);
         if (investment is null) return false;
 
-        mapper.Map(Investment, investment);
+        investment.UnitAmount = Investment.UnitAmount;
+        investment.CurrencyAmount = Investment.CurrencyAmount;
+        investment.Description = Investment.Description;
+        investment.Date = Investment.Date;
+
         investment.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
         return await context.SaveChangesAsync() > 0;
@@ -254,6 +258,7 @@ public class InvestmentRepository : IInvestmentRepository
                 CurrencyAmount = i.CurrencyAmount,
                 UnitAmount = i.UnitAmount,
                 Description = i.Description,
+                Date = i.Date,
                 CreatedAt = i.CreatedAt,
                 UpdatedAt = i.UpdatedAt,
                 AssetID = i.AssetId,
