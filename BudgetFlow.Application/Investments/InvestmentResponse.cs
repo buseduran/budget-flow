@@ -11,6 +11,7 @@ public class InvestmentResponse
     public int AssetID { get; set; }
     public int PortfolioID { get; set; }
     public InvestmentType Type { get; set; }
+    public DateTime Date { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }

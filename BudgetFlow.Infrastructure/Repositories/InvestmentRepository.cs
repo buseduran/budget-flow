@@ -42,13 +42,17 @@ public class InvestmentRepository : IInvestmentRepository
         var investment = await context.Investments.FindAsync(ID);
         if (investment is null) return false;
 
-        mapper.Map(Investment, investment);
+        investment.UnitAmount = Investment.UnitAmount;
+        investment.CurrencyAmount = Investment.CurrencyAmount;
+        investment.Description = Investment.Description;
+        investment.Date = Investment.Date;
+
         investment.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
         return await context.SaveChangesAsync() > 0;
     }
 
-    public async Task<List<InvestmentResponse>> GetInvestmentsAsync(int PortfolioID)
+    public async Task<PaginatedList<InvestmentResponse>> GetInvestmentsAsync(int Page, int PageSize, int PortfolioID)
     {
         var investments = await context.Investments
             .Where(e => e.PortfolioId == PortfolioID)
@@ -63,7 +67,8 @@ public class InvestmentRepository : IInvestmentRepository
                 CreatedAt = i.CreatedAt,
                 UpdatedAt = i.UpdatedAt,
             }).ToListAsync();
-        return investments;
+        var count = investments.Count();
+        return new PaginatedList<InvestmentResponse>(investments, count, Page, PageSize);
     }
 
     public async Task<PortfolioAssetResponse> GetAssetInvestmentsAsync(string portfolio, int userID)
@@ -86,7 +91,8 @@ public class InvestmentRepository : IInvestmentRepository
                 e.AssetId,
                 AssetType = e.Asset.AssetType,
                 AssetName = e.Asset.Name,
-                e.Asset.SellPrice
+                e.Asset.SellPrice,
+                e.Asset.Description
             })
             .Select(g => new
             {
@@ -94,6 +100,7 @@ public class InvestmentRepository : IInvestmentRepository
                 g.Key.AssetType,
                 g.Key.AssetName,
                 g.Key.SellPrice,
+                g.Key.Description,
                 TotalUnitAmount = g.Sum(e => e.UnitAmount),
                 TotalCurrencyAmount = g.Sum(e => e.CurrencyAmount),
                 Code = g.OrderByDescending(e => e.CreatedAt).First().Asset.Code,
@@ -114,6 +121,7 @@ public class InvestmentRepository : IInvestmentRepository
                 var userAsset = userAssets.FirstOrDefault(u => u.AssetId == i.AssetId);
                 return new PortfolioAssetInvestmentsResponse
                 {
+                    Description = i.Description,
                     Name = i.AssetName,
                     AssetType = i.AssetType.ToString(),
                     Code = i.Code,
@@ -254,6 +262,7 @@ public class InvestmentRepository : IInvestmentRepository
                 CurrencyAmount = i.CurrencyAmount,
                 UnitAmount = i.UnitAmount,
                 Description = i.Description,
+                Date = i.Date,
                 CreatedAt = i.CreatedAt,
                 UpdatedAt = i.UpdatedAt,
                 AssetID = i.AssetId,

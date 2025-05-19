@@ -11,7 +11,6 @@ public class PortfolioAssetInfoResponse
 }
 public class PortfolioAssetInvestmentsResponse
 {
-    public int ID { get; set; }
     public int AssetId { get; set; }
     public string AssetType { get; set; }
     public int PortfolioId { get; set; }
