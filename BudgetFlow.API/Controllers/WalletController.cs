@@ -48,9 +48,9 @@ public class WalletController : ControllerBase
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<WalletResponse>))]
-    public async Task<IResult> GetWalletsAsync([FromQuery] GetWalletQuery getWalletQuery)
+    public async Task<IResult> GetWalletsAsync()
     {
-        var result = await mediator.Send(getWalletQuery);
+        var result = await mediator.Send(new GetWalletQuery());
         return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();

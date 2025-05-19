@@ -22,6 +22,7 @@ public static class ServiceRegistration
         services.AddScoped<IPortfolioRepository, PortfolioRepository>();
         services.AddScoped<IWalletRepository, WalletRepository>();
         services.AddScoped<IUserWalletRepository, UserWalletRepository>();
+        services.AddScoped<IInvitationRepository, InvitationRepository>();
 
         services.AddScoped<ITokenProvider, TokenProvider>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
