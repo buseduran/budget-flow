@@ -119,6 +119,7 @@ public class WalletRepository : IWalletRepository
             .Select(uw => new WalletResponse
             {
                 ID = uw.Wallet.ID,
+                Name = uw.User.Name,
                 Balance = uw.Wallet.Balance,
                 Currency = uw.Wallet.Currency,
                 Role = uw.Role
