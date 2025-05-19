@@ -1,5 +1,4 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
-using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
@@ -112,9 +111,9 @@ public class WalletRepository : IWalletRepository
         return true;
     }
 
-    public async Task<PaginatedList<WalletResponse>> GetWalletsAsync(int page, int pageSize, int userID)
+    public async Task<List<WalletResponse>> GetWalletsAsync(int userID)
     {
-        var query = context.UserWallets
+        var wallets = await context.UserWallets
             .Where(uw => uw.UserID == userID)
             .Include(uw => uw.Wallet)
             .Select(uw => new WalletResponse
@@ -123,15 +122,8 @@ public class WalletRepository : IWalletRepository
                 Balance = uw.Wallet.Balance,
                 Currency = uw.Wallet.Currency,
                 Role = uw.Role
-            });
+            }).ToListAsync();
 
-        var totalCount = await query.CountAsync();
-
-        var wallets = await query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-
-        return new PaginatedList<WalletResponse>(wallets, totalCount, page, pageSize);
+        return wallets;
     }
 }
