@@ -42,15 +42,15 @@ public class WalletController : ControllerBase
     }
 
     /// <summary>
-    /// Get Paginated Wallets. 
+    /// Get User's Wallets. 
     /// </summary>
     /// <returns></returns>
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<WalletResponse>))]
-    public async Task<IResult> GetWalletsAsync([FromQuery] GetWalletPaginationQuery getWalletPaginationQuery)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<WalletResponse>))]
+    public async Task<IResult> GetWalletsAsync([FromQuery] GetWalletQuery getWalletQuery)
     {
-        var result = await mediator.Send(getWalletPaginationQuery);
+        var result = await mediator.Send(getWalletQuery);
         return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();

@@ -1,5 +1,4 @@
-﻿using BudgetFlow.Application.Common.Utils;
-using BudgetFlow.Application.Investments;
+﻿using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 
@@ -14,5 +13,5 @@ public interface IWalletRepository
     Task<WalletAssetResponse> GetWalletAssetAsync(int WalletID, int AssetID);
     Task<bool> CreateWalletAssetAsync(WalletAsset walletAsset, bool saveChanges = true);
     Task<bool> UpdateWalletAssetAsync(int ID, decimal Amount, decimal Balance, bool saveChanges = true);
-    Task<PaginatedList<WalletResponse>> GetWalletsAsync(int Page, int PageSize, int UserID);
+    Task<List<WalletResponse>> GetWalletsAsync(int UserID);
 }
