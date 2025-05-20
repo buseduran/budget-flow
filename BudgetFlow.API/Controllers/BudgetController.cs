@@ -92,15 +92,15 @@ namespace BudgetFlow.API.Controllers
         /// <summary>
         /// Get Entries for Dashboard. 
         /// </summary>
-        /// <param name="Range"></param>
+        /// <param name="getAnalysisEntriesQuery"></param>
         /// <returns></returns>
         [HttpGet]
         [Route("Analysis")]
         [Produces(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AnalysisEntriesResponse))]
-        public async Task<IResult> GetAnalysisEntriesAsync([FromQuery] string Range, int Wallet)
+        public async Task<IResult> GetAnalysisEntriesAsync([FromQuery] GetAnalysisEntriesQuery getAnalysisEntriesQuery)
         {
-            var result = await mediator.Send(new GetAnalysisEntriesQuery(Range, Wallet));
+            var result = await mediator.Send(getAnalysisEntriesQuery);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();

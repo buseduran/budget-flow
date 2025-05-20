@@ -26,4 +26,5 @@ public static class UserErrors
     public static Error EmailConfirmationMailFailed => new("Kayıt başarılı ama e-posta gönderilemedi. Lütfen daha sonra tekrar deneyin.");
     public static Error LogNotFound => new("Log bulunamadı.");
     public static Error UserRoleCreationFailed => new("Kullanıcı rolü oluşturulamadı.");
+    public static Error UserNotFoundWithInvitation => new("Bu cüzdana katılmak için lütfen davet edilen e-posta adresiyle kayıt olun.");
 }
