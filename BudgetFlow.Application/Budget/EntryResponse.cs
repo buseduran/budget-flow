@@ -1,5 +1,4 @@
 ﻿using BudgetFlow.Application.Categories;
-using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Enums;
 
 namespace BudgetFlow.Application.Budget;
@@ -11,4 +10,5 @@ public class EntryResponse
     public CurrencyType Currency { get; set; }
     public DateTime Date { get; set; }
     public CategoryResponse Category { get; set; }
+    public int WalletID { get; set; }
 }

@@ -13,4 +13,5 @@ public static class WalletErrors
     public static Error UserIsNotOwner => new("Bu işlemi gerçekleştirmek için gerekli yetkiye sahip değilsiniz.");
     public static Error UserWalletCreationFailed => new("Cüzdan kullanıcı ilişkisi oluşturulurken bir hata oluştu.");
     public static Error UserWalletAlreadyExists => new("Kullanıcının zaten bir cüzdanı bulunmaktadır.");
+    public static Error UserHasNoPermission => new("Bu cüzdanda bu işlemi yapma izniniz yok.");
 }

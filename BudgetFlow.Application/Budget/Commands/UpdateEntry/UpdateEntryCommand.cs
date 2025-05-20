@@ -68,14 +68,10 @@ public class UpdateEntryCommand : IRequest<Result<bool>>
             await unitOfWork.BeginTransactionAsync();
             try
             {
-                var walletUpdateResult = await walletRepository.UpdateWalletAsync(userID, difference, saveChanges:false);
-                if (!walletUpdateResult)
-                    return Result.Failure<bool>(WalletErrors.UpdateFailed);
+                await walletRepository.UpdateWalletAsync(userID, difference, saveChanges: false);
 
                 mappedEntry.Amount = newAmount;
-                var entryResult = await budgetRepository.UpdateEntryAsync(request.ID, mapper.Map<EntryDto>(mappedEntry), saveChanges: false);
-                if (!entryResult)
-                    return Result.Failure<bool>(EntryErrors.EntryUpdateFailed);
+                await budgetRepository.UpdateEntryAsync(request.ID, mapper.Map<EntryDto>(mappedEntry), saveChanges: false);
 
                 await unitOfWork.SaveChangesAsync();
                 await unitOfWork.CommitAsync();

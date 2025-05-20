@@ -161,6 +161,61 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
 
         return subClaim?.Value == userId.ToString() && purposeClaim?.Value == "email_confirmation";
     }
+    #endregion
+
+    #region Invitation
+    public string GenerateWalletInvitationToken(string email, int walletId)
+    {
+        string secretKey = configuration["Jwt:Secret"];
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var expirationHours = configuration.GetValue<int>("Jwt:InvitationExpirationInHours");
+        var descriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new[]
+            {
+                new Claim("email", email),
+                new Claim("walletId", walletId.ToString())
+            }),
+            Expires = DateTime.UtcNow.AddHours(expirationHours),
+            SigningCredentials = credentials,
+            Issuer = configuration["Jwt:Issuer"],
+            Audience = configuration["Jwt:Audience"]
+        };
+        var handler = new JsonWebTokenHandler();
+        return handler.CreateToken(descriptor);
+    }
+    public async Task<(bool IsValid, int WalletID, string email)> VerifyWalletInvitationToken(string token)
+    {
+        var handler = new JsonWebTokenHandler();
+        var secretKey = configuration["Jwt:Secret"];
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+        var parameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidIssuer = configuration["Jwt:Issuer"],
+            ValidAudience = configuration["Jwt:Audience"],
+            IssuerSigningKey = key,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+
+        var result = await handler.ValidateTokenAsync(token, parameters);
+        if (!result.IsValid)
+        {
+            return (false, 0, null);
+        }
+
+        var claims = result.ClaimsIdentity.Claims.ToList();
+        var walletIdClaim = claims.FirstOrDefault(c => c.Type == "walletId");
+        var emailClaim = claims.FirstOrDefault(c => c.Type == "email");
+
+        var success = int.TryParse(walletIdClaim.Value, out int walletId);
+
+        return (success, walletId, emailClaim.Value);
+    }
+
 
     #endregion
 }

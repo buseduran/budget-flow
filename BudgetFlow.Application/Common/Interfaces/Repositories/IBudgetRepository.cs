@@ -9,7 +9,7 @@ public interface IBudgetRepository
 {
     Task<bool> CreateEntryAsync(Entry Entry, bool saveChanges = true);
     Task<bool> UpdateEntryAsync(int ID, EntryDto Entry, bool saveChanges = true);
-    Task<bool> DeleteEntryAsync(int ID);
+    Task<bool> DeleteEntryAsync(int ID, bool saveChanges = true);
     Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID, CurrencyType currencyType, int walletID);
     Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(int userID, string Range, CurrencyType currencyType, int walletID);
     Task<List<LastEntryResponse>> GetLastFiveEntriesAsync(int userID, CurrencyType currencyType, int walletID);
