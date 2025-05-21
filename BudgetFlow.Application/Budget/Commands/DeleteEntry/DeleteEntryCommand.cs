@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using BudgetFlow.Application.Common.Interfaces;
+﻿using BudgetFlow.Application.Common.Interfaces;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
@@ -24,6 +23,7 @@ public class DeleteEntryCommand : IRequest<Result<bool>>
         private readonly IUserWalletRepository userWalletRepository;
         private readonly ICategoryRepository categoryRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly ICurrencyRateRepository currencyRateRepository;
         private readonly IUnitOfWork unitOfWork;
 
         public DeleteEntryCommandHandler(
@@ -32,6 +32,7 @@ public class DeleteEntryCommand : IRequest<Result<bool>>
             IUserWalletRepository userWalletRepository,
             ICategoryRepository categoryRepository,
             IHttpContextAccessor httpContextAccessor,
+            ICurrencyRateRepository currencyRateRepository,
             IUnitOfWork unitOfWork)
         {
             this.budgetRepository = budgetRepository;
@@ -39,6 +40,7 @@ public class DeleteEntryCommand : IRequest<Result<bool>>
             this.userWalletRepository = userWalletRepository;
             this.categoryRepository = categoryRepository;
             this.httpContextAccessor = httpContextAccessor;
+            this.currencyRateRepository = currencyRateRepository;
             this.unitOfWork = unitOfWork;
         }
 
@@ -62,10 +64,22 @@ public class DeleteEntryCommand : IRequest<Result<bool>>
                 ? -Math.Abs(existingEntry.Amount)
                 : Math.Abs(existingEntry.Amount);
 
+            var currency= wallet.Wallet.Currency;
+            decimal exchangeRateToTRY = 1m;
+            var currencyRate = await currencyRateRepository.GetCurrencyRateByType(currency);
+            if (currency != CurrencyType.TRY)
+            {
+                exchangeRateToTRY = currencyRate.ForexSelling;
+            }
+
+            decimal balanceAdjustmentInTRY = category.Type == EntryType.Income
+                ? -Math.Abs(existingEntry.Amount) * exchangeRateToTRY
+                : Math.Abs(existingEntry.Amount) * exchangeRateToTRY;
+
             await unitOfWork.BeginTransactionAsync();
             try
             {
-                var walletUpdateResult = await walletRepository.UpdateWalletAsync(userID, balanceAdjustment, saveChanges: false);
+                var walletUpdateResult = await walletRepository.UpdateWalletAsync(userID, balanceAdjustment, balanceAdjustmentInTRY, saveChanges: false);
 
                 var deleteResult = await budgetRepository.DeleteEntryAsync(request.ID, saveChanges: false);
 

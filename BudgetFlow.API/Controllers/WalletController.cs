@@ -1,17 +1,14 @@
 ﻿using BudgetFlow.Application.Common.Extensions;
-using BudgetFlow.Application.Common.Utils;
-using BudgetFlow.Application.Portfolios.Queries.GetPortfolioPagination;
-using BudgetFlow.Application.Portfolios;
+using BudgetFlow.Application.Investments;
 using BudgetFlow.Application.Wallets.Commands.CreateWallet;
 using BudgetFlow.Application.Wallets.Commands.UpdateCurrency;
 using BudgetFlow.Application.Wallets.Queries.GetUserCurrency;
+using BudgetFlow.Application.Wallets.Queries.GetWalletPagination;
 using BudgetFlow.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
-using BudgetFlow.Application.Investments;
-using BudgetFlow.Application.Wallets.Queries.GetWalletPagination;
 
 namespace BudgetFlow.API.Controllers;
 [ApiController]
@@ -81,9 +78,9 @@ public class WalletController : ControllerBase
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CurrencyType))]
     [Authorize]
-    public async Task<IResult> GetUserCurrencyAsync()
+    public async Task<IResult> GetUserCurrencyAsync([FromQuery] GetUserCurrencyQuery getUserCurrencyQuery)
     {
-        var result = await mediator.Send(new GetUserCurrencyQuery());
+        var result = await mediator.Send(getUserCurrencyQuery);
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();

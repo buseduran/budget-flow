@@ -14,23 +14,25 @@ public class GetEntryPaginationQuery : IRequest<Result<PaginatedList<EntryRespon
     public class GetEntryPaginationQueryHandler : IRequestHandler<GetEntryPaginationQuery, Result<PaginatedList<EntryResponse>>>
     {
         private readonly IBudgetRepository budgetRepository;
-        private readonly IWalletRepository walletRepository;
+        private readonly IUserWalletRepository userWalletRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
-        public GetEntryPaginationQueryHandler(IBudgetRepository budgetRepository, IHttpContextAccessor httpContextAccessor, IWalletRepository walletRepository)
+        public GetEntryPaginationQueryHandler(
+            IBudgetRepository budgetRepository,
+            IHttpContextAccessor httpContextAccessor,
+            IUserWalletRepository userWalletRepository)
         {
             this.budgetRepository = budgetRepository;
             this.httpContextAccessor = httpContextAccessor;
-            this.walletRepository = walletRepository;
+            this.userWalletRepository = userWalletRepository;
         }
 
         public async Task<Result<PaginatedList<EntryResponse>>> Handle(GetEntryPaginationQuery request, CancellationToken cancellationToken)
         {
-            GetCurrentUser getCurrentUser = new(httpContextAccessor);
-            int userID = getCurrentUser.GetCurrentUserID();
+            int userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
 
-            var currency = await walletRepository.GetUserCurrencyAsync(userID);
+            var userWallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(request.WalletID, userID);
 
-            var result = await budgetRepository.GetPaginatedAsync(request.Page, request.PageSize, userID, currency, request.WalletID);
+            var result = await budgetRepository.GetPaginatedAsync(request.Page, request.PageSize, userID, userWallet.Wallet.Currency, request.WalletID);
             if (result == null)
                 return Result.Failure<PaginatedList<EntryResponse>>(EntryErrors.EntryNotFound);
 
