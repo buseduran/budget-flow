@@ -41,6 +41,16 @@ public static class ServiceRegistration
                 .WithCronSchedule("0 0/30 * * * ?")); // Every 30 minutes  
         });
 
+        services.AddQuartz(q =>
+        {
+            var jobKey = new JobKey("CurrencyJob");
+            q.AddJob<CurrencyJob>(opts => opts.WithIdentity(jobKey));
+            q.AddTrigger(opts => opts
+                .ForJob(jobKey)
+                .WithIdentity("CurrencyJob-trigger")
+                .WithCronSchedule("0 0 16 * * ?")); // Every day at 16:00
+        });
+
         services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
     }
 }

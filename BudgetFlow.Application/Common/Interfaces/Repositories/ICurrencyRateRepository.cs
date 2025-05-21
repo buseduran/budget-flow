@@ -1,0 +1,8 @@
+﻿using BudgetFlow.Domain.Entities;
+
+namespace BudgetFlow.Application.Common.Interfaces.Repositories;
+public interface ICurrencyRateRepository
+{
+    Task DeleteRatesForDateAsync(DateTime date, bool saveChanges = true);
+    Task AddRatesAsync(IEnumerable<CurrencyRate> rates, bool saveChanges = true);
+}

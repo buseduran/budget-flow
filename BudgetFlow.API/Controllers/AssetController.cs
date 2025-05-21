@@ -105,9 +105,9 @@ public class AssetController : ControllerBase
     }
 
     /// <summary>
-    /// Create an Asset. 
+    /// Synchronize Assets. 
     /// </summary>
-    /// <param name="createAssetCommand"></param>
+    /// <param name="syncAssetCommand"></param>
     /// <returns></returns>
     [HttpPost("Sync")]
     [Produces(MediaTypeNames.Application.Json)]

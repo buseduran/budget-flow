@@ -74,7 +74,7 @@ public class CreateEntryCommand : IRequest<Result<bool>>
             try
             {
                 // Entry ekle
-                var entryResult = await budgetRepository.CreateEntryAsync(mappedEntry, saveChanges: false);
+                await budgetRepository.CreateEntryAsync(mappedEntry, saveChanges: false);
 
                 // Miktarı kategori tipine göre ayarla
                 mappedEntry.Amount = category.Type == EntryType.Income
@@ -82,7 +82,7 @@ public class CreateEntryCommand : IRequest<Result<bool>>
                     : -Math.Abs(mappedEntry.Amount);
 
                 // Cüzdan güncelle
-                var result = await walletRepository.UpdateWalletAsync(wallet.WalletID, mappedEntry.Amount, saveChanges: false);
+                await walletRepository.UpdateWalletAsync(wallet.WalletID, mappedEntry.Amount, saveChanges: false);
 
                 await unitOfWork.SaveChangesAsync();
                 await unitOfWork.CommitAsync();
