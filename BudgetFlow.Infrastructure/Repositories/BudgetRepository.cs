@@ -73,7 +73,8 @@ public class BudgetRepository : IBudgetRepository
                     Name = e.Category.Name,
                     Color = e.Category.Color,
                     Type = e.Category.Type
-                }
+                },
+                WalletID = walletID,
             })
             .ToListAsync();
         var count = await context.Entries.CountAsync();
@@ -244,7 +245,7 @@ public class BudgetRepository : IBudgetRepository
                 Amount = e.Amount,
                 Category = new CategoryResponse
                 {
-                    ID= e.CategoryID,
+                    ID = e.CategoryID,
                     Type = e.Category.Type
                 },
                 WalletID = e.WalletID,

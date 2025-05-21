@@ -14,7 +14,11 @@ using Microsoft.AspNetCore.Http;
 namespace BudgetFlow.Application.Budget.Commands.CreateEntry;
 public class CreateEntryCommand : IRequest<Result<bool>>
 {
-    public EntryDto Entry { get; set; }
+    public string Name { get; set; }
+    public decimal Amount { get; set; }
+    public DateTime Date { get; set; }
+    public int CategoryID { get; set; }
+    public int WalletID { get; set; }
     public class CreateEntryCommandHandler : IRequestHandler<CreateEntryCommand, Result<bool>>
     {
         private readonly IBudgetRepository budgetRepository;
@@ -25,6 +29,7 @@ public class CreateEntryCommand : IRequest<Result<bool>>
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly IWalletAuthService walletAuthService;
         private readonly IUnitOfWork unitOfWork;
+        private readonly ICurrencyRateRepository currencyRateRepository;
         public CreateEntryCommandHandler(
             IBudgetRepository budgetRepository,
             IWalletRepository walletRepository,
@@ -33,7 +38,8 @@ public class CreateEntryCommand : IRequest<Result<bool>>
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor,
             IWalletAuthService walletAuthService,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ICurrencyRateRepository currencyRateRepository)
         {
             this.budgetRepository = budgetRepository;
             this.walletRepository = walletRepository;
@@ -43,6 +49,7 @@ public class CreateEntryCommand : IRequest<Result<bool>>
             this.httpContextAccessor = httpContextAccessor;
             this.walletAuthService = walletAuthService;
             this.unitOfWork = unitOfWork;
+            this.currencyRateRepository = currencyRateRepository;
         }
 
         public async Task<Result<bool>> Handle(CreateEntryCommand request, CancellationToken cancellationToken)
@@ -50,14 +57,23 @@ public class CreateEntryCommand : IRequest<Result<bool>>
             var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
 
             #region Check user has a wallet and user's role for this wallet
-            var wallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(request.Entry.WalletID, userID);
+            var wallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(request.WalletID, userID);
             if (wallet is null)
                 return Result.Failure<bool>(WalletErrors.WalletNotFound);
 
-            await walletAuthService.EnsureUserHasAccessAsync(request.Entry.WalletID, userID, WalletRole.Owner);
+            await walletAuthService.EnsureUserHasAccessAsync(request.WalletID, userID, WalletRole.Owner);
             #endregion
 
-            var mappedEntry = mapper.Map<Entry>(request.Entry);
+            var entry = new EntryDto
+            {
+                Name = request.Name,
+                Amount = request.Amount,
+                Date = request.Date,
+                CategoryID = request.CategoryID,
+                WalletID = request.WalletID,
+            };
+
+            var mappedEntry = mapper.Map<Entry>(entry);
             mappedEntry.UserID = userID;
 
             var category = await categoryRepository.GetCategoryByIdAsync(mappedEntry.CategoryID);
@@ -73,16 +89,36 @@ public class CreateEntryCommand : IRequest<Result<bool>>
             await unitOfWork.BeginTransactionAsync();
             try
             {
-                // Entry ekle
-                await budgetRepository.CreateEntryAsync(mappedEntry, saveChanges: false);
+                //userın currency'sini al ve ata
+                var currency = wallet.Wallet.Currency;
+                mappedEntry.Currency = currency;
+
+                #region TRY ile işlem yapılmıyorsa dönüşüm yapılır.
+                decimal exchangeRateToTRY = 1m;
+                var currencyRate = await currencyRateRepository.GetCurrencyRateByType(currency);
+                if (currency != CurrencyType.TRY)
+                {
+                    exchangeRateToTRY = currencyRate.ForexSelling;
+                }
+                mappedEntry.AmountInTRY = mappedEntry.Amount * exchangeRateToTRY;
+              
+                #endregion
 
                 // Miktarı kategori tipine göre ayarla
                 mappedEntry.Amount = category.Type == EntryType.Income
                     ? Math.Abs(mappedEntry.Amount)
                     : -Math.Abs(mappedEntry.Amount);
+                mappedEntry.AmountInTRY = category.Type == EntryType.Income
+                   ? Math.Abs(mappedEntry.AmountInTRY)
+                   : -Math.Abs(mappedEntry.AmountInTRY);
+
+
+                // Entry ekle
+                await budgetRepository.CreateEntryAsync(mappedEntry, saveChanges: false);
+
 
                 // Cüzdan güncelle
-                await walletRepository.UpdateWalletAsync(wallet.WalletID, mappedEntry.Amount, saveChanges: false);
+                await walletRepository.UpdateWalletAsync(wallet.WalletID, mappedEntry.Amount, mappedEntry.AmountInTRY, saveChanges: false);
 
                 await unitOfWork.SaveChangesAsync();
                 await unitOfWork.CommitAsync();

@@ -23,6 +23,7 @@ public class DeleteInvestmentCommand : IRequest<Result<bool>>
         private readonly IPortfolioRepository portfolioRepository;
         private readonly IAssetRepository assetRepository;
         private readonly IWalletRepository walletRepository;
+        private readonly ICurrencyRateRepository currencyRateRepository;
         private readonly IUnitOfWork unitOfWork;
         public DeleteInvestmentCommandHandler(
             IInvestmentRepository investmentRepository,
@@ -31,6 +32,7 @@ public class DeleteInvestmentCommand : IRequest<Result<bool>>
             IPortfolioRepository portfolioRepository,
             IAssetRepository assetRepository,
             IWalletRepository walletRepository,
+            ICurrencyRateRepository currencyRateRepository,
             IUnitOfWork unitOfWork)
         {
             this.investmentRepository = investmentRepository;
@@ -39,6 +41,7 @@ public class DeleteInvestmentCommand : IRequest<Result<bool>>
             this.portfolioRepository = portfolioRepository;
             this.assetRepository = assetRepository;
             this.walletRepository = walletRepository;
+            this.currencyRateRepository = currencyRateRepository;
             this.unitOfWork = unitOfWork;
         }
         public async Task<Result<bool>> Handle(DeleteInvestmentCommand request, CancellationToken cancellationToken)
@@ -68,6 +71,19 @@ public class DeleteInvestmentCommand : IRequest<Result<bool>>
                 ? investment.UnitAmount * asset.BuyPrice
                 : investment.UnitAmount * asset.SellPrice;
 
+            #region AmountInTRY hesapla
+            var currency = wallet.Wallet.Currency;
+            decimal exchangeRateToTRY = 1m;
+
+            if (currency != CurrencyType.TRY)
+            {
+                var currencyRate = await currencyRateRepository.GetCurrencyRateByType(currency);
+                exchangeRateToTRY = currencyRate.ForexSelling;
+            }
+
+            investment.AmountInTRY = investment.CurrencyAmount * exchangeRateToTRY;
+            #endregion
+
             var walletAsset = await walletRepository.GetWalletAssetAsync(portfolio.WalletID, investment.AssetID);
             if (walletAsset is null)
                 return Result.Failure<bool>(WalletAssetErrors.NotFound);
@@ -88,7 +104,7 @@ public class DeleteInvestmentCommand : IRequest<Result<bool>>
                     if (!assetUpdate)
                         return Result.Failure<bool>(WalletAssetErrors.UserAssetUpdateFailed);
 
-                    var walletUpdate = await walletRepository.UpdateWalletAsync(portfolio.WalletID, investment.CurrencyAmount, saveChanges: false);
+                    var walletUpdate = await walletRepository.UpdateWalletAsync(portfolio.WalletID, investment.CurrencyAmount, investment.AmountInTRY, saveChanges: false);
                     if (!walletUpdate)
                         return Result.Failure<bool>(WalletErrors.UpdateFailed);
                 }
@@ -105,7 +121,7 @@ public class DeleteInvestmentCommand : IRequest<Result<bool>>
                     if (!assetUpdate)
                         return Result.Failure<bool>(WalletAssetErrors.UserAssetUpdateFailed);
 
-                    var walletUpdate = await walletRepository.UpdateWalletAsync(portfolio.WalletID, -investment.CurrencyAmount, saveChanges: false);
+                    var walletUpdate = await walletRepository.UpdateWalletAsync(portfolio.WalletID, -investment.CurrencyAmount, -investment.AmountInTRY, saveChanges: false);
                     if (!walletUpdate)
                         return Result.Failure<bool>(WalletErrors.UpdateFailed);
                 }

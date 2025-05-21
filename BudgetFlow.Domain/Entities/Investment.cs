@@ -6,6 +6,8 @@ public class Investment : BaseEntity
 {
     public decimal CurrencyAmount { get; set; }
     public decimal UnitAmount { get; set; }
+    public decimal AmountInTRY { get; set; }
+    public CurrencyType Currency { get; set; }
     public string Description { get; set; }
     public InvestmentType Type { get; set; }
     public DateTime Date { get; set; }

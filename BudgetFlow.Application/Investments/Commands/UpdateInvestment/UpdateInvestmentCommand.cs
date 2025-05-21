@@ -26,6 +26,7 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
         private readonly IPortfolioRepository portfolioRepository;
         private readonly IUserWalletRepository userWalletRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly ICurrencyRateRepository currencyRateRepository;
         private readonly IUnitOfWork unitOfWork;
 
         public UpdateInvestmentCommandHandler(
@@ -35,6 +36,7 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
             IPortfolioRepository portfolioRepository,
             IUserWalletRepository userWalletRepository,
             IHttpContextAccessor httpContextAccessor,
+            ICurrencyRateRepository currencyRateRepository,
             IUnitOfWork unitOfWork)
         {
             this.investmentRepository = investmentRepository;
@@ -43,6 +45,7 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
             this.portfolioRepository = portfolioRepository;
             this.userWalletRepository = userWalletRepository;
             this.httpContextAccessor = httpContextAccessor;
+            this.currencyRateRepository = currencyRateRepository;
             this.unitOfWork = unitOfWork;
         }
 
@@ -75,12 +78,26 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
                 ? request.UnitAmount * asset.BuyPrice
                 : request.UnitAmount * asset.SellPrice;
 
+
             var walletAsset = await walletRepository.GetWalletAssetAsync(portfolio.WalletID, existingInvestment.AssetID);
             if (walletAsset is null)
                 return Result.Failure<bool>(WalletAssetErrors.NotEnoughAssetAmount);
 
             decimal unitDifference = request.UnitAmount - existingInvestment.UnitAmount;
             decimal balanceDifference = newCurrencyAmount - existingInvestment.CurrencyAmount;
+
+            #region AmountInTRY güncelle
+            var currency = userWallet.Wallet.Currency;
+            decimal exchangeRateToTRY = 1m;
+
+            if (currency != CurrencyType.TRY)
+            {
+                var currencyRate = await currencyRateRepository.GetCurrencyRateByType(currency);
+                exchangeRateToTRY = currencyRate.ForexSelling;
+            }
+            decimal balanceDifferenceInTRY = balanceDifference * exchangeRateToTRY;
+            #endregion
+
 
             await unitOfWork.BeginTransactionAsync();
 
@@ -94,7 +111,7 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
                     walletAsset.Amount += unitDifference;
                     walletAsset.Balance += balanceDifference;
 
-                    await walletRepository.UpdateWalletAsync(userWallet.Wallet.ID, -balanceDifference, saveChanges: false);
+                    await walletRepository.UpdateWalletAsync(userWallet.Wallet.ID, -balanceDifference, -balanceDifferenceInTRY, saveChanges: false);
                 }
                 else
                 {
@@ -104,7 +121,7 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
                     walletAsset.Amount -= unitDifference;
                     walletAsset.Balance -= balanceDifference;
 
-                    await walletRepository.UpdateWalletAsync(userWallet.Wallet.ID, balanceDifference, saveChanges: false);
+                    await walletRepository.UpdateWalletAsync(userWallet.Wallet.ID, balanceDifference, balanceDifferenceInTRY, saveChanges: false);
                 }
 
                 await walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);

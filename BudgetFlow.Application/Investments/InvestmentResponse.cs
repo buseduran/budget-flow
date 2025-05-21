@@ -8,6 +8,7 @@ public class InvestmentResponse
     public string Description { get; set; }
     public decimal CurrencyAmount { get; set; }
     public decimal UnitAmount { get; set; }
+    public decimal AmountInTRY { get; set; }
     public int AssetID { get; set; }
     public int PortfolioID { get; set; }
     public InvestmentType Type { get; set; }

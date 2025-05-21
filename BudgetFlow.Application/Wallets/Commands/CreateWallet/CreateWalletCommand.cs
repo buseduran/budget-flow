@@ -21,6 +21,7 @@ public class CreateWalletCommand : IRequest<Result<bool>>
         private readonly ICategoryRepository categoryRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly IUserWalletRepository userWalletRepository;
+        private readonly ICurrencyRateRepository currencyRateRepository;
         private readonly IUnitOfWork unitOfWork;
         public CreateWalletCommandHandler(
             IWalletRepository walletRepository,
@@ -28,13 +29,15 @@ public class CreateWalletCommand : IRequest<Result<bool>>
             IHttpContextAccessor httpContextAccessor,
             ICategoryRepository categoryRepository,
             IUserWalletRepository userWalletRepository,
-            IUnitOfWork unitOfWork)
+            ICurrencyRateRepository currencyRateRepository,
+        IUnitOfWork unitOfWork)
         {
             this.walletRepository = walletRepository;
             this.budgetRepository = budgetRepository;
             this.httpContextAccessor = httpContextAccessor;
             this.categoryRepository = categoryRepository;
             this.userWalletRepository = userWalletRepository;
+            this.currencyRateRepository = currencyRateRepository;
             this.unitOfWork = unitOfWork;
         }
         public async Task<Result<bool>> Handle(CreateWalletCommand request, CancellationToken cancellationToken)
@@ -61,10 +64,20 @@ public class CreateWalletCommand : IRequest<Result<bool>>
                 };
                 await categoryRepository.CreateCategoryAsync(category, saveChanges: false);
 
+                #region ExchangeRate alınır.
+                decimal exchangeRateToTRY = 1m;
+                var currencyRate = await currencyRateRepository.GetCurrencyRateByType(request.Currency);
+                if (request.Currency != CurrencyType.TRY)
+                {
+                    exchangeRateToTRY = currencyRate.ForexSelling;
+                }
+                #endregion
+
                 // Cüzdan oluştur
                 var wallet = new Wallet
                 {
                     Balance = request.Balance,
+                    BalanceInTRY = request.Balance * exchangeRateToTRY,
                     Currency = request.Currency,
                 };
                 await walletRepository.CreateWalletAsync(wallet, saveChanges: false);
@@ -86,6 +99,7 @@ public class CreateWalletCommand : IRequest<Result<bool>>
                 {
                     Name = "Başlangıç Bakiyesi",
                     Amount = request.Balance,
+                    AmountInTRY = request.Balance * exchangeRateToTRY,
                     Date = DateTime.UtcNow,
                     CategoryID = category.ID,
                     UserID = userID,

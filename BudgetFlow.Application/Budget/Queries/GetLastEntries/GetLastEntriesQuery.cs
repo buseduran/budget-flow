@@ -12,22 +12,25 @@ public class GetLastEntriesQuery : IRequest<Result<List<LastEntryResponse>>>
     public class GetLastFiveEntriesQueryHandler : IRequestHandler<GetLastEntriesQuery, Result<List<LastEntryResponse>>>
     {
         private readonly IBudgetRepository budgetRepository;
-        private readonly IWalletRepository walletRepository;
+        private readonly IUserWalletRepository userWalletRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
-        public GetLastFiveEntriesQueryHandler(IBudgetRepository budgetRepository, IHttpContextAccessor httpContextAccessor, IWalletRepository walletRepository)
+        public GetLastFiveEntriesQueryHandler(
+            IBudgetRepository budgetRepository,
+            IHttpContextAccessor httpContextAccessor,
+            IUserWalletRepository userWalletRepository)
         {
             this.budgetRepository = budgetRepository;
             this.httpContextAccessor = httpContextAccessor;
-            this.walletRepository = walletRepository;
+            this.userWalletRepository = userWalletRepository;
         }
         public async Task<Result<List<LastEntryResponse>>> Handle(GetLastEntriesQuery request, CancellationToken cancellationToken)
         {
             GetCurrentUser getCurrentUser = new(httpContextAccessor);
             int userID = getCurrentUser.GetCurrentUserID();
 
-            var currency = await walletRepository.GetUserCurrencyAsync(userID);
+            var userWallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(request.WalletID, userID);
 
-            var entries = await budgetRepository.GetLastFiveEntriesAsync(userID, currency, request.WalletID);
+            var entries = await budgetRepository.GetLastFiveEntriesAsync(userID, userWallet.Wallet.Currency, request.WalletID);
             return entries != null
                 ? Result.Success(entries)
                 : Result.Failure<List<LastEntryResponse>>(EntryErrors.LatestEntriesRetrievalFailed);

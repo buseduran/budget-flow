@@ -25,7 +25,7 @@ public class WalletRepository : IWalletRepository
         return wallet.ID;
     }
 
-    public async Task<bool> UpdateWalletAsync(int ID, decimal Amount, bool saveChanges = true)
+    public async Task<bool> UpdateWalletAsync(int ID, decimal Amount, decimal AmountInTRY, bool saveChanges = true)
     {
         var wallet = await context.Wallets
             .FirstOrDefaultAsync(wallet => wallet.ID == ID);
@@ -33,9 +33,9 @@ public class WalletRepository : IWalletRepository
 
         wallet.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
         wallet.Balance += Amount;
+        wallet.BalanceInTRY += AmountInTRY;
         if (saveChanges)
             await context.SaveChangesAsync();
-
         return true;
     }
 

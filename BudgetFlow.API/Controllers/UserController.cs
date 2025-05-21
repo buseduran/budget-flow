@@ -176,7 +176,7 @@ public class UserController : ControllerBase
     /// <summary>
     /// Pages a User Logs
     /// </summary>
-    /// <param name="getEntryPaginationQuery"></param>
+    /// <param name="getLogPaginationQuery"></param>
     /// <returns></returns>
     [HttpGet("Logs")]
     [Produces(MediaTypeNames.Application.Json)]

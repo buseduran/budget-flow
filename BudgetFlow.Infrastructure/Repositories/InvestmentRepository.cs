@@ -261,6 +261,7 @@ public class InvestmentRepository : IInvestmentRepository
                 Name = i.Asset.Name,
                 CurrencyAmount = i.CurrencyAmount,
                 UnitAmount = i.UnitAmount,
+                AmountInTRY = i.AmountInTRY,
                 Description = i.Description,
                 Date = i.Date,
                 CreatedAt = i.CreatedAt,

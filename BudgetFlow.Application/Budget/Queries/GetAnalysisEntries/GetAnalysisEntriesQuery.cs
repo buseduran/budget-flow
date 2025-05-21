@@ -10,30 +10,27 @@ public class GetAnalysisEntriesQuery : IRequest<Result<AnalysisEntriesResponse>>
 {
     public string Range { get; set; }
     public int WalletID { get; set; }
-    public GetAnalysisEntriesQuery(string Range, int WalletID)
-    {
-        this.Range = Range;
-        this.WalletID = WalletID;
-    }
     public class GetAnalysisEntriesQueryHandler : IRequestHandler<GetAnalysisEntriesQuery, Result<AnalysisEntriesResponse>>
     {
         private readonly IBudgetRepository budgetRepository;
-        private readonly IWalletRepository walletRepository;
+        private readonly IUserWalletRepository userWalletRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
-        public GetAnalysisEntriesQueryHandler(IBudgetRepository budgetRepository, IHttpContextAccessor httpContextAccessor, IWalletRepository walletRepository)
+        public GetAnalysisEntriesQueryHandler(
+            IBudgetRepository budgetRepository,
+            IHttpContextAccessor httpContextAccessor,
+            IUserWalletRepository userWalletRepository)
         {
             this.budgetRepository = budgetRepository;
             this.httpContextAccessor = httpContextAccessor;
-            this.walletRepository = walletRepository;
+            this.userWalletRepository = userWalletRepository;
         }
         public async Task<Result<AnalysisEntriesResponse>> Handle(GetAnalysisEntriesQuery request, CancellationToken cancellationToken)
         {
-            GetCurrentUser getCurrentUser = new(httpContextAccessor);
-            int userID = getCurrentUser.GetCurrentUserID();
+            int userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
 
-            var currency = await walletRepository.GetUserCurrencyAsync(userID);
+            var userWallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(request.WalletID, userID);
 
-            var entries = await budgetRepository.GetAnalysisEntriesAsync(userID, request.Range, currency, request.WalletID);
+            var entries = await budgetRepository.GetAnalysisEntriesAsync(userID, request.Range, userWallet.Wallet.Currency, request.WalletID);
             return entries != null
                 ? Result.Success(entries)
                 : Result.Failure<AnalysisEntriesResponse>(EntryErrors.AnalysisEntriesRetrievalFailed);

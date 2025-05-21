@@ -68,7 +68,8 @@ public class ExchangeRateScraper : IExchangeRateScraper
         await unitOfWork.BeginTransactionAsync();
         try
         {
-            await currencyRateRepository.DeleteRatesForDateAsync(DateTime.UtcNow.Date, saveChanges: false);
+            //await currencyRateRepository.DeleteRatesForDateAsync(DateTime.UtcNow.Date, saveChanges: false);
+            //güncelle
             await currencyRateRepository.AddRatesAsync(latestRates, saveChanges: false);
 
             await unitOfWork.SaveChangesAsync();

@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Enums;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,5 +29,12 @@ public class CurrencyRateRepository : ICurrencyRateRepository
         await context.CurrencyRates.AddRangeAsync(rates);
         if (saveChanges)
             await context.SaveChangesAsync();
+    }
+
+    public async Task<CurrencyRate> GetCurrencyRateByType(CurrencyType currency)
+    {
+        var currencyRate = await context.CurrencyRates
+            .FirstOrDefaultAsync(c => c.CurrencyType == currency);
+        return currencyRate;
     }
 }

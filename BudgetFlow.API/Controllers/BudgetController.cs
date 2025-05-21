@@ -114,9 +114,9 @@ namespace BudgetFlow.API.Controllers
         [Route("Latest")]
         [Produces(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<LastEntryResponse>))]
-        public async Task<IResult> GetLastEntriesAsync()
+        public async Task<IResult> GetLastEntriesAsync([FromQuery] GetLastEntriesQuery getLastEntriesQuery)
         {
-            var result = await mediator.Send(new GetLastEntriesQuery());
+            var result = await mediator.Send(getLastEntriesQuery);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();
