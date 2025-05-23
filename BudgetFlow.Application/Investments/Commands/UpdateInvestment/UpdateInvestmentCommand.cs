@@ -129,12 +129,16 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
                 existingInvestment.Description = request.Description;
                 existingInvestment.UnitAmount = request.UnitAmount;
                 existingInvestment.CurrencyAmount = newCurrencyAmount;
+                existingInvestment.AmountInTRY = newCurrencyAmount * exchangeRateToTRY;
+                existingInvestment.ExchangeRate = exchangeRateToTRY;
                 existingInvestment.Date = DateTime.SpecifyKind(request.Date, DateTimeKind.Utc);
 
                 var investmentDto = new InvestmentDto
                 {
                     UnitAmount = request.UnitAmount,
                     CurrencyAmount = newCurrencyAmount,
+                    AmountInTRY = newCurrencyAmount * exchangeRateToTRY,
+                    ExchangeRate = exchangeRateToTRY,
                     Description = request.Description,
                     Date = DateTime.SpecifyKind(request.Date, DateTimeKind.Utc),
                 };

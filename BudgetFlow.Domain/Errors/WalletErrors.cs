@@ -14,4 +14,6 @@ public static class WalletErrors
     public static Error UserWalletCreationFailed => new("Cüzdan kullanıcı ilişkisi oluşturulurken bir hata oluştu.");
     public static Error UserWalletAlreadyExists => new("Kullanıcının zaten bir cüzdanı bulunmaktadır.");
     public static Error UserHasNoPermission => new("Bu cüzdanda bu işlemi yapma izniniz yok.");
+    public static Error InvalidCurrency => new("Geçersiz para birimi.");
+    public static Error CurrencyRateNotFound => new("Para birimi kuru bulunamadı.");
 }

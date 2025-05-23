@@ -65,8 +65,17 @@ public class CreateWalletCommand : IRequest<Result<bool>>
                 await categoryRepository.CreateCategoryAsync(category, saveChanges: false);
 
                 #region ExchangeRate alınır.
-                decimal exchangeRateToTRY = 1m;
+                if (!Enum.IsDefined(typeof(CurrencyType), request.Currency))
+                {
+                    return Result.Failure<bool>(WalletErrors.InvalidCurrency);
+                }
+
                 var currencyRate = await currencyRateRepository.GetCurrencyRateByType(request.Currency);
+                if (currencyRate == null)
+                    return Result.Failure<bool>(WalletErrors.CurrencyRateNotFound);
+
+                decimal exchangeRateToTRY = 1m;
+
                 if (request.Currency != CurrencyType.TRY)
                 {
                     exchangeRateToTRY = currencyRate.ForexSelling;
@@ -82,7 +91,7 @@ public class CreateWalletCommand : IRequest<Result<bool>>
                 };
                 await walletRepository.CreateWalletAsync(wallet, saveChanges: false);
 
-                // İlk SaveChanges — Category ve Wallet ID’leri garanti altına alınır
+                // İlk SaveChanges — Category ve Wallet ID'leri garanti altına alınır
                 await unitOfWork.SaveChangesAsync();
 
                 // Kullanıcı-Cüzdan ilişkisi

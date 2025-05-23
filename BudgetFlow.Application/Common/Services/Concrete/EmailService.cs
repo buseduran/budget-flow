@@ -1,4 +1,5 @@
-﻿using BudgetFlow.Application.Common.Services.Abstract;
+﻿using BudgetFlow.Application.Common.Exceptions;
+using BudgetFlow.Application.Common.Services.Abstract;
 using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Net.Mail;
@@ -38,8 +39,14 @@ public class EmailService : IEmailService
 
         mailMessage.To.Add(to);
 
-        await smtpClient.SendMailAsync(mailMessage);
-
+        try
+        {
+            await smtpClient.SendMailAsync(mailMessage);
+        }
+        catch (Exception ex)
+        {
+            throw new EmailSendException($"E-posta '{to}' adresine gönderilemedi.", ex);
+        }
     }
 }
 

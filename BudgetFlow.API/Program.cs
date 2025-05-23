@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.API.Middlewares;
 using BudgetFlow.Application;
+using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -139,6 +140,21 @@ using (var scope = app.Services.CreateScope())
     var context = services.GetRequiredService<BudgetContext>();
     context.Database.Migrate();
 }
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<BudgetContext>();
+
+    if (!context.Roles.Any())
+    {
+        context.Roles.AddRange(
+            new Role { ID = Role.AdminID, Name = Role.Admin },
+            new Role { ID = Role.MemberID, Name = Role.Member }
+        );
+        context.SaveChanges();
+    }
+}
+
 
 // Dev Tools
 if (app.Environment.IsDevelopment())

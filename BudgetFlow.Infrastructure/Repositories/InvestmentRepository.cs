@@ -44,6 +44,8 @@ public class InvestmentRepository : IInvestmentRepository
 
         investment.UnitAmount = Investment.UnitAmount;
         investment.CurrencyAmount = Investment.CurrencyAmount;
+        investment.AmountInTRY = Investment.AmountInTRY;
+        investment.ExchangeRate = Investment.ExchangeRate;
         investment.Description = Investment.Description;
         investment.Date = Investment.Date;
 
@@ -61,8 +63,10 @@ public class InvestmentRepository : IInvestmentRepository
             {
                 ID = i.ID,
                 Name = i.Asset.Name,
-                CurrencyAmount = i.CurrencyAmount,
                 UnitAmount = i.UnitAmount,
+                CurrencyAmount = i.CurrencyAmount,
+                AmountInTRY = i.AmountInTRY,
+                ExchangeRate = i.ExchangeRate,
                 Description = i.Description,
                 CreatedAt = i.CreatedAt,
                 UpdatedAt = i.UpdatedAt,
@@ -153,100 +157,6 @@ public class InvestmentRepository : IInvestmentRepository
         {
             Investments = investments,
             AssetInfo = portfolioAssetInfoResponse
-        };
-    }
-
-    public async Task<List<Dictionary<string, object>>> GetAssetRevenueAsync(string Portfolio, int UserID)
-    {
-        var portfolioId = await context.Portfolios
-            .Where(p => p.Name == Portfolio && p.UserID == UserID)
-            .Select(p => p.ID)
-            .FirstOrDefaultAsync();
-
-        var investments = await context.Investments
-            .Where(e => e.Portfolio.ID == portfolioId)
-            .GroupBy(i => new { i.Date.Date, i.Asset.Name })
-            .Select(g => new
-            {
-                Date = g.Key.Date.ToString("yyyy-MM-dd"),
-                Asset = g.Key.Name,
-                Total = g.Sum(e => e.CurrencyAmount)
-            }).ToListAsync();
-
-        var transformedData = investments
-            .GroupBy(i => i.Date)
-            .Select(g =>
-            {
-                var dict = new Dictionary<string, object> { { "date", g.Key } };
-                foreach (var item in g)
-                {
-                    dict[item.Asset] = item.Total;
-                }
-                return dict;
-            })
-            .ToList();
-
-        return transformedData;
-    }
-
-    public async Task<PaginatedAssetInvestResponse> GetAssetInvestPaginationAsync(int WalletID, int PortfolioID, int AssetID, int Page, int PageSize)
-    {
-        var investments = await context.Investments
-             .Where(e => e.PortfolioId == PortfolioID && e.AssetId == AssetID)
-             .OrderByDescending(c => c.CreatedAt)
-             .Skip((Page - 1) * PageSize)
-             .Take(PageSize)
-             .Select(i => new AssetInvestResponse
-             {
-                 ID = i.ID,
-                 UnitAmount = i.UnitAmount,
-                 CurrencyAmount = i.CurrencyAmount,
-                 Description = i.Description,
-                 Date = i.Date,
-                 Type = i.Type,
-                 CreatedAt = i.CreatedAt,
-                 UpdatedAt = i.UpdatedAt
-             })
-             .ToListAsync();
-
-        // TODO : null check
-        var assetInvestMainResponse = await context.Investments
-            .Where(e => e.PortfolioId == PortfolioID && e.AssetId == AssetID)
-            .GroupBy(e => new { e.AssetId, e.Asset.Name, e.Asset.Code, e.Asset.Unit, e.Asset.Symbol })
-            .Select(g => new
-            {
-                ID = g.Key.AssetId,
-                g.Key.Name,
-                g.Key.Code,
-                g.Key.Unit,
-                g.Key.Symbol,
-            }).FirstOrDefaultAsync();
-
-        var userAsset = await context.WalletAssets
-            .Where(u => u.AssetId == AssetID && u.WalletId == WalletID)
-            .Select(u => new
-            {
-                u.Amount,
-                u.Balance
-            }).FirstOrDefaultAsync();
-
-        var count = await context.Investments
-            .Where(i => i.PortfolioId == PortfolioID && i.AssetId == AssetID)
-            .CountAsync();
-
-        return new PaginatedAssetInvestResponse
-        {
-            AssetInfo = new AssetInvestInfoResponse
-            {
-                ID = assetInvestMainResponse.ID,
-                Name = assetInvestMainResponse.Name,
-                Code = assetInvestMainResponse.Code,
-                Unit = assetInvestMainResponse.Unit,
-                Symbol = assetInvestMainResponse.Symbol,
-                TotalAmount = userAsset.Amount,
-                TotalPrice = userAsset.Balance
-            },
-            AssetInvests = new PaginatedList<AssetInvestResponse>(investments, count, Page, PageSize)
         };
     }
 

@@ -53,6 +53,7 @@ public class WalletRepository : IWalletRepository
 
         return wallet;
     }
+
     public async Task<bool> UpdateCurrencyAsync(int WalletID, CurrencyType Currency)
     {
         var wallet = await context.Wallets
@@ -79,6 +80,7 @@ public class WalletRepository : IWalletRepository
     {
         var walletAsset = await context.WalletAssets
             .Where(e => e.WalletId == WalletID && e.AssetId == AssetID)
+
             .Select(e => new WalletAssetResponse
             {
                 ID = e.ID,

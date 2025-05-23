@@ -71,19 +71,6 @@ public class DeleteInvestmentCommand : IRequest<Result<bool>>
                 ? investment.UnitAmount * asset.BuyPrice
                 : investment.UnitAmount * asset.SellPrice;
 
-            #region AmountInTRY hesapla
-            var currency = wallet.Wallet.Currency;
-            decimal exchangeRateToTRY = 1m;
-
-            if (currency != CurrencyType.TRY)
-            {
-                var currencyRate = await currencyRateRepository.GetCurrencyRateByType(currency);
-                exchangeRateToTRY = currencyRate.ForexSelling;
-            }
-
-            investment.AmountInTRY = investment.CurrencyAmount * exchangeRateToTRY;
-            #endregion
-
             var walletAsset = await walletRepository.GetWalletAssetAsync(portfolio.WalletID, investment.AssetID);
             if (walletAsset is null)
                 return Result.Failure<bool>(WalletAssetErrors.NotFound);

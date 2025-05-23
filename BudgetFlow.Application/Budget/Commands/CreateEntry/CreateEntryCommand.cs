@@ -101,7 +101,7 @@ public class CreateEntryCommand : IRequest<Result<bool>>
                     exchangeRateToTRY = currencyRate.ForexSelling;
                 }
                 mappedEntry.AmountInTRY = mappedEntry.Amount * exchangeRateToTRY;
-              
+                mappedEntry.ExchangeRate = exchangeRateToTRY;
                 #endregion
 
                 // Miktarı kategori tipine göre ayarla

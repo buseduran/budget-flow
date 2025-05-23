@@ -192,9 +192,12 @@ public class UserRepository : IUserRepository
         return roles;
     }
 
-    public async Task<bool> CreateUserRoleAsync(UserRole userRole)
+    public async Task<bool> CreateUserRoleAsync(UserRole userRole, bool saveChanges = false)
     {
         context.UserRoles.Add(userRole);
-        return await context.SaveChangesAsync() > 0;
+        if (saveChanges)
+            return await context.SaveChangesAsync() > 0;
+
+        return true;
     }
 }

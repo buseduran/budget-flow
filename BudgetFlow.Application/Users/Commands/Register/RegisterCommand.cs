@@ -1,4 +1,6 @@
-﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+﻿using BudgetFlow.Application.Common.Exceptions;
+using BudgetFlow.Application.Common.Interfaces;
+using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Interfaces.Services;
 using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Application.Common.Results;
@@ -21,18 +23,21 @@ public class RegisterCommand : IRequest<Result<bool>>
         private readonly ITokenProvider tokenProvider;
         private readonly IEmailService emailService;
         private readonly IConfiguration configuration;
+        private readonly IUnitOfWork unitOfWork;
         public CreateUserCommandHandler(
             IUserRepository userRepository,
             IPasswordHasher passwordHasher,
             ITokenProvider tokenProvider,
             IEmailService emailService,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IUnitOfWork unitOfWork)
         {
             this.userRepository = userRepository;
             this.passwordHasher = passwordHasher;
             this.tokenProvider = tokenProvider;
             this.emailService = emailService;
             this.configuration = configuration;
+            this.unitOfWork = unitOfWork;
         }
 
         public async Task<Result<bool>> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -51,45 +56,49 @@ public class RegisterCommand : IRequest<Result<bool>>
                 PasswordHash = passwordHasher.Hash(request.User.Password)
             };
 
-            var userID = await userRepository.CreateAsync(user);
-            if (userID is 0)
-                return Result.Failure<bool>(UserErrors.CreationFailed);
-
-            #region Create UserRole
-            var userRole = new UserRole()
+            await unitOfWork.BeginTransactionAsync();
+            try
             {
-                UserID = userID,
-                RoleID = Role.MemberID // Default role
-            };
-            var userRoleResult = await userRepository.CreateUserRoleAsync(userRole);
-            if (!userRoleResult)
-                return Result.Failure<bool>(UserErrors.UserRoleCreationFailed);
-            #endregion
-            else
-            {
-                try
+                var userID = await userRepository.CreateAsync(user);
+
+                #region Create UserRole
+                var userRole = new UserRole()
                 {
-                    #region Send e-mail confirmation
-                    var emailConfig = configuration.GetSection("EmailConfiguration");
+                    UserID = userID,
+                    RoleID = Role.MemberID // Default role
+                };
+                await userRepository.CreateUserRoleAsync(userRole, saveChanges: false);
+                #endregion
 
-                    var token = tokenProvider.GenerateEmailConfirmationToken(user);
-                    var confirmationLink = $"{emailConfig["ConfirmURI"]}?token={token}&email={user.Email}";
+                #region Send e-mail confirmation
+                var emailConfig = configuration.GetSection("EmailConfiguration");
 
-                    var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Resources", "Templates", "EmailConfirmTemplate.html");
-                    var emailTemplate = File.ReadAllText(templatePath, Encoding.UTF8);
+                var token = tokenProvider.GenerateEmailConfirmationToken(user);
+                var confirmationLink = $"{emailConfig["ConfirmURI"]}?token={token}&email={user.Email}";
 
-                    var emailBody = emailTemplate.Replace("{{confirmationLink}}", confirmationLink);
-                    var emailSubject = "E-posta Doğrulama";
-                    await emailService.SendEmailAsync(user.Email, emailSubject, emailBody);
-                    #endregion
-                }
-                catch (Exception ex)
-                {
-                    return Result.Failure<bool>(UserErrors.EmailConfirmationMailFailed);
-                }
+                var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Resources", "Templates", "EmailConfirmTemplate.html");
+                var emailTemplate = File.ReadAllText(templatePath, Encoding.UTF8);
+
+                var emailBody = emailTemplate.Replace("{{confirmationLink}}", confirmationLink);
+                var emailSubject = "E-posta Doğrulama";
+                await emailService.SendEmailAsync(user.Email, emailSubject, emailBody);
+                #endregion
+
+                await unitOfWork.SaveChangesAsync();
+                await unitOfWork.CommitAsync();
+
+                return Result.Success(true);
             }
-
-            return Result.Success(true);
+            catch (EmailSendException)
+            {
+                await unitOfWork.RollbackAsync();
+                return Result.Failure<bool>(UserErrors.EmailConfirmationMailFailed);
+            }
+            catch (Exception)
+            {
+                await unitOfWork.RollbackAsync();
+                return Result.Failure<bool>(UserErrors.CreationFailed);
+            }
         }
     }
 }

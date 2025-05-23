@@ -69,15 +69,16 @@ public class UpdateEntryCommand : IRequest<Result<bool>>
                 var currencyRate = await currencyRateRepository.GetCurrencyRateByType(userWallet.Wallet.Currency);
                 exchangeRateToTRY = currencyRate.ForexSelling;
             }
-            mappedEntry.AmountInTRY = (category.Type == EntryType.Income
+            mappedEntry.AmountInTRY = category.Type == EntryType.Income
                              ? Math.Abs(mappedEntry.Amount * exchangeRateToTRY)
-                             : -Math.Abs(mappedEntry.Amount * exchangeRateToTRY));
+                             : -Math.Abs(mappedEntry.Amount * exchangeRateToTRY);
+            mappedEntry.ExchangeRate = exchangeRateToTRY;
             #endregion
 
             var difference = newAmount - existingEntry.Amount;
-            var differenceInTry = (category.Type == EntryType.Income
+            var differenceInTry = category.Type == EntryType.Income
                 ? Math.Abs(difference * exchangeRateToTRY)
-                : -Math.Abs(difference * exchangeRateToTRY));
+                : -Math.Abs(difference * exchangeRateToTRY);
 
             var wallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(request.Entry.WalletID, userID);
             if (category.Type == EntryType.Expense && wallet.Wallet.Balance < Math.Abs(difference) && difference < 0)
