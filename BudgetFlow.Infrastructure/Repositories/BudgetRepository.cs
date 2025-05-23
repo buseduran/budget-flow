@@ -52,7 +52,12 @@ public class BudgetRepository : IBudgetRepository
             await context.SaveChangesAsync();
         return true;
     }
-    public async Task<PaginatedList<EntryResponse>> GetPaginatedAsync(int Page, int PageSize, int UserID, CurrencyType currencyType, int walletID)
+    public async Task<PaginatedList<EntryResponse>> GetPaginatedAsync(
+        int Page,
+        int PageSize,
+        int UserID,
+        CurrencyType currencyType,
+        int walletID)
     {
         var entries = await context.Entries
             .OrderByDescending(c => c.CreatedAt)
@@ -65,6 +70,8 @@ public class BudgetRepository : IBudgetRepository
                 ID = e.ID,
                 Name = e.Name,
                 Amount = e.Amount,
+                AmountInTRY = e.AmountInTRY,
+                ExchangeRate = e.ExchangeRate,
                 Currency = currencyType,
                 Date = e.Date,
                 Category = new CategoryResponse
@@ -82,12 +89,19 @@ public class BudgetRepository : IBudgetRepository
         return new PaginatedList<EntryResponse>(entries, count, Page, PageSize);
     }
 
-    public async Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(int userID, string Range, CurrencyType currencyType, int walletID)
+    public async Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(
+        int userID,
+        string Range,
+        CurrencyType currencyType,
+        int walletID,
+        decimal exchangeRateToTRY,
+        bool convertToTRY)
     {
         var startDate = GetDateForRange.GetStartDateForRange(Range);
         var endDate = DateTime.UtcNow;
         var previousStartDate = GetDateForRange.GetPreviousStartDateForRange(Range);
         var previousEndDate = startDate.AddDays(-1);
+
 
         var groupedEntries = await context.Entries
             .Where(e => e.UserID == userID &&
@@ -147,8 +161,8 @@ public class BudgetRepository : IBudgetRepository
                     Color = e.Value.Color,
                     Type = e.Key.Type
                 },
-                Currency = currencyType,
-                Amount = e.Value.CurrentAmount
+                Currency = convertToTRY ? CurrencyType.TRY : currencyType,
+                Amount = convertToTRY ? e.Value.CurrentAmount * exchangeRateToTRY : e.Value.CurrentAmount
             })
             .ToList();
 
@@ -163,27 +177,27 @@ public class BudgetRepository : IBudgetRepository
                     Color = e.Value.Color,
                     Type = e.Key.Type
                 },
-                Currency = currencyType,
-                Amount = e.Value.CurrentAmount
+                Currency = convertToTRY ? CurrencyType.TRY : currencyType,
+                Amount = convertToTRY ? e.Value.CurrentAmount * exchangeRateToTRY : e.Value.CurrentAmount
             })
             .ToList();
 
         #region Calculate Trending
         var currentIncomeTotal = entryDictionary
            .Where(e => e.Key.Type == EntryType.Income)
-           .Sum(e => e.Value.CurrentAmount);
+           .Sum(e => convertToTRY ? e.Value.CurrentAmount * exchangeRateToTRY : e.Value.CurrentAmount);
 
         var previousIncomeTotal = entryDictionary
             .Where(e => e.Key.Type == EntryType.Income)
-            .Sum(e => e.Value.PreviousAmount);
+            .Sum(e => convertToTRY ? e.Value.PreviousAmount * exchangeRateToTRY : e.Value.PreviousAmount);
 
         var currentExpenseTotal = entryDictionary
             .Where(e => e.Key.Type == EntryType.Expense)
-            .Sum(e => e.Value.CurrentAmount);
+            .Sum(e => convertToTRY ? e.Value.CurrentAmount * exchangeRateToTRY : e.Value.CurrentAmount);
 
         var previousExpenseTotal = entryDictionary
             .Where(e => e.Key.Type == EntryType.Expense)
-            .Sum(e => e.Value.PreviousAmount);
+            .Sum(e => convertToTRY ? e.Value.PreviousAmount * exchangeRateToTRY : e.Value.PreviousAmount);
 
         decimal incomeTrend = previousIncomeTotal == 0 ? (currentIncomeTotal != 0 ? 100 : 0) :
             (currentIncomeTotal - previousIncomeTotal) / previousIncomeTotal * 100;
@@ -214,6 +228,8 @@ public class BudgetRepository : IBudgetRepository
                 ID = e.ID,
                 Name = e.Name,
                 Amount = e.Amount,
+                AmountInTRY = e.AmountInTRY,
+                ExchangeRate = e.ExchangeRate,
                 Currency = currencyType,
                 Date = e.Date,
                 Category = new CategoryResponse

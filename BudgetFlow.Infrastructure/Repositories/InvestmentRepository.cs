@@ -44,6 +44,8 @@ public class InvestmentRepository : IInvestmentRepository
 
         investment.UnitAmount = Investment.UnitAmount;
         investment.CurrencyAmount = Investment.CurrencyAmount;
+        investment.AmountInTRY = Investment.AmountInTRY;
+        investment.ExchangeRate = Investment.ExchangeRate;
         investment.Description = Investment.Description;
         investment.Date = Investment.Date;
 
@@ -61,8 +63,10 @@ public class InvestmentRepository : IInvestmentRepository
             {
                 ID = i.ID,
                 Name = i.Asset.Name,
-                CurrencyAmount = i.CurrencyAmount,
                 UnitAmount = i.UnitAmount,
+                CurrencyAmount = i.CurrencyAmount,
+                AmountInTRY = i.AmountInTRY,
+                ExchangeRate = i.ExchangeRate,
                 Description = i.Description,
                 CreatedAt = i.CreatedAt,
                 UpdatedAt = i.UpdatedAt,
@@ -189,7 +193,14 @@ public class InvestmentRepository : IInvestmentRepository
         return transformedData;
     }
 
-    public async Task<PaginatedAssetInvestResponse> GetAssetInvestPaginationAsync(int WalletID, int PortfolioID, int AssetID, int Page, int PageSize)
+    public async Task<PaginatedAssetInvestResponse> GetAssetInvestPaginationAsync(
+        int WalletID,
+        int PortfolioID,
+        int AssetID,
+        int Page,
+        int PageSize,
+        decimal exchangeRateToTRY,
+        bool convertToTRY)
     {
         var investments = await context.Investments
              .Where(e => e.PortfolioId == PortfolioID && e.AssetId == AssetID)
@@ -200,7 +211,9 @@ public class InvestmentRepository : IInvestmentRepository
              {
                  ID = i.ID,
                  UnitAmount = i.UnitAmount,
-                 CurrencyAmount = i.CurrencyAmount,
+                 CurrencyAmount = convertToTRY ? i.CurrencyAmount * exchangeRateToTRY : i.CurrencyAmount,
+                 AmountInTRY = i.AmountInTRY,
+                 ExchangeRate = i.ExchangeRate,
                  Description = i.Description,
                  Date = i.Date,
                  Type = i.Type,

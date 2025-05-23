@@ -79,6 +79,7 @@ public class WalletRepository : IWalletRepository
     {
         var walletAsset = await context.WalletAssets
             .Where(e => e.WalletId == WalletID && e.AssetId == AssetID)
+
             .Select(e => new WalletAssetResponse
             {
                 ID = e.ID,

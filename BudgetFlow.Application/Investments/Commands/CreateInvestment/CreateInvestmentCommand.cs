@@ -83,8 +83,8 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
             investment.AmountInTRY = investment.Type == InvestmentType.Buy
                 ? investment.CurrencyAmount * exchangeRateToTRY
                 : investment.CurrencyAmount * exchangeRateToTRY;
+            investment.ExchangeRate = exchangeRateToTRY;
             #endregion
-
 
             var walletAsset = await walletRepository.GetWalletAssetAsync(portfolio.WalletID, investment.AssetId);
 
