@@ -31,6 +31,8 @@ public class GetEntryPaginationQuery : IRequest<Result<PaginatedList<EntryRespon
             int userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
 
             var userWallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(request.WalletID, userID);
+            if (userWallet == null)
+                return Result.Failure<PaginatedList<EntryResponse>>(UserWalletErrors.UserWalletNotFound);
 
             var result = await budgetRepository.GetPaginatedAsync(request.Page, request.PageSize, userID, userWallet.Wallet.Currency, request.WalletID);
             if (result == null)

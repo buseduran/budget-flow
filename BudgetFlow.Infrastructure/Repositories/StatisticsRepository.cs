@@ -6,6 +6,7 @@ using BudgetFlow.Application.Statistics.Queries.GetAssetRevenue;
 using BudgetFlow.Application.Statistics.Queries.GetAssetInvestPagination;
 using BudgetFlow.Application.Statistics.Responses;
 using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Enums;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,15 +21,15 @@ public class StatisticsRepository : IStatisticsRepository
         _context = context;
     }
 
-    public async Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(GetAnalysisEntriesQuery query)
+    public async Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(int walletId, string range, bool convertToTRY)
     {
         var entries = await _context.Entries
-            .Where(e => e.WalletID == query.WalletID)
+            .Where(e => e.WalletID == walletId)
             .Select(e => new AnalysisEntryResponse
             {
                 ID = e.ID,
                 Name = e.Name,
-                Amount = e.Amount,
+                Amount = convertToTRY ? e.AmountInTRY : e.Amount,
                 Date = e.Date,
                 CreatedAt = e.CreatedAt,
                 UpdatedAt = e.UpdatedAt
@@ -41,10 +42,10 @@ public class StatisticsRepository : IStatisticsRepository
         };
     }
 
-    public async Task<List<LastEntryResponse>> GetLastEntriesAsync(GetLastEntriesQuery query)
+    public async Task<List<LastEntryResponse>> GetLastEntriesAsync(int walletId)
     {
         var entries = await _context.Entries
-            .Where(e => e.WalletID == query.WalletID)
+            .Where(e => e.WalletID == walletId)
             .OrderByDescending(e => e.CreatedAt)
             .Take(5)
             .Select(e => new LastEntryResponse
@@ -52,6 +53,9 @@ public class StatisticsRepository : IStatisticsRepository
                 ID = e.ID,
                 Name = e.Name,
                 Amount = e.Amount,
+                AmountInTRY = e.AmountInTRY,
+                ExchangeRate = e.ExchangeRate,
+                Currency = e.Currency,
                 Date = e.Date,
                 CreatedAt = e.CreatedAt,
                 UpdatedAt = e.UpdatedAt
@@ -93,7 +97,7 @@ public class StatisticsRepository : IStatisticsRepository
             {
                 ID = i.ID,
                 UnitAmount = i.UnitAmount,
-                CurrencyAmount = i.CurrencyAmount,
+                CurrencyAmount = query.ConvertToTRY ? i.AmountInTRY : i.CurrencyAmount,
                 AmountInTRY = i.AmountInTRY,
                 ExchangeRate = i.ExchangeRate,
                 Date = i.Date,
@@ -115,6 +119,11 @@ public class StatisticsRepository : IStatisticsRepository
                 g.Key.Symbol,
             }).FirstOrDefaultAsync();
 
+        var wallet = await _context.Wallets
+            .Where(w => w.ID == query.WalletID)
+            .Select(w => new { w.Currency })
+            .FirstOrDefaultAsync();
+
         var userAsset = await _context.WalletAssets
             .Where(u => u.AssetId == query.AssetID && u.WalletId == query.WalletID)
             .Select(u => new
@@ -122,6 +131,21 @@ public class StatisticsRepository : IStatisticsRepository
                 u.Amount,
                 u.Balance
             }).FirstOrDefaultAsync();
+
+        decimal totalPrice = userAsset.Balance;
+        if (query.ConvertToTRY && wallet.Currency != CurrencyType.TRY)
+        {
+            var currencyRate = await _context.CurrencyRates
+                .Where(c => c.CurrencyType == wallet.Currency)
+                .OrderByDescending(c => c.RetrievedAt)
+                .Select(c => c.ForexSelling)
+                .FirstOrDefaultAsync();
+
+            if (currencyRate > 0)
+            {
+                totalPrice *= currencyRate;
+            }
+        }
 
         var count = await _context.Investments
             .Where(i => i.PortfolioId == query.PortfolioID && i.AssetId == query.AssetID)
@@ -137,7 +161,7 @@ public class StatisticsRepository : IStatisticsRepository
                 Unit = assetInvestMainResponse.Unit,
                 Symbol = assetInvestMainResponse.Symbol,
                 TotalAmount = userAsset.Amount,
-                TotalPrice = userAsset.Balance
+                TotalPrice = totalPrice
             },
             AssetInvests = new PaginatedList<AssetInvestResponse>(investments, count, query.Page, query.PageSize)
         };

@@ -8,8 +8,8 @@ namespace BudgetFlow.Application.Common.Interfaces;
 
 public interface IStatisticsRepository
 {
-    Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(GetAnalysisEntriesQuery query);
-    Task<List<LastEntryResponse>> GetLastEntriesAsync(GetLastEntriesQuery query);
+    Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(int walletId, string range, bool convertToTRY);
+    Task<List<LastEntryResponse>> GetLastEntriesAsync(int walletId);
     Task<List<AssetRevenueResponse>> GetAssetRevenueAsync(string portfolio);
     Task<PaginatedAssetInvestResponse> GetAssetInvestsPaginationAsync(GetAssetInvestPaginationQuery query);
 }
