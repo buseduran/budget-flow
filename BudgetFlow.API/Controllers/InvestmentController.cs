@@ -4,8 +4,6 @@ using BudgetFlow.Application.Investments.Commands.CreateInvestment;
 using BudgetFlow.Application.Investments.Commands.DeleteInvestment;
 using BudgetFlow.Application.Investments.Commands.UpdateInvestment;
 using BudgetFlow.Application.Investments.Queries;
-using BudgetFlow.Application.Investments.Queries.GetAssetInvestPagination;
-using BudgetFlow.Application.Investments.Queries.GetAssetRevenue;
 using BudgetFlow.Application.Investments.Queries.GetInvestments;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -13,12 +11,19 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
 
 namespace BudgetFlow.API.Controllers;
+/// <summary>
+/// Controller for managing investment operations.
+/// </summary>
 [ApiController]
 [Route("[controller]")]
 [Authorize]
 public class InvestmentController : ControllerBase
 {
     private readonly IMediator mediator;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InvestmentController"/> class.
+    /// </summary>
+    /// <param name="mediator">The mediator instance for handling requests.</param>
     public InvestmentController(IMediator mediator)
     {
         this.mediator = mediator;
@@ -96,37 +101,6 @@ public class InvestmentController : ControllerBase
     public async Task<IResult> GetAssetInvestmentsAsync(string Portfolio)
     {
         var result = await mediator.Send(new GetPortfolioAssetsQuery(Portfolio));
-        return result.IsSuccess
-               ? Results.Ok(result.Value)
-               : result.ToProblemDetails();
-    }
-
-    /// <summary>
-    /// Get Asset Revenue for Dashboard. 
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("Revenue/{Portfolio}")]
-    [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AssetRevenueResponse>))]
-    public async Task<IResult> GetAssetRevenueAsync(string Portfolio)
-    {
-        var result = await mediator.Send(new GetAssetRevenueQuery(Portfolio));
-        return result.IsSuccess
-               ? Results.Ok(result.Value)
-               : result.ToProblemDetails();
-    }
-
-    /// <summary>
-    /// Pages an Asset's Investments by Portfolio. 
-    /// </summary>
-    /// <param name="getAssetInvestPaginationQuery"></param>
-    /// <returns></returns>
-    [HttpGet("Invests")]
-    [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedAssetInvestResponse))]
-    public async Task<IResult> GetAssetInvestsPaginationAsync([FromQuery] GetAssetInvestPaginationQuery getAssetInvestPaginationQuery)
-    {
-        var result = await mediator.Send(getAssetInvestPaginationQuery);
         return result.IsSuccess
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();

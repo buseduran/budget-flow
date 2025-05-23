@@ -11,12 +11,21 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
 
 namespace BudgetFlow.API.Controllers;
+
+/// <summary>
+/// Controller for managing wallet operations.
+/// </summary>
 [ApiController]
 [Route("[controller]")]
 [Authorize]
 public class WalletController : ControllerBase
 {
     private readonly IMediator mediator;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WalletController"/> class.
+    /// </summary>
+    /// <param name="mediator">The mediator instance for handling requests.</param>
     public WalletController(IMediator mediator)
     {
         this.mediator = mediator;

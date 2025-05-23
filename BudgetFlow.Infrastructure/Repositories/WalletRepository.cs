@@ -53,6 +53,7 @@ public class WalletRepository : IWalletRepository
 
         return wallet;
     }
+
     public async Task<bool> UpdateCurrencyAsync(int WalletID, CurrencyType Currency)
     {
         var wallet = await context.Wallets

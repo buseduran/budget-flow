@@ -10,6 +10,7 @@ namespace BudgetFlow.Application.Wallets.Commands.UpdateCurrency;
 public class UpdateCurrencyCommand : IRequest<Result<bool>>
 {
     public CurrencyType Currency { get; set; }
+    public int WalletID { get; set; }
     public class UpdateCurrencyCommandHandler : IRequestHandler<UpdateCurrencyCommand, Result<bool>>
     {
         private readonly IWalletRepository walletRepository;
@@ -22,7 +23,7 @@ public class UpdateCurrencyCommand : IRequest<Result<bool>>
         public async Task<Result<bool>> Handle(UpdateCurrencyCommand request, CancellationToken cancellationToken)
         {
             var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
-            var result = await walletRepository.UpdateCurrencyAsync(userID, request.Currency);
+            var result = await walletRepository.UpdateCurrencyAsync(request.WalletID, request.Currency);
 
             return result ? Result.Success(true)
                 : Result.Failure<bool>(WalletErrors.UpdateFailed);
