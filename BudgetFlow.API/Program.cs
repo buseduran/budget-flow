@@ -1,8 +1,10 @@
 ﻿using BudgetFlow.API.Middlewares;
 using BudgetFlow.Application;
+using BudgetFlow.Application.Categories.Commands.CreateCategory;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Infrastructure;
 using BudgetFlow.Infrastructure.Contexts;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -12,6 +14,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using FluentValidation.AspNetCore;
+using BudgetFlow.Application.Portfolios.Commands.CreatePortfolio;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -116,7 +120,12 @@ builder.Services.AddDbContext<BudgetContext>((sp, options) =>
 
 // Email Configuration
 
-
+// FluentValidation
+builder.Services.AddValidatorsFromAssembly(typeof(CreatePortfolioValidator).Assembly);
+builder.Services.AddFluentValidationAutoValidation(config =>
+{
+    config.DisableDataAnnotationsValidation = true;
+});
 
 // 🌐 CORS
 builder.Services.AddCors(options =>

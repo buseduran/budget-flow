@@ -15,14 +15,19 @@ public class GetPortfolioPaginationQuery : IRequest<Result<PaginatedList<Portfol
     {
         private readonly IPortfolioRepository portfolioRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
-        public GetPortfolioPaginationQueryHandler(IPortfolioRepository portfolioRepository, IHttpContextAccessor httpContextAccessor)
+        private readonly IUserWalletRepository userWalletRepository;
+        public GetPortfolioPaginationQueryHandler(IPortfolioRepository portfolioRepository, IHttpContextAccessor httpContextAccessor, IUserWalletRepository userWalletRepository)
         {
             this.portfolioRepository = portfolioRepository;
             this.httpContextAccessor = httpContextAccessor;
+            this.userWalletRepository = userWalletRepository;
         }
         public async Task<Result<PaginatedList<PortfolioResponse>>> Handle(GetPortfolioPaginationQuery request, CancellationToken cancellationToken)
         {
             int userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
+            var userWallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(request.WalletID, userID);
+            if (userWallet == null)
+                return Result.Failure<PaginatedList<PortfolioResponse>>(UserWalletErrors.UserWalletNotFound);
 
             var result = await portfolioRepository.GetPortfoliosAsync(request.Page, request.PageSize, userID, request.WalletID);
             return result != null
