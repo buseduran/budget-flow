@@ -95,6 +95,7 @@ public class UpdateEntryCommand : IRequest<Result<bool>>
                 await walletRepository.UpdateWalletAsync(userID, difference, differenceInTry, saveChanges: false);
 
                 mappedEntry.Amount = newAmount;
+                mappedEntry.Currency = existingEntry.Currency;
 
                 await budgetRepository.UpdateEntryAsync(request.ID, mappedEntry, saveChanges: false);
 
