@@ -29,17 +29,20 @@ public class GlobalExceptionHandler : IExceptionHandler
             var problemDetails = new ProblemDetails
             {
                 Status = StatusCodes.Status400BadRequest,
-                Title = "Validation error",
-                Detail = "One or more validation errors occurred.",
-                Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
+                Title = "Bad Request",
+                Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1"
             };
 
-            problemDetails.Extensions["errors"] = validationException.Errors
-                .GroupBy(x => x.PropertyName)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(x => x.ErrorMessage).ToArray()
-                );
+            // Get the first validation error
+            var firstError = validationException.Errors.FirstOrDefault();
+            if (firstError != null)
+            {
+                problemDetails.Extensions["errors"] = new
+                {
+                    code = firstError.ErrorCode,
+                    message = firstError.ErrorMessage
+                };
+            }
 
             httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
             await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
