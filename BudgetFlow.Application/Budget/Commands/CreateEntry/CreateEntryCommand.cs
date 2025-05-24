@@ -96,6 +96,9 @@ public class CreateEntryCommand : IRequest<Result<bool>>
                 #region TRY ile işlem yapılmıyorsa dönüşüm yapılır.
                 decimal exchangeRateToTRY = 1m;
                 var currencyRate = await currencyRateRepository.GetCurrencyRateByType(currency);
+                if (currencyRate is null)
+                    return Result.Failure<bool>(CurrencyRateErrors.FetchFailed);
+
                 if (currency != CurrencyType.TRY)
                 {
                     exchangeRateToTRY = currencyRate.ForexSelling;
@@ -112,17 +115,14 @@ public class CreateEntryCommand : IRequest<Result<bool>>
                    ? Math.Abs(mappedEntry.AmountInTRY)
                    : -Math.Abs(mappedEntry.AmountInTRY);
 
-
                 // Entry ekle
                 await budgetRepository.CreateEntryAsync(mappedEntry, saveChanges: false);
-
 
                 // Cüzdan güncelle
                 await walletRepository.UpdateWalletAsync(wallet.WalletID, mappedEntry.Amount, mappedEntry.AmountInTRY, saveChanges: false);
 
                 await unitOfWork.SaveChangesAsync();
                 await unitOfWork.CommitAsync();
-
                 return Result.Success(true);
             }
             catch (Exception ex)

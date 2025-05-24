@@ -3,5 +3,5 @@
 namespace BudgetFlow.Domain.Errors;
 public class GeneralErrors
 {
-    public static Error FromMessage(string message) => new(message);
+    public static Error FromMessage(string message) => new("General.UnknownError", message);
 }

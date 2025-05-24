@@ -30,13 +30,19 @@ public class BudgetRepository : IBudgetRepository
             await context.SaveChangesAsync();
         return true;
     }
-    public async Task<bool> UpdateEntryAsync(int ID, EntryDto Entry, bool saveChanges = true)
+    public async Task<bool> UpdateEntryAsync(int ID, Entry Entry, bool saveChanges = true)
     {
         var entry = await context.Entries.FindAsync(ID);
         if (entry is null) return false;
 
-        mapper.Map(Entry, entry);
-        entry.Date = DateTime.SpecifyKind(entry.Date, DateTimeKind.Utc);
+        entry.Name = Entry.Name;
+        entry.Amount = Entry.Amount;
+        entry.AmountInTRY = Entry.AmountInTRY;
+        entry.ExchangeRate = Entry.ExchangeRate;
+        entry.Currency = Entry.Currency;
+        entry.Date = DateTime.SpecifyKind(Entry.Date, DateTimeKind.Utc);
+        entry.CategoryID = Entry.CategoryID;
+        entry.WalletID = Entry.WalletID;
         entry.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
         return await context.SaveChangesAsync() > 0;
@@ -109,6 +115,7 @@ public class BudgetRepository : IBudgetRepository
                     Type = e.Category.Type
                 },
                 WalletID = e.WalletID,
+                Currency = e.Currency
             })
             .FirstOrDefaultAsync();
         return entry;

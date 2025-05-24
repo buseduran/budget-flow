@@ -3,9 +3,9 @@
 namespace BudgetFlow.Domain.Errors;
 public static class PortfolioErrors
 {
-    public static Error PortfolioNotFound => new("Portföy bulunamadı.");
-    public static Error PortfolioAlreadyExists => new("Bu isimde bir portföy zaten var.");
-    public static Error PortfolioCreationFailed => new("Portföy oluşturulamadı.");
-    public static Error PortfolioUpdateFailed => new("Portföy güncellenemedi.");
-    public static Error PortfolioDeletionFailed => new("Portföy silinemedi.");
+    public static Error PortfolioNotFound => new("Portfolio.NotFound", "Portföy bulunamadı.");
+    public static Error PortfolioAlreadyExists => new("Portfolio.AlreadyExists", "Bu isimde bir portföy zaten var.");
+    public static Error PortfolioCreationFailed => new("Portfolio.CreationFailed", "Portföy oluşturulamadı.");
+    public static Error PortfolioUpdateFailed => new("Portfolio.UpdateFailed", "Portföy güncellenemedi.");
+    public static Error PortfolioDeletionFailed => new("Portfolio.DeletionFailed", "Portföy silinemedi.");
 }

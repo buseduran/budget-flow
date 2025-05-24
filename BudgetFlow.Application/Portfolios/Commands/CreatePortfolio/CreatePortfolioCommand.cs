@@ -15,13 +15,20 @@ public class CreatePortfolioCommand : IRequest<Result<int>>
     {
         private readonly IPortfolioRepository portfolioRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
-        public CreatePortfolioCommandHandler(IPortfolioRepository portfolioRepository, IHttpContextAccessor httpContextAccessor)
+        private readonly IUserWalletRepository userWalletRepository;
+        public CreatePortfolioCommandHandler(IPortfolioRepository portfolioRepository, IHttpContextAccessor httpContextAccessor, IUserWalletRepository userWalletRepository)
         {
             this.portfolioRepository = portfolioRepository;
             this.httpContextAccessor = httpContextAccessor;
+            this.userWalletRepository = userWalletRepository;
         }
         public async Task<Result<int>> Handle(CreatePortfolioCommand request, CancellationToken cancellationToken)
         {
+            var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
+            var userWallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(request.Portfolio.WalletID, userID);
+            if (userWallet == null)
+                return Result.Failure<int>(UserWalletErrors.UserWalletNotFound);
+
             //check if the portfolio name exists
             var existingPortfolio = await portfolioRepository.GetPortfolioAsync(request.Portfolio.Name);
             if (existingPortfolio != null)
