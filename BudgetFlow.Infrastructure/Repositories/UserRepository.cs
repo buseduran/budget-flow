@@ -50,6 +50,7 @@ public class UserRepository : IUserRepository
             Name = user.Name,
             Email = user.Email,
             IsEmailConfirmed = user.IsEmailConfirmed,
+            PasswordHash= user.PasswordHash,
             Wallets = user.UserWallets.Select(uw => new UserWalletResponse
             {
                 WalletID = uw.WalletID,

@@ -10,6 +10,9 @@ public static class UserErrors
     public static Error PasswordsDoNotMatch => new("User.PasswordsDoNotMatch", "Şifre ile şifre tekrarı uyuşmuyor.");
     public static Error CreationFailed => new("User.CreationFailed", "Kullanıcı oluşturulamadı.");
     public static Error UpdateFailed => new("User.UpdateFailed", "Kullanıcı güncellenemedi.");
+    public static Error OldPasswordCannotBeEmpty => new("User.OldPasswordCannotBeEmpty", "Eski şifre boş olamaz.");
+    public static Error NewPasswordCannotBeEmpty => new("User.NewPasswordCannotBeEmpty", "Yeni şifre boş olamaz.");
+    public static Error InvalidOldPassword => new("User.InvalidOldPassword", "Eski şifre yanlış.");
 
     public static Error RefreshTokenRevokeFailed => new("User.RefreshTokenRevokeFailed", "Yenileme token'ı iptal edilemedi.");
     public static Error RefreshTokenCreationFailed => new("User.RefreshTokenCreationFailed", "Yenileme token'ı oluşturulamadı.");

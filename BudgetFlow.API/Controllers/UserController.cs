@@ -10,6 +10,7 @@ using BudgetFlow.Application.Users.Commands.Register;
 using BudgetFlow.Application.Users.Commands.ResendConfirmEmail;
 using BudgetFlow.Application.Users.Commands.ResetPassword;
 using BudgetFlow.Application.Users.Commands.UpdateAccount;
+using BudgetFlow.Application.Users.Commands.UpdatePassword;
 using BudgetFlow.Application.Users.Queries.GetLogPagination;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -136,6 +137,22 @@ public class UserController : ControllerBase
     public async Task<IResult> ResetPasswordAsync([FromBody] ResetPasswordCommand resetPasswordCommand)
     {
         var result = await mediator.Send(resetPasswordCommand);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Update Password  
+    /// </summary>
+    /// <param name="updatePasswordCommand"></param>
+    /// <returns></returns>
+    [HttpPut("UpdatePassword")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    public async Task<IResult> UpdatePasswordAsync([FromBody] UpdatePasswordCommand updatePasswordCommand)
+    {
+        var result = await mediator.Send(updatePasswordCommand);
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();
