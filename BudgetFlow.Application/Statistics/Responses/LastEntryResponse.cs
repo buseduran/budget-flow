@@ -1,3 +1,4 @@
+using BudgetFlow.Application.Categories;
 using BudgetFlow.Domain.Enums;
 
 namespace BudgetFlow.Application.Statistics.Responses;
@@ -10,6 +11,7 @@ public class LastEntryResponse
     public decimal AmountInTRY { get; set; }
     public decimal ExchangeRate { get; set; }
     public CurrencyType Currency { get; set; }
+    public CategoryResponse Category { get; set; }
     public DateTime Date { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }

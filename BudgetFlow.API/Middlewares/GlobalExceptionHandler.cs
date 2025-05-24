@@ -1,7 +1,7 @@
-﻿using FluentValidation;
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
+using FluentValidation;
 
 namespace BudgetFlow.API.Middlewares;
 public class GlobalExceptionHandler : IExceptionHandler
@@ -21,35 +21,28 @@ public class GlobalExceptionHandler : IExceptionHandler
         {
             logger.LogError(
                 exception,
-                "Validation error occurred: {Message} {@Errors}",
-                exception.Message,
-                validationException.Errors
+                "Exception occurred: {Message}",
+                exception.Message
             );
 
             var problemDetails = new ProblemDetails
             {
                 Status = StatusCodes.Status400BadRequest,
-                Title = "Bad Request",
+                Title = "One or more validation errors occurred.",
                 Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1"
             };
 
-            // Get the first validation error
-            var firstError = validationException.Errors.FirstOrDefault();
-            if (firstError != null)
+            problemDetails.Extensions["traceId"] = Activity.Current?.Id ?? httpContext.TraceIdentifier;
+            problemDetails.Extensions["error"] = new
             {
-                problemDetails.Extensions["errors"] = new
-                {
-                    code = firstError.ErrorCode,
-                    message = firstError.ErrorMessage
-                };
-            }
+                code = "Validation.Error",
+                message = validationException.Errors.FirstOrDefault()?.ErrorMessage
+            };
 
             httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
             await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
             return true;
         }
-
-        logger.LogError(exception, "An unhandled exception occurred while processing the request: {Message}", exception.Message);
 
         var errorDetails = new ProblemDetails
         {
@@ -58,6 +51,8 @@ public class GlobalExceptionHandler : IExceptionHandler
             Detail = exception.Message,
             Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1"
         };
+
+        errorDetails.Extensions["traceId"] = Activity.Current?.Id ?? httpContext.TraceIdentifier;
 
         httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
         await httpContext.Response.WriteAsJsonAsync(errorDetails, cancellationToken);

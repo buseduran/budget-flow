@@ -20,7 +20,7 @@ public static class ResultExtensions
             type: "https://tools.ietf.org/html/rfc9110#section-15.5.1",
             extensions: new Dictionary<string, object>
             {
-                { "errors", result.Error ?? BaseErrors.UnknownError }
+                { "error", result.Error ?? BaseErrors.UnknownError }
             }
         );
     }
@@ -35,7 +35,7 @@ public static class ResultExtensions
             type: "https://tools.ietf.org/html/rfc9110#section-15.5.1",
             extensions: new Dictionary<string, object>
             {
-                { "errors", result.Error ?? BaseErrors.UnknownError }
+                { "error", result.Error ?? BaseErrors.UnknownError }
             }
         );
     }
