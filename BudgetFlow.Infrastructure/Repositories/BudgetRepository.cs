@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
 using BudgetFlow.Application.Budget;
 using BudgetFlow.Application.Categories;
-using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
-using BudgetFlow.Domain.Enums;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -62,7 +60,6 @@ public class BudgetRepository : IBudgetRepository
         int Page,
         int PageSize,
         int UserID,
-        CurrencyType currencyType,
         int walletID)
     {
         var entries = await context.Entries
@@ -78,7 +75,7 @@ public class BudgetRepository : IBudgetRepository
                 Amount = e.Amount,
                 AmountInTRY = e.AmountInTRY,
                 ExchangeRate = e.ExchangeRate,
-                Currency = currencyType,
+                Currency = e.Currency,
                 Date = e.Date,
                 Category = new CategoryResponse
                 {
