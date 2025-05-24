@@ -1,11 +1,8 @@
+using BudgetFlow.Application.Categories;
 using BudgetFlow.Application.Common.Interfaces;
 using BudgetFlow.Application.Common.Utils;
-using BudgetFlow.Application.Statistics.Queries.GetAnalysisEntries;
-using BudgetFlow.Application.Statistics.Queries.GetLastEntries;
-using BudgetFlow.Application.Statistics.Queries.GetAssetRevenue;
 using BudgetFlow.Application.Statistics.Queries.GetAssetInvestPagination;
 using BudgetFlow.Application.Statistics.Responses;
-using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -21,24 +18,129 @@ public class StatisticsRepository : IStatisticsRepository
         _context = context;
     }
 
-    public async Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(int walletId, string range, bool convertToTRY)
+    public async Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(
+        int userID,
+        string Range,
+        CurrencyType currencyType,
+        int walletID,
+        decimal exchangeRateToTRY,
+        bool convertToTRY)
     {
-        var entries = await _context.Entries
-            .Where(e => e.WalletID == walletId)
-            .Select(e => new AnalysisEntryResponse
+        var startDate = GetDateForRange.GetStartDateForRange(Range);
+        var endDate = DateTime.UtcNow;
+        var previousStartDate = GetDateForRange.GetPreviousStartDateForRange(Range);
+        var previousEndDate = startDate.AddDays(-1);
+
+
+        var groupedEntries = await _context.Entries
+            .Where(e => e.UserID == userID &&
+                        e.WalletID == walletID &&
+                       ((e.Date >= startDate && e.Date <= endDate) ||
+                        (e.Date >= previousStartDate && e.Date <= previousEndDate)))
+            .Select(e => new
             {
-                ID = e.ID,
-                Name = e.Name,
-                Amount = convertToTRY ? e.AmountInTRY : e.Amount,
-                Date = e.Date,
-                CreatedAt = e.CreatedAt,
-                UpdatedAt = e.UpdatedAt
+                e.Amount,
+                e.CategoryID,
+                e.Category.Name,
+                e.Category.Color,
+                e.Category.Type,
+                Period = (e.Date >= startDate && e.Date <= endDate) ? "Current" : "Previous"
+            })
+            .GroupBy(e => new
+            {
+                e.CategoryID,
+                e.Name,
+                e.Color,
+                e.Type,
+                e.Period
+            })
+            .Select(g => new
+            {
+                g.Key.CategoryID,
+                g.Key.Name,
+                g.Key.Color,
+                g.Key.Type,
+                g.Key.Period,
+                Amount = g.Sum(e => e.Amount),
             })
             .ToListAsync();
 
+        var entryDictionary = groupedEntries
+            .GroupBy(e => new { e.CategoryID, e.Name, e.Type, e.Color })
+            .ToDictionary(
+                g => g.Key,
+                g => new
+                {
+                    Name = g.Key.Name,
+                    Color = g.Key.Color,
+                    Type = g.Key.Type,
+                    CategoryID = g.Key.CategoryID,
+                    CurrentAmount = g.FirstOrDefault(e => e.Period == "Current")?.Amount ?? 0,
+                    PreviousAmount = g.FirstOrDefault(e => e.Period == "Previous")?.Amount ?? 0
+                });
+
+        var incomes = entryDictionary
+            .Where(e => e.Key.Type == EntryType.Income)
+            .Select(e => new AnalysisEntryResponse
+            {
+                Category = new CategoryResponse
+                {
+                    ID = e.Value.CategoryID,
+                    Name = e.Value.Name,
+                    Color = e.Value.Color,
+                    Type = e.Key.Type
+                },
+                Currency = convertToTRY ? CurrencyType.TRY : currencyType,
+                Amount = convertToTRY ? e.Value.CurrentAmount * exchangeRateToTRY : e.Value.CurrentAmount
+            })
+            .ToList();
+
+        var expenses = entryDictionary
+            .Where(e => e.Key.Type == EntryType.Expense)
+            .Select(e => new AnalysisEntryResponse
+            {
+                Category = new CategoryResponse
+                {
+                    ID = e.Value.CategoryID,
+                    Name = e.Value.Name,
+                    Color = e.Value.Color,
+                    Type = e.Key.Type
+                },
+                Currency = convertToTRY ? CurrencyType.TRY : currencyType,
+                Amount = convertToTRY ? e.Value.CurrentAmount * exchangeRateToTRY : e.Value.CurrentAmount
+            })
+            .ToList();
+
+        #region Calculate Trending
+        var currentIncomeTotal = entryDictionary
+           .Where(e => e.Key.Type == EntryType.Income)
+           .Sum(e => convertToTRY ? e.Value.CurrentAmount * exchangeRateToTRY : e.Value.CurrentAmount);
+
+        var previousIncomeTotal = entryDictionary
+            .Where(e => e.Key.Type == EntryType.Income)
+            .Sum(e => convertToTRY ? e.Value.PreviousAmount * exchangeRateToTRY : e.Value.PreviousAmount);
+
+        var currentExpenseTotal = entryDictionary
+            .Where(e => e.Key.Type == EntryType.Expense)
+            .Sum(e => convertToTRY ? e.Value.CurrentAmount * exchangeRateToTRY : e.Value.CurrentAmount);
+
+        var previousExpenseTotal = entryDictionary
+            .Where(e => e.Key.Type == EntryType.Expense)
+            .Sum(e => convertToTRY ? e.Value.PreviousAmount * exchangeRateToTRY : e.Value.PreviousAmount);
+
+        decimal incomeTrend = previousIncomeTotal == 0 ? (currentIncomeTotal != 0 ? 100 : 0) :
+            (currentIncomeTotal - previousIncomeTotal) / previousIncomeTotal * 100;
+
+        decimal expenseTrend = previousExpenseTotal == 0 ? (currentExpenseTotal != 0 ? 100 : 0) :
+            (currentExpenseTotal - previousExpenseTotal) / previousExpenseTotal * 100;
+        #endregion
+
         return new AnalysisEntriesResponse
         {
-            Entries = entries
+            Incomes = incomes,
+            Expenses = expenses,
+            IncomeTrendPercentage = incomeTrend,
+            ExpenseTrendPercentage = expenseTrend
         };
     }
 
