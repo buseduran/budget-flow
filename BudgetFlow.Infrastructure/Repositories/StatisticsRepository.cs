@@ -158,6 +158,13 @@ public class StatisticsRepository : IStatisticsRepository
                 AmountInTRY = e.AmountInTRY,
                 ExchangeRate = e.ExchangeRate,
                 Currency = e.Currency,
+                Category = new CategoryResponse
+                {
+                    ID = e.CategoryID,
+                    Name = e.Category.Name,
+                    Color = e.Category.Color,
+                    Type = e.Category.Type
+                },
                 Date = e.Date,
                 CreatedAt = e.CreatedAt,
                 UpdatedAt = e.UpdatedAt

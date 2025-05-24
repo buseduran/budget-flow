@@ -16,6 +16,8 @@ using System.Security.Claims;
 using System.Text;
 using FluentValidation.AspNetCore;
 using BudgetFlow.Application.Portfolios.Commands.CreatePortfolio;
+using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -125,6 +127,25 @@ builder.Services.AddValidatorsFromAssembly(typeof(CreatePortfolioValidator).Asse
 builder.Services.AddFluentValidationAutoValidation(config =>
 {
     config.DisableDataAnnotationsValidation = true;
+});
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = actionContext =>
+    {
+        var errors = actionContext.ModelState
+            .Where(e => e.Value?.Errors.Count > 0)
+            .Select(e => new { code = "Validation.Error", message = e.Value?.Errors.First().ErrorMessage })
+            .ToList();
+
+        return new BadRequestObjectResult(new
+        {
+            type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+            title = "One or more validation errors occurred.",
+            status = 400,
+            error = errors.FirstOrDefault(),
+            traceId = Activity.Current?.Id ?? actionContext.HttpContext.TraceIdentifier
+        });
+    };
 });
 
 // 🌐 CORS
