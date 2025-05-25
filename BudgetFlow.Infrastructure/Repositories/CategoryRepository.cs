@@ -25,9 +25,10 @@ public class CategoryRepository : ICategoryRepository
         return Category.ID;
     }
 
-    public async Task<PaginatedList<CategoryResponse>> GetCategoriesAsync(int Page, int PageSize)
+    public async Task<PaginatedList<CategoryResponse>> GetCategoriesAsync(int Page, int PageSize, int userID)
     {
         var categories = await context.Categories
+            .Where(c => c.UserID == userID)
             .OrderByDescending(c => c.CreatedAt)
             .Skip((Page - 1) * PageSize)
             .Take(PageSize)
