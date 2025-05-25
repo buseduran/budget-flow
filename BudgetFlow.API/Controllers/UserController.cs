@@ -15,6 +15,7 @@ using BudgetFlow.Application.Users.Commands.UpdateAccount;
 using BudgetFlow.Application.Users.Commands.UpdatePassword;
 using BudgetFlow.Application.Users.Queries.GetLogPagination;
 using BudgetFlow.Application.Users.Queries.GetUserPagination;
+using BudgetFlow.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -198,6 +199,7 @@ public class UserController : ControllerBase
     /// </summary>
     /// <param name="getLogPaginationQuery"></param>
     /// <returns></returns>
+    [Authorize(Roles = Role.Admin)]
     [HttpGet("Logs")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<LogResponse>))]
@@ -214,6 +216,7 @@ public class UserController : ControllerBase
     /// </summary>
     /// <param name="getUserPaginationQuery"></param>
     /// <returns></returns>
+    [Authorize(Roles = Role.Admin)]
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<UserResponse>))]
@@ -230,6 +233,7 @@ public class UserController : ControllerBase
     /// </summary>
     /// <param name="ID"></param>
     /// <returns></returns>
+    [Authorize(Roles = Role.Admin)]
     [HttpDelete("{ID}")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
