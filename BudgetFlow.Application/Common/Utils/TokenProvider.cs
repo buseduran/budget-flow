@@ -27,7 +27,7 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Name, user.Name),
             new Claim(JwtRegisteredClaimNames.Birthdate,user.CreatedAt.ToString()),
-            new Claim("role",ClaimTypes.Role)
+            new Claim("role",roles.FirstOrDefault())
         };
         #endregion
 
