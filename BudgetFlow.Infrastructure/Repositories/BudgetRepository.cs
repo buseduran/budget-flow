@@ -87,7 +87,7 @@ public class BudgetRepository : IBudgetRepository
                 WalletID = walletID,
             })
             .ToListAsync();
-        var count = await context.Entries.CountAsync();
+        var count = entries.Count();
 
         return new PaginatedList<EntryResponse>(entries, count, Page, PageSize);
     }

@@ -112,7 +112,8 @@ public class CreateWalletCommand : IRequest<Result<bool>>
                     Date = DateTime.UtcNow,
                     CategoryID = category.ID,
                     UserID = userID,
-                    WalletID = wallet.ID
+                    WalletID = wallet.ID,
+                    Currency= request.Currency
                 };
                 var entryResult = await budgetRepository.CreateEntryAsync(entry, saveChanges: false);
 
