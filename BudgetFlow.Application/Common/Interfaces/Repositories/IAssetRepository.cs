@@ -6,8 +6,8 @@ using BudgetFlow.Domain.Entities;
 namespace BudgetFlow.Application.Common.Interfaces.Repositories;
 public interface IAssetRepository
 {
-    Task<bool> CreateAssetAsync(Asset Asset);
-    Task<bool> UpdateAssetAsync(Asset Asset);
+    Task<bool> CreateAssetAsync(Asset Asset, bool saveChanges = true);
+    Task<bool> UpdateAssetAsync(Asset Asset, bool saveChanges = true);
     Task<bool> DeleteAssetAsync(int ID);
     Task<PaginatedList<AssetResponse>> GetAssetsAsync(int Page, int PageSize);
     Task<AssetResponse> GetAssetAsync(int ID);

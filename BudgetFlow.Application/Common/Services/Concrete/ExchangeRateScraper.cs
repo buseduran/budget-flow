@@ -8,7 +8,7 @@ using BudgetFlow.Domain.Errors;
 using Microsoft.Extensions.Configuration;
 using System.Xml.Linq;
 
-namespace BudgetFlow.Infrastructure.Services;
+namespace BudgetFlow.Application.Common.Services.Concrete;
 public class ExchangeRateScraper : IExchangeRateScraper
 {
     private readonly ICurrencyRateRepository currencyRateRepository;
@@ -68,9 +68,23 @@ public class ExchangeRateScraper : IExchangeRateScraper
         await unitOfWork.BeginTransactionAsync();
         try
         {
-            //await currencyRateRepository.DeleteRatesForDateAsync(DateTime.UtcNow.Date, saveChanges: false);
-            //güncelle
-            await currencyRateRepository.AddRatesAsync(latestRates, saveChanges: false);
+            foreach (var rate in latestRates)
+            {
+                var existingRate = await currencyRateRepository.GetCurrencyRateByType(rate.CurrencyType);
+                if (existingRate != null)
+                {
+                    // Update existing rate
+                    existingRate.ForexBuying = rate.ForexBuying;
+                    existingRate.ForexSelling = rate.ForexSelling;
+                    existingRate.RetrievedAt = DateTime.UtcNow;
+                    await currencyRateRepository.AddRatesAsync(new[] { existingRate }, saveChanges: false);
+                }
+                else
+                {
+                    // Create new rate
+                    await currencyRateRepository.AddRatesAsync(new[] { rate }, saveChanges: false);
+                }
+            }
 
             await unitOfWork.SaveChangesAsync();
             await unitOfWork.CommitAsync();

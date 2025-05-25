@@ -33,9 +33,6 @@ public static class ServiceRegistration
         services.AddScoped<ITokenProvider, TokenProvider>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        services.AddHttpClient<IExchangeRateScraper, ExchangeRateScraper>();
-        services.AddHttpClient<IMetalScraper, MetalScraper>();
-
         //AuditInterceptor kaydı
         services.AddScoped<AuditInterceptor>();
     }

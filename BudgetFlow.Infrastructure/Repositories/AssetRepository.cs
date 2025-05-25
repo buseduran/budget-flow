@@ -17,15 +17,15 @@ public class AssetRepository : IAssetRepository
         this.context = context;
         this.mapper = mapper;
     }
-    public async Task<bool> CreateAssetAsync(Asset Asset)
+    public async Task<bool> CreateAssetAsync(Asset Asset, bool saveChanges = true)
     {
         Asset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
         Asset.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
         await context.Assets.AddAsync(Asset);
-        return await context.SaveChangesAsync() > 0;
+        return saveChanges ? await context.SaveChangesAsync() > 0 : true;
     }
-    public async Task<bool> UpdateAssetAsync(Asset Asset)
+    public async Task<bool> UpdateAssetAsync(Asset Asset, bool saveChanges = true)
     {
         var asset = await context.Assets.FindAsync(Asset.ID);
         if (asset is null) return false;
@@ -34,7 +34,7 @@ public class AssetRepository : IAssetRepository
         mapper.Map(Asset, asset);
         asset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
-        return await context.SaveChangesAsync() > 0;
+        return saveChanges ? await context.SaveChangesAsync() > 0 : true;
     }
     public async Task<bool> DeleteAssetAsync(int ID)
     {

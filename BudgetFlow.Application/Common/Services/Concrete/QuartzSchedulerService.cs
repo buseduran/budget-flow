@@ -49,6 +49,22 @@ public class QuartzSchedulerService
 
         await scheduler.ScheduleJob(currencyJob, currencyTrigger);
         #endregion
+
+        #region Metal Job
+        IJobDetail metalJob = JobBuilder.Create<MetalJob>()
+            .WithIdentity("metalJob", "group1")
+            .Build();
+
+        ITrigger metalTrigger = TriggerBuilder.Create()
+            .WithIdentity("metalTrigger", "group1")
+            .StartNow()
+            .WithSimpleSchedule(x => x
+                .WithIntervalInSeconds(60) // Her dakika başı
+                .RepeatForever())
+            .Build();
+
+        await scheduler.ScheduleJob(metalJob, metalTrigger);
+        #endregion
     }
     public async Task StopAsync()
     {

@@ -4,6 +4,7 @@ using BudgetFlow.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using System.Data;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -26,8 +27,8 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Name, user.Name),
             new Claim(JwtRegisteredClaimNames.Birthdate,user.CreatedAt.ToString()),
+            new Claim("role",ClaimTypes.Role)
         };
-        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
         #endregion
 
         var minutes = configuration.GetValue<int>("Jwt:ExpirationInMinutes");

@@ -39,6 +39,11 @@ public static class ServiceRegistration
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IWalletAuthService, WalletAuthService>();
 
+        services.AddHttpClient<IExchangeRateScraper, ExchangeRateScraper>();
+        services.AddHttpClient<IMetalScraper, MetalScraper>();
+
+        services.AddScoped<MetalJob>();
+
         services.AddQuartz(q =>
         {
             var jobKey = new JobKey("StockJob");
@@ -48,7 +53,7 @@ public static class ServiceRegistration
             q.AddTrigger(opts => opts
                 .ForJob(jobKey)
                 .WithIdentity("StockJob-trigger")
-                .WithCronSchedule("0 0/30 * * * ?")); // Every 30 minutes  
+                .WithCronSchedule("0 0 * * * ?")); // Every hour
         });
 
         services.AddQuartz(q =>
@@ -59,6 +64,16 @@ public static class ServiceRegistration
                 .ForJob(jobKey)
                 .WithIdentity("CurrencyJob-trigger")
                 .WithCronSchedule("0 0 16 * * ?")); // Every day at 16:00
+        });
+
+        services.AddQuartz(q =>
+        {
+            var jobKey = new JobKey("MetalJob");
+            q.AddJob<MetalJob>(opts => opts.WithIdentity(jobKey));
+            q.AddTrigger(opts => opts
+                .ForJob(jobKey)
+                .WithIdentity("MetalJob-trigger")
+                .WithCronSchedule("0 0 * * * ?")); // Every hour
         });
 
         services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);

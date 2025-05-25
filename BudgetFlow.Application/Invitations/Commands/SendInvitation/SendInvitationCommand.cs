@@ -55,6 +55,11 @@ public class SendInvitationCommand : IRequest<Result<bool>>
             if (string.IsNullOrWhiteSpace(request.Email))
                 return Result.Failure<bool>(UserErrors.EmailCannotBeEmpty);
 
+            //role owner mı kontrolü yapılacak
+
+
+
+
             #region Wallet Kontrolü
             var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
             var wallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(request.WalletID, userID);

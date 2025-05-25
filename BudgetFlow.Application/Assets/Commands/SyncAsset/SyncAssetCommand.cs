@@ -1,4 +1,4 @@
-﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+﻿using BudgetFlow.Application.Common.Jobs;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Enums;
@@ -10,14 +10,14 @@ public class SyncAssetCommand : IRequest<Result<bool>>
     public AssetType AssetType { get; set; }
     public class SyncAssetCommandHandler : IRequestHandler<SyncAssetCommand, Result<bool>>
     {
-        private readonly IAssetRepository assetRepository;
         private readonly IStockScraper stockScraper;
-        private readonly IMetalScraper metalScraper;
-        public SyncAssetCommandHandler(IAssetRepository assetRepository, IStockScraper stockScraper, IMetalScraper metalScraper)
+        private readonly MetalJob metalJob;
+        public SyncAssetCommandHandler(
+            IStockScraper stockScraper,
+            MetalJob metalJob)
         {
-            this.assetRepository = assetRepository;
             this.stockScraper = stockScraper;
-            this.metalScraper = metalScraper;
+            this.metalJob = metalJob;
         }
 
         public async Task<Result<bool>> Handle(SyncAssetCommand request, CancellationToken cancellationToken)
@@ -28,8 +28,10 @@ public class SyncAssetCommand : IRequest<Result<bool>>
             }
             if (request.AssetType == AssetType.Metal)
             {
-                var metals = await metalScraper.GetMetalsAsync(request.AssetType);
+                await metalJob.ExecuteAsync();
             }
+
+
 
 
             return Result.Success(true);
