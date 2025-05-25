@@ -1,5 +1,4 @@
-﻿using BudgetFlow.Application.Common.Dtos;
-using BudgetFlow.Application.Common.Interfaces;
+﻿using BudgetFlow.Application.Common.Interfaces;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Utils;
@@ -12,7 +11,12 @@ using Microsoft.AspNetCore.Http;
 namespace BudgetFlow.Application.Investments.Commands.CreateInvestment;
 public class CreateInvestmentCommand : IRequest<Result<bool>>
 {
-    public InvestmentDto Investment { get; set; }
+    public int AssetId { get; set; }
+    public decimal UnitAmount { get; set; }
+    public string Description { get; set; }
+    public InvestmentType Type { get; set; }
+    public DateTime Date { get; set; }
+    public int PortfolioId { get; set; }
     public class CreateInvestmentCommandHandler : IRequestHandler<CreateInvestmentCommand, Result<bool>>
     {
         private readonly IInvestmentRepository investmentRepository;
@@ -47,7 +51,7 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
         public async Task<Result<bool>> Handle(CreateInvestmentCommand request, CancellationToken cancellationToken)
         {
             var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
-            var portfolio = await portfolioRepository.GetPortfolioByIdAsync(request.Investment.PortfolioId);
+            var portfolio = await portfolioRepository.GetPortfolioByIdAsync(request.PortfolioId);
             if (portfolio is null)
                 return Result.Failure<bool>(PortfolioErrors.PortfolioNotFound);
 
@@ -55,16 +59,16 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
             if (wallet is null)
                 return Result.Failure<bool>(WalletErrors.WalletNotFound);
 
-            var asset = await assetRepository.GetAssetAsync(request.Investment.AssetId);
+            var asset = await assetRepository.GetAssetAsync(request.AssetId);
 
             var investment = new Investment
             {
-                AssetId = request.Investment.AssetId,
-                UnitAmount = request.Investment.UnitAmount,
-                Description = request.Investment.Description,
-                Date = DateTime.SpecifyKind(request.Investment.Date, DateTimeKind.Utc),
-                PortfolioId = request.Investment.PortfolioId,
-                Type = request.Investment.Type
+                AssetId = request.AssetId,
+                UnitAmount = request.UnitAmount,
+                Description = request.Description,
+                Date = DateTime.SpecifyKind(request.Date, DateTimeKind.Utc),
+                PortfolioId = request.PortfolioId,
+                Type = request.Type
             };
 
             investment.CurrencyAmount = investment.Type == InvestmentType.Buy
@@ -85,6 +89,8 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                 : investment.CurrencyAmount * exchangeRateToTRY;
             investment.ExchangeRate = exchangeRateToTRY;
             #endregion
+
+            investment.Currency = currency;
 
             var walletAsset = await walletRepository.GetWalletAssetAsync(portfolio.WalletID, investment.AssetId);
 

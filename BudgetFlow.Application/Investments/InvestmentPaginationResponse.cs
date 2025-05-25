@@ -1,7 +1,12 @@
 ﻿using BudgetFlow.Domain.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace BudgetFlow.Application.Investments;
-public class InvestmentResponse
+public class InvestmentPaginationResponse
 {
     public int ID { get; set; }
     public string Name { get; set; }
@@ -12,8 +17,6 @@ public class InvestmentResponse
     public CurrencyType Currency { get; set; }
     public decimal AmountInTRY { get; set; }
     public decimal ExchangeRate { get; set; }
-    public int AssetID { get; set; }
-    public int PortfolioID { get; set; }
     public InvestmentType Type { get; set; }
     public DateTime Date { get; set; }
     public DateTime CreatedAt { get; set; }

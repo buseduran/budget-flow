@@ -12,6 +12,7 @@ public class GetLogPaginationQuery : IRequest<Result<PaginatedList<LogResponse>>
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 50;
     public LogType LogType { get; set; } = LogType.All;
+    public int UserID { get; set; }
     public class GetLogPaginationQueryHandler : IRequestHandler<GetLogPaginationQuery, Result<PaginatedList<LogResponse>>>
     {
         private readonly IUserRepository userRepository;
@@ -23,9 +24,7 @@ public class GetLogPaginationQuery : IRequest<Result<PaginatedList<LogResponse>>
         }
         public async Task<Result<PaginatedList<LogResponse>>> Handle(GetLogPaginationQuery request, CancellationToken cancellationToken)
         {
-            int userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
-
-            var result = await userRepository.GetLogsPaginatedAsync(request.Page, request.PageSize, request.LogType, userID);
+            var result = await userRepository.GetLogsPaginatedAsync(request.Page, request.PageSize, request.LogType, request.UserID);
             if (result == null)
                 return Result.Failure<PaginatedList<LogResponse>>(UserErrors.LogNotFound);
 

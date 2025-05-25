@@ -3,12 +3,12 @@
     public enum AssetType
     {
         Stock = 1,
-        Bond = 2,
-        MutualFund = 3,
-        ETF = 4,
-        RealEstate = 5,
-        Cryptocurrency = 6,
-        Commodity = 7,
+        Metal = 2, // kıymetli madenler (altın, gümüş, platin)
+        Bond = 3,
+        MutualFund = 4,
+        ETF = 5,
+        RealEstate = 6,
+        Cryptocurrency = 7,
         CashEquivalent = 8,
         Other = 9
     }

@@ -58,6 +58,38 @@ public class BudgetContext : DbContext
             .HasIndex(x => x.Name)
             .IsUnique();
 
+        // Configure cascade delete for User
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.UserWallets)
+            .WithOne(uw => uw.User)
+            .HasForeignKey(uw => uw.UserID)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.Portfolios)
+            .WithOne(p => p.User)
+            .HasForeignKey(p => p.UserID)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.Categories)
+            .WithOne(c => c.User)
+            .HasForeignKey(c => c.UserID)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.Entries)
+            .WithOne(e => e.User)
+            .HasForeignKey(e => e.UserID)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure cascade delete for Category
+        modelBuilder.Entity<Category>()
+            .HasMany(c => c.Entries)
+            .WithOne(e => e.Category)
+            .HasForeignKey(e => e.CategoryID)
+            .OnDelete(DeleteBehavior.Cascade);
+
         base.OnModelCreating(modelBuilder);
     }
 }

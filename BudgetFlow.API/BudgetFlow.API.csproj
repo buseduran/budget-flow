@@ -30,8 +30,4 @@
     <ProjectReference Include="..\BudgetFlow.Infrastructure\BudgetFlow.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Authorize\" />
-  </ItemGroup>
-
 </Project>

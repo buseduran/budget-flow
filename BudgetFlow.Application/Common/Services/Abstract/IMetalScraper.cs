@@ -2,7 +2,7 @@
 using BudgetFlow.Domain.Enums;
 
 namespace BudgetFlow.Application.Common.Services.Abstract;
-public interface IStockScraper
+public interface IMetalScraper
 {
-    Task<IEnumerable<Asset>> GetStocksAsync(AssetType assetType);
+    Task<IEnumerable<Asset>> GetMetalsAsync(AssetType assetType);
 }

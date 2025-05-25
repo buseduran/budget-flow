@@ -201,4 +201,35 @@ public class UserRepository : IUserRepository
 
         return true;
     }
+
+    public async Task<PaginatedList<UserResponse>> GetPaginatedAsync(int page, int pageSize)
+    {
+        var query = context.Users
+            .OrderByDescending(x => x.CreatedAt)
+            .AsQueryable();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(x => new UserResponse
+            {
+                ID = x.ID,
+                Name = x.Name,
+                Email = x.Email,
+                IsEmailConfirmed = x.IsEmailConfirmed,
+                PasswordHash = x.PasswordHash,
+                Wallets = x.UserWallets.Select(uw => new UserWalletResponse
+                {
+                    WalletID = uw.WalletID,
+                    Role = uw.Role,
+                    Balance = uw.Wallet.Balance,
+                    Currency = uw.Wallet.Currency.ToString()
+                }).ToList(),
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt
+            })
+            .ToListAsync();
+        var totalCount = await query.CountAsync();
+        var paginatedList = new PaginatedList<UserResponse>(items, totalCount, page, pageSize);
+        return paginatedList;
+    }
 }

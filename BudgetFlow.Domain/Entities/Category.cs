@@ -11,4 +11,5 @@ public class Category : BaseEntity
     public int UserID { get; set; }
     public User User { get; set; }
 
+    public ICollection<Entry> Entries { get; set; }
 }

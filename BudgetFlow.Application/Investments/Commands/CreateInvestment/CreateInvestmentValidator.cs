@@ -6,28 +6,28 @@ public class CreateInvestmentValidator : AbstractValidator<CreateInvestmentComma
 {
     public CreateInvestmentValidator()
     {
-        RuleFor(x => x.Investment)
+        RuleFor(x => x)
             .NotNull().WithMessage("Yatırım bilgileri boş olamaz.");
 
-        When(x => x.Investment != null, () =>
+        When(x => x != null, () =>
         {
-            RuleFor(x => x.Investment.AssetId)
+            RuleFor(x => x.AssetId)
                 .GreaterThan(0).WithMessage("Geçersiz varlık ID'si.");
 
-            RuleFor(x => x.Investment.UnitAmount)
+            RuleFor(x => x.UnitAmount)
                 .GreaterThan(0).WithMessage("Birim miktar 0'dan büyük olmalıdır.");
 
-            RuleFor(x => x.Investment.Description)
+            RuleFor(x => x.Description)
                 .MaximumLength(500).WithMessage("Açıklama 500 karakterden uzun olamaz.");
 
-            RuleFor(x => x.Investment.Date)
+            RuleFor(x => x.Date)
                 .NotEmpty().WithMessage("Tarih boş olamaz.")
                 .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("Tarih bugünden sonra olamaz.");
 
-            RuleFor(x => x.Investment.PortfolioId)
+            RuleFor(x => x.PortfolioId)
                 .GreaterThan(0).WithMessage("Geçersiz portföy ID'si.");
 
-            RuleFor(x => x.Investment.Type)
+            RuleFor(x => x.Type)
                 .IsInEnum().WithMessage("Geçersiz yatırım tipi.");
         });
     }

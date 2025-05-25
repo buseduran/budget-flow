@@ -1,7 +1,9 @@
 ﻿using BudgetFlow.Application.Common.Extensions;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Portfolios.Commands.DeletePortfolio;
 using BudgetFlow.Application.Users;
 using BudgetFlow.Application.Users.Commands.ConfirmEmail;
+using BudgetFlow.Application.Users.Commands.DeleteUser;
 using BudgetFlow.Application.Users.Commands.ForgotPassword;
 using BudgetFlow.Application.Users.Commands.Login;
 using BudgetFlow.Application.Users.Commands.Logout;
@@ -12,6 +14,7 @@ using BudgetFlow.Application.Users.Commands.ResetPassword;
 using BudgetFlow.Application.Users.Commands.UpdateAccount;
 using BudgetFlow.Application.Users.Commands.UpdatePassword;
 using BudgetFlow.Application.Users.Queries.GetLogPagination;
+using BudgetFlow.Application.Users.Queries.GetUserPagination;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -204,5 +207,37 @@ public class UserController : ControllerBase
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Pages a Users
+    /// </summary>
+    /// <param name="getUserPaginationQuery"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<UserResponse>))]
+    public async Task<IResult> GetUsersPaginationAsync([FromQuery] GetUserPaginationQuery getUserPaginationQuery)
+    {
+        var result = await mediator.Send(getUserPaginationQuery);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Deletes a User. 
+    /// </summary>
+    /// <param name="ID"></param>
+    /// <returns></returns>
+    [HttpDelete("{ID}")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    public async Task<IResult> DeleteUserAsync([FromRoute] int ID)
+    {
+        var result = await mediator.Send(new DeleteUserCommand(ID));
+        return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : result.ToProblemDetails();
     }
 }

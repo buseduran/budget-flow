@@ -80,12 +80,12 @@ public class InvestmentController : ControllerBase
     /// Get Investments. 
     /// </summary>
     /// <returns></returns>
-    [HttpGet("{PortfolioID}")]
+    [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<InvestmentResponse>))]
-    public async Task<IResult> GetInvestmentsAsync([FromRoute] int PortfolioID)
+    public async Task<IResult> GetInvestmentsAsync([FromQuery] GetInvestmentsQuery GetInvestmentsQuery)
     {
-        var result = await mediator.Send(new GetInvestmentsQuery(PortfolioID));
+        var result = await mediator.Send(GetInvestmentsQuery);
         return result.IsSuccess
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();

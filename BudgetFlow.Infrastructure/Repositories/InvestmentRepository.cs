@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using BudgetFlow.Application.Common.Dtos;
+﻿using BudgetFlow.Application.Common.Dtos;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Application.Investments;
@@ -11,11 +10,9 @@ namespace BudgetFlow.Infrastructure.Repositories;
 public class InvestmentRepository : IInvestmentRepository
 {
     private readonly BudgetContext context;
-    private readonly IMapper mapper;
-    public InvestmentRepository(BudgetContext context, IMapper mapper)
+    public InvestmentRepository(BudgetContext context)
     {
         this.context = context;
-        this.mapper = mapper;
     }
 
     public async Task<bool> CreateInvestmentAsync(Investment Investment, bool saveChanges = true)
@@ -54,25 +51,29 @@ public class InvestmentRepository : IInvestmentRepository
         return await context.SaveChangesAsync() > 0;
     }
 
-    public async Task<PaginatedList<InvestmentResponse>> GetInvestmentsAsync(int Page, int PageSize, int PortfolioID)
+    public async Task<PaginatedList<InvestmentPaginationResponse>> GetInvestmentsAsync(int Page, int PageSize, int PortfolioID)
     {
         var investments = await context.Investments
             .Where(e => e.PortfolioId == PortfolioID)
             .Include(e => e.Asset)
-            .Select(i => new InvestmentResponse
+            .Select(i => new InvestmentPaginationResponse
             {
                 ID = i.ID,
                 Name = i.Asset.Name,
                 UnitAmount = i.UnitAmount,
+                Unit = i.Asset.Unit,
                 CurrencyAmount = i.CurrencyAmount,
                 AmountInTRY = i.AmountInTRY,
+                Type = i.Type,
+                Currency = i.Currency,
                 ExchangeRate = i.ExchangeRate,
                 Description = i.Description,
+                Date = i.Date,
                 CreatedAt = i.CreatedAt,
                 UpdatedAt = i.UpdatedAt,
             }).ToListAsync();
         var count = investments.Count();
-        return new PaginatedList<InvestmentResponse>(investments, count, Page, PageSize);
+        return new PaginatedList<InvestmentPaginationResponse>(investments, count, Page, PageSize);
     }
 
     public async Task<PortfolioAssetResponse> GetAssetInvestmentsAsync(string portfolio, int userID)

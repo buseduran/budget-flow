@@ -10,8 +10,10 @@ public class UserResponse
     public bool IsEmailConfirmed { get; set; }
 
     public List<UserWalletResponse> Wallets { get; set; }
-}
 
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+}
 public class UserWalletResponse
 {
     public int WalletID { get; set; }
