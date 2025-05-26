@@ -5,12 +5,12 @@ using Quartz.Impl;
 namespace BudgetFlow.Application.Common.Services.Concrete;
 public class QuartzSchedulerService
 {
-    private readonly ISchedulerFactory schedulerFactory;
-    private readonly IScheduler scheduler;
+    private readonly ISchedulerFactory _schedulerFactory;
+    private readonly IScheduler _scheduler;
     public QuartzSchedulerService(ISchedulerFactory schedulerFactory)
     {
-        this.schedulerFactory = schedulerFactory;
-        this.scheduler = schedulerFactory.GetScheduler().Result;
+        _schedulerFactory = schedulerFactory;
+        _scheduler = schedulerFactory.GetScheduler().Result;
     }
     public static async Task StartAsync(IServiceProvider serviceProvider)
     {
@@ -68,10 +68,10 @@ public class QuartzSchedulerService
     }
     public async Task StopAsync()
     {
-        await scheduler.Shutdown();
+        await _scheduler.Shutdown();
     }
     public async Task ScheduleJob(IJobDetail jobDetail, ITrigger trigger)
     {
-        await scheduler.ScheduleJob(jobDetail, trigger);
+        await _scheduler.ScheduleJob(jobDetail, trigger);
     }
 }

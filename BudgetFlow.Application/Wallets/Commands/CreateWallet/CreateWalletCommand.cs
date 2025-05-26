@@ -1,12 +1,11 @@
 ﻿using BudgetFlow.Application.Common.Interfaces;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
-using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using BudgetFlow.Domain.Errors;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 
 namespace BudgetFlow.Application.Wallets.Commands.CreateWallet;
 public class CreateWalletCommand : IRequest<Result<bool>>
@@ -16,42 +15,42 @@ public class CreateWalletCommand : IRequest<Result<bool>>
 
     public class CreateWalletCommandHandler : IRequestHandler<CreateWalletCommand, Result<bool>>
     {
-        private readonly IWalletRepository walletRepository;
-        private readonly IBudgetRepository budgetRepository;
-        private readonly ICategoryRepository categoryRepository;
-        private readonly IHttpContextAccessor httpContextAccessor;
-        private readonly IUserWalletRepository userWalletRepository;
-        private readonly ICurrencyRateRepository currencyRateRepository;
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IWalletRepository _walletRepository;
+        private readonly IBudgetRepository _budgetRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IUserWalletRepository _userWalletRepository;
+        private readonly ICurrencyRateRepository _currencyRateRepository;
+        private readonly IUnitOfWork _unitOfWork;
         public CreateWalletCommandHandler(
             IWalletRepository walletRepository,
             IBudgetRepository budgetRepository,
-            IHttpContextAccessor httpContextAccessor,
+            ICurrentUserService currentUserService,
             ICategoryRepository categoryRepository,
             IUserWalletRepository userWalletRepository,
             ICurrencyRateRepository currencyRateRepository,
         IUnitOfWork unitOfWork)
         {
-            this.walletRepository = walletRepository;
-            this.budgetRepository = budgetRepository;
-            this.httpContextAccessor = httpContextAccessor;
-            this.categoryRepository = categoryRepository;
-            this.userWalletRepository = userWalletRepository;
-            this.currencyRateRepository = currencyRateRepository;
-            this.unitOfWork = unitOfWork;
+            _walletRepository = walletRepository;
+            _budgetRepository = budgetRepository;
+            _currentUserService = currentUserService;
+            _categoryRepository = categoryRepository;
+            _userWalletRepository = userWalletRepository;
+            _currencyRateRepository = currencyRateRepository;
+            _unitOfWork = unitOfWork;
         }
         public async Task<Result<bool>> Handle(CreateWalletCommand request, CancellationToken cancellationToken)
         {
             if (request.Balance < 0)
                 return Result.Failure<bool>(WalletErrors.InvalidOpeningBalance);
 
-            var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
+            var userID = _currentUserService.GetCurrentUserID();
 
-            var hasExistingOwnerWallet = await userWalletRepository.GetUserWalletByRoleAsync(userID, WalletRole.Owner);
+            var hasExistingOwnerWallet = await _userWalletRepository.GetUserWalletByRoleAsync(userID, WalletRole.Owner);
             if (hasExistingOwnerWallet is not null)
                 return Result.Failure<bool>(WalletErrors.UserWalletAlreadyExists);
 
-            await unitOfWork.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync();
             try
             {
                 // Kategori oluştur
@@ -62,7 +61,7 @@ public class CreateWalletCommand : IRequest<Result<bool>>
                     Type = EntryType.OpeningBalance,
                     UserID = userID
                 };
-                await categoryRepository.CreateCategoryAsync(category, saveChanges: false);
+                await _categoryRepository.CreateCategoryAsync(category, saveChanges: false);
 
                 #region ExchangeRate alınır.
                 if (!Enum.IsDefined(typeof(CurrencyType), request.Currency))
@@ -70,7 +69,7 @@ public class CreateWalletCommand : IRequest<Result<bool>>
                     return Result.Failure<bool>(WalletErrors.InvalidCurrency);
                 }
 
-                var currencyRate = await currencyRateRepository.GetCurrencyRateByType(request.Currency);
+                var currencyRate = await _currencyRateRepository.GetCurrencyRateByType(request.Currency);
                 if (currencyRate == null)
                     return Result.Failure<bool>(WalletErrors.CurrencyRateNotFound);
 
@@ -89,10 +88,10 @@ public class CreateWalletCommand : IRequest<Result<bool>>
                     BalanceInTRY = request.Balance * exchangeRateToTRY,
                     Currency = request.Currency,
                 };
-                await walletRepository.CreateWalletAsync(wallet, saveChanges: false);
+                await _walletRepository.CreateWalletAsync(wallet, saveChanges: false);
 
                 // İlk SaveChanges — Category ve Wallet ID'leri garanti altına alınır
-                await unitOfWork.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 // Kullanıcı-Cüzdan ilişkisi
                 var userWallet = new UserWallet
@@ -101,7 +100,7 @@ public class CreateWalletCommand : IRequest<Result<bool>>
                     WalletID = wallet.ID,
                     Role = WalletRole.Owner
                 };
-                var userWalletCreated = await userWalletRepository.CreateAsync(userWallet, saveChanges: false);
+                var userWalletCreated = await _userWalletRepository.CreateAsync(userWallet, saveChanges: false);
 
                 // Entry oluştur
                 var entry = new Entry
@@ -113,19 +112,19 @@ public class CreateWalletCommand : IRequest<Result<bool>>
                     CategoryID = category.ID,
                     UserID = userID,
                     WalletID = wallet.ID,
-                    Currency= request.Currency
+                    Currency = request.Currency
                 };
-                var entryResult = await budgetRepository.CreateEntryAsync(entry, saveChanges: false);
+                var entryResult = await _budgetRepository.CreateEntryAsync(entry, saveChanges: false);
 
                 // Final save
-                await unitOfWork.SaveChangesAsync();
-                await unitOfWork.CommitAsync();
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitAsync();
 
                 return Result.Success(true);
             }
             catch (Exception ex)
             {
-                await unitOfWork.RollbackAsync();
+                await _unitOfWork.RollbackAsync();
                 return Result.Failure<bool>(GeneralErrors.FromMessage(ex.Message));
             }
         }

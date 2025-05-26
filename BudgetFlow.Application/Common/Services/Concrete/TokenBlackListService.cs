@@ -7,11 +7,11 @@ namespace BudgetFlow.Application.Common.Services.Concrete;
 public class TokenBlacklistService : ITokenBlacklistService
 {
     private readonly ConcurrentDictionary<string, DateTime> _blacklistedTokens = new();
-    private readonly IConfiguration configuration;
+    private readonly IConfiguration _configuration;
 
     public TokenBlacklistService(IConfiguration configuration)
     {
-        this.configuration = configuration;
+        _configuration = configuration;
     }
 
     public bool IsBlacklisted(string token)
@@ -28,7 +28,7 @@ public class TokenBlacklistService : ITokenBlacklistService
 
     public void Blacklist(string token)
     {
-        var expirationMinutes = configuration.GetValue<int>("Jwt:PasswordResetExpirationInMinutes");
+        var expirationMinutes = _configuration.GetValue<int>("Jwt:PasswordResetExpirationInMinutes");
         _blacklistedTokens[token] = DateTime.UtcNow.AddMinutes(expirationMinutes);
     }
 }

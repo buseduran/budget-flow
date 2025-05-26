@@ -11,10 +11,10 @@ namespace BudgetFlow.API.Controllers;
 [Route("[controller]")]
 public class InvitationController : ControllerBase
 {
-    private readonly IMediator mediator;
+    private readonly IMediator _mediator;
     public InvitationController(IMediator mediator)
     {
-        this.mediator = mediator;
+        _mediator = mediator;
     }
 
     /// <summary>  
@@ -28,7 +28,7 @@ public class InvitationController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> SendInvitationAsync([FromBody] SendInvitationCommand sendInvitationCommand)
     {
-        var result = await mediator.Send(sendInvitationCommand);
+        var result = await _mediator.Send(sendInvitationCommand);
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();
@@ -44,7 +44,7 @@ public class InvitationController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> JoinWalletByInvitationAsync([FromBody] JoinWalletCommand joinWalletCommand)
     {
-        var result = await mediator.Send(joinWalletCommand);
+        var result = await _mediator.Send(joinWalletCommand);
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();

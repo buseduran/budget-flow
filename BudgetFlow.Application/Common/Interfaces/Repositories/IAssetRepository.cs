@@ -1,6 +1,5 @@
 ﻿using BudgetFlow.Application.Assets;
 using BudgetFlow.Application.Common.Utils;
-using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Entities;
 
 namespace BudgetFlow.Application.Common.Interfaces.Repositories;

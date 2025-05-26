@@ -1,37 +1,31 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Interfaces.Services;
 using BudgetFlow.Application.Common.Results;
-using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Errors;
 using MediatR;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BudgetFlow.Application.Users.Commands.UpdatePassword;
-public class UpdatePasswordCommand:IRequest<Result<bool>>
+public class UpdatePasswordCommand : IRequest<Result<bool>>
 {
     public string OldPassword { get; set; }
     public string NewPassword { get; set; }
     public string ConfirmNewPassword { get; set; }
     public class UpdatePasswordCommandHandler : IRequestHandler<UpdatePasswordCommand, Result<bool>>
     {
-        private readonly IUserRepository userRepository;
-        private readonly IPasswordHasher passwordHasher;
-        private readonly IHttpContextAccessor httpContextAccessor;
-        public UpdatePasswordCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IHttpContextAccessor httpContextAccessor)
+        private readonly IUserRepository _userRepository;
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly ICurrentUserService _currentUserService;
+        public UpdatePasswordCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, ICurrentUserService currentUserService)
         {
-            this.userRepository = userRepository;
-            this.passwordHasher = passwordHasher;
-            this.httpContextAccessor = httpContextAccessor;
+            _userRepository = userRepository;
+            _passwordHasher = passwordHasher;
+            _currentUserService = currentUserService;
         }
         public async Task<Result<bool>> Handle(UpdatePasswordCommand request, CancellationToken cancellationToken)
         {
-            var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
-            var user = await userRepository.GetByIdAsync(userID);
+            var userID = _currentUserService.GetCurrentUserID();
+            var user = await _userRepository.GetByIdAsync(userID);
             if (user == null)
                 return Result.Failure<bool>(UserErrors.UserNotFound);
 
@@ -43,12 +37,12 @@ public class UpdatePasswordCommand:IRequest<Result<bool>>
                 return Result.Failure<bool>(UserErrors.PasswordsDoNotMatch);
 
 
-            if (!passwordHasher.Verify(request.OldPassword, user.PasswordHash))
+            if (!_passwordHasher.Verify(request.OldPassword, user.PasswordHash))
                 return Result.Failure<bool>(UserErrors.InvalidOldPassword);
 
 
-            var newPasswordHash = passwordHasher.Hash(request.NewPassword);
-            var result = await userRepository.UpdateAsync(user.Name, user.Email, user.Email, newPasswordHash);
+            var newPasswordHash = _passwordHasher.Hash(request.NewPassword);
+            var result = await _userRepository.UpdateAsync(user.Name, user.Email, user.Email, newPasswordHash);
             if (!result)
                 return Result.Failure<bool>(UserErrors.UpdateFailed);
 

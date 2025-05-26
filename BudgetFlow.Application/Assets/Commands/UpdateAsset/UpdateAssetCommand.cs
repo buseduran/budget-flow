@@ -14,10 +14,10 @@ public class UpdateAssetCommand : IRequest<Result<bool>>
     public IFormFile Symbol { get; set; }
     public class UpdateAssetCommandHandler : IRequestHandler<UpdateAssetCommand, Result<bool>>
     {
-        private readonly IAssetRepository assetRepository;
+        private readonly IAssetRepository _assetRepository;
         public UpdateAssetCommandHandler(IAssetRepository assetRepository)
         {
-            this.assetRepository = assetRepository;
+            _assetRepository = assetRepository;
         }
         public async Task<Result<bool>> Handle(UpdateAssetCommand request, CancellationToken cancellationToken)
         {
@@ -41,7 +41,7 @@ public class UpdateAssetCommand : IRequest<Result<bool>>
                 Unit = request.Asset.Unit
             };
 
-            var result = await assetRepository.UpdateAssetAsync(asset);
+            var result = await _assetRepository.UpdateAssetAsync(asset);
 
             return result
                 ? Result.Success(true)

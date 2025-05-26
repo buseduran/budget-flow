@@ -5,7 +5,6 @@ using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Application.Common.Services.Concrete;
 using BudgetFlow.Application.Common.Utils;
 using FluentValidation;
-using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
@@ -38,6 +37,7 @@ public static class ServiceRegistration
         services.AddScoped<IStockScraper, StockScraper>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IWalletAuthService, WalletAuthService>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         services.AddHttpClient<IExchangeRateScraper, ExchangeRateScraper>();
         services.AddHttpClient<IMetalScraper, MetalScraper>();

@@ -11,9 +11,9 @@ using System.Xml.Linq;
 namespace BudgetFlow.Application.Common.Services.Concrete;
 public class ExchangeRateScraper : IExchangeRateScraper
 {
-    private readonly ICurrencyRateRepository currencyRateRepository;
-    private readonly HttpClient httpClient;
-    private readonly IUnitOfWork unitOfWork;
+    private readonly ICurrencyRateRepository _currencyRateRepository;
+    private readonly HttpClient _httpClient;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly string TcmbUrl;
     public ExchangeRateScraper(
         ICurrencyRateRepository currencyRateRepository,
@@ -21,9 +21,9 @@ public class ExchangeRateScraper : IExchangeRateScraper
         IUnitOfWork unitOfWork,
         IConfiguration configuration)
     {
-        this.currencyRateRepository = currencyRateRepository;
-        this.httpClient = httpClient;
-        this.unitOfWork = unitOfWork;
+        _currencyRateRepository = currencyRateRepository;
+        _httpClient = httpClient;
+        _unitOfWork = unitOfWork;
         TcmbUrl = configuration["Tcmb:ExchangeRateUrl"];
     }
 
@@ -31,7 +31,7 @@ public class ExchangeRateScraper : IExchangeRateScraper
     {
         try
         {
-            var xml = await httpClient.GetStringAsync(TcmbUrl);
+            var xml = await _httpClient.GetStringAsync(TcmbUrl);
             var doc = XDocument.Parse(xml);
 
             var currencies = doc.Descendants("Currency")
@@ -65,35 +65,35 @@ public class ExchangeRateScraper : IExchangeRateScraper
         if (!latestRates.Any())
             return Result.Failure<bool>(CurrencyRateErrors.FetchFailed);
 
-        await unitOfWork.BeginTransactionAsync();
+        await _unitOfWork.BeginTransactionAsync();
         try
         {
             foreach (var rate in latestRates)
             {
-                var existingRate = await currencyRateRepository.GetCurrencyRateByType(rate.CurrencyType);
+                var existingRate = await _currencyRateRepository.GetCurrencyRateByType(rate.CurrencyType);
                 if (existingRate != null)
                 {
                     // Update existing rate
                     existingRate.ForexBuying = rate.ForexBuying;
                     existingRate.ForexSelling = rate.ForexSelling;
                     existingRate.RetrievedAt = DateTime.UtcNow;
-                    await currencyRateRepository.AddRatesAsync(new[] { existingRate }, saveChanges: false);
+                    await _currencyRateRepository.AddRatesAsync(new[] { existingRate }, saveChanges: false);
                 }
                 else
                 {
                     // Create new rate
-                    await currencyRateRepository.AddRatesAsync(new[] { rate }, saveChanges: false);
+                    await _currencyRateRepository.AddRatesAsync(new[] { rate }, saveChanges: false);
                 }
             }
 
-            await unitOfWork.SaveChangesAsync();
-            await unitOfWork.CommitAsync();
+            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.CommitAsync();
 
             return Result.Success(true);
         }
         catch (Exception)
         {
-            await unitOfWork.RollbackAsync();
+            await _unitOfWork.RollbackAsync();
             return Result.Failure<bool>(CurrencyRateErrors.CreationFailed);
         }
     }

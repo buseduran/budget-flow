@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Errors;
 using MediatR;
 
@@ -13,12 +14,14 @@ public class DeleteCategoryCommand : IRequest<Result<bool>>
     }
     public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryCommand, Result<bool>>
     {
-        private readonly ICategoryRepository categoryRepository;
-        private readonly IBudgetRepository budgetRepository;
-        public DeleteCategoryCommandHandler(ICategoryRepository categoryRepository, IBudgetRepository budgetRepository)
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly IBudgetRepository _budgetRepository;
+        private readonly ICurrentUserService _currentUserService;
+        public DeleteCategoryCommandHandler(ICategoryRepository categoryRepository, IBudgetRepository budgetRepository, ICurrentUserService currentUserService)
         {
-            this.categoryRepository = categoryRepository;
-            this.budgetRepository = budgetRepository;
+            _categoryRepository = categoryRepository;
+            _budgetRepository = budgetRepository;
+            _currentUserService = currentUserService;
         }
         public async Task<Result<bool>> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
         {
@@ -26,14 +29,13 @@ public class DeleteCategoryCommand : IRequest<Result<bool>>
                 return Result.Failure<bool>(CategoryErrors.InvalidCategoryId);
 
             #region Check if there is an existing entry 
-
-            var budget = await budgetRepository.CheckEntryByCategoryAsync(request.ID);
+            var userID = _currentUserService.GetCurrentUserID();
+            var budget = await _budgetRepository.CheckEntryByCategoryAsync(request.ID, userID);
             if (budget)
                 return Result.Failure<bool>(CategoryErrors.CannotDeleteCategoryWithEntries);
-
             #endregion
 
-            var result = await categoryRepository.DeleteCategoryAsync(request.ID);
+            var result = await _categoryRepository.DeleteCategoryAsync(request.ID);
             return result
                 ? Result.Success(true)
                 : Result.Failure<bool>(CategoryErrors.DeletionFailed);

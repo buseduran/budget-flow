@@ -57,17 +57,21 @@ public class BudgetRepository : IBudgetRepository
         return true;
     }
     public async Task<PaginatedList<EntryResponse>> GetPaginatedAsync(
-        int Page,
-        int PageSize,
-        int UserID,
-        int walletID)
+       int Page,
+       int PageSize,
+       int UserID,
+       int walletID)
     {
-        var entries = await context.Entries
-            .OrderByDescending(c => c.CreatedAt)
+        var query = context.Entries
+            .Where(e => e.UserID == UserID && e.WalletID == walletID)
+            .OrderByDescending(e => e.CreatedAt)
+            .Include(e => e.Category);
+
+        var count = await query.CountAsync();
+
+        var entries = await query
             .Skip((Page - 1) * PageSize)
             .Take(PageSize)
-            .Where(u => u.UserID == UserID && u.WalletID == walletID)
-            .Include(c => c.Category)
             .Select(e => new EntryResponse
             {
                 ID = e.ID,
@@ -87,15 +91,15 @@ public class BudgetRepository : IBudgetRepository
                 WalletID = walletID,
             })
             .ToListAsync();
-        var count = entries.Count();
 
         return new PaginatedList<EntryResponse>(entries, count, Page, PageSize);
     }
 
-    public async Task<bool> CheckEntryByCategoryAsync(int CategoryID)
+
+    public async Task<bool> CheckEntryByCategoryAsync(int CategoryID, int UserID)
     {
         return await context.Entries
-            .AnyAsync(e => e.CategoryID == CategoryID);
+            .AnyAsync(e => e.CategoryID == CategoryID && e.UserID == UserID);
     }
 
     public async Task<EntryResponse> GetEntryByIdAsync(int ID)

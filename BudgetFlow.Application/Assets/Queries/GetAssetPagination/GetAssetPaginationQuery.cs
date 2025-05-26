@@ -1,10 +1,10 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Enums;
 using BudgetFlow.Domain.Errors;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 
 namespace BudgetFlow.Application.Assets.Queries.GetAssetPagination;
 public class GetAssetPaginationQuery : IRequest<Result<PaginatedList<AssetResponse>>>
@@ -14,31 +14,30 @@ public class GetAssetPaginationQuery : IRequest<Result<PaginatedList<AssetRespon
     public int WalletID { get; set; }
     public class GetAssetPaginationQueryHandler : IRequestHandler<GetAssetPaginationQuery, Result<PaginatedList<AssetResponse>>>
     {
-        private readonly IAssetRepository assetRepository;
-        private readonly IUserWalletRepository userWalletRepository;
-        private readonly IHttpContextAccessor httpContextAccessor;
-
-        private readonly ICurrencyRateRepository currencyRateRepository;
-        public GetAssetPaginationQueryHandler(IAssetRepository assetRepository, IUserWalletRepository userWalletRepository, IHttpContextAccessor httpContextAccessor, ICurrencyRateRepository currencyRateRepository)
+        private readonly IAssetRepository _assetRepository;
+        private readonly IUserWalletRepository _userWalletRepository;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly ICurrencyRateRepository _currencyRateRepository;
+        public GetAssetPaginationQueryHandler(IAssetRepository assetRepository, IUserWalletRepository userWalletRepository, ICurrentUserService currentUserService, ICurrencyRateRepository currencyRateRepository)
         {
-            this.assetRepository = assetRepository;
-            this.userWalletRepository = userWalletRepository;
-            this.httpContextAccessor = httpContextAccessor;
-            this.currencyRateRepository = currencyRateRepository;
+            _assetRepository = assetRepository;
+            _userWalletRepository = userWalletRepository;
+            _currentUserService = currentUserService;
+            _currencyRateRepository = currencyRateRepository;
         }
         public async Task<Result<PaginatedList<AssetResponse>>> Handle(GetAssetPaginationQuery request, CancellationToken cancellationToken)
         {
-            var assetList = await assetRepository.GetAssetsAsync(request.Page, request.PageSize);
+            var assetList = await _assetRepository.GetAssetsAsync(request.Page, request.PageSize);
 
-            int userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
+            int userID = _currentUserService.GetCurrentUserID();
 
-            var userWallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(request.WalletID, userID);
+            var userWallet = await _userWalletRepository.GetByWalletIdAndUserIdAsync(request.WalletID, userID);
             if (userWallet == null)
                 return Result.Failure<PaginatedList<AssetResponse>>(UserWalletErrors.UserWalletNotFound);
 
-            //convert to usercurrency from try
+            //convert to usercurrency from try      
             var userCurrency = userWallet.Wallet.Currency;
-            var currencyRate = await currencyRateRepository.GetCurrencyRateByType(userCurrency);
+            var currencyRate = await _currencyRateRepository.GetCurrencyRateByType(userCurrency);
 
             if (assetList == null)
                 return Result.Failure<PaginatedList<AssetResponse>>(AssetErrors.AssetNotFound);

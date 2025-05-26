@@ -9,11 +9,11 @@ namespace BudgetFlow.Application.Common.Services.Concrete
 {
     public class StockScraper : IStockScraper
     {
-        private readonly IAssetRepository assetRepository;
+        private readonly IAssetRepository _assetRepository;
 
         public StockScraper(IAssetRepository assetRepository)
         {
-            this.assetRepository = assetRepository;
+            _assetRepository = assetRepository;
         }
 
         public async Task<IEnumerable<Asset>> GetStocksAsync(AssetType assetType)
@@ -57,11 +57,11 @@ namespace BudgetFlow.Application.Common.Services.Concrete
                 decimal.TryParse(stockPrice, NumberStyles.Currency, cultureInfo, out var price);
                 double.TryParse(stockPercentage, NumberStyles.Any, cultureInfo, out var percentage);
 
-                var existAsset = await assetRepository.GetByCodeAsync(stockName);
+                var existAsset = await _assetRepository.GetByCodeAsync(stockName);
                 // check if not exist in db
-                if(existAsset != null)
+                if (existAsset != null)
                 {
-                    
+
                 }
                 Asset asset = new()
                 {

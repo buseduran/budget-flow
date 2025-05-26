@@ -8,6 +8,6 @@ public interface ICategoryRepository
     Task<int> CreateCategoryAsync(Category categoryDto, bool saveChanges = true);
     Task<PaginatedList<CategoryResponse>> GetCategoriesAsync(int Page, int PageSize, int userID);
     Task<CategoryResponse> GetCategoryByIdAsync(int ID);
-    Task<bool> UpdateCategoryAsync(int ID, string Color);
+    Task<bool> UpdateCategoryAsync(int ID, string Color, int UserID);
     Task<bool> DeleteCategoryAsync(int ID);
 }

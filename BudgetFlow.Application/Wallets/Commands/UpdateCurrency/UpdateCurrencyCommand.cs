@@ -1,10 +1,9 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
-using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Enums;
 using BudgetFlow.Domain.Errors;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 
 namespace BudgetFlow.Application.Wallets.Commands.UpdateCurrency;
 public class UpdateCurrencyCommand : IRequest<Result<bool>>
@@ -13,17 +12,17 @@ public class UpdateCurrencyCommand : IRequest<Result<bool>>
     public int WalletID { get; set; }
     public class UpdateCurrencyCommandHandler : IRequestHandler<UpdateCurrencyCommand, Result<bool>>
     {
-        private readonly IWalletRepository walletRepository;
-        private readonly IHttpContextAccessor httpContextAccessor;
-        public UpdateCurrencyCommandHandler(IWalletRepository walletRepository, IHttpContextAccessor httpContextAccessor)
+        private readonly IWalletRepository _walletRepository;
+        private readonly ICurrentUserService _currentUserService;
+        public UpdateCurrencyCommandHandler(IWalletRepository walletRepository, ICurrentUserService currentUserService)
         {
-            this.walletRepository = walletRepository;
-            this.httpContextAccessor = httpContextAccessor;
+            _walletRepository = walletRepository;
+            _currentUserService = currentUserService;
         }
         public async Task<Result<bool>> Handle(UpdateCurrencyCommand request, CancellationToken cancellationToken)
         {
-            var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
-            var result = await walletRepository.UpdateCurrencyAsync(request.WalletID, request.Currency);
+            var userID = _currentUserService.GetCurrentUserID();
+            var result = await _walletRepository.UpdateCurrencyAsync(request.WalletID, request.Currency);
 
             return result ? Result.Success(true)
                 : Result.Failure<bool>(WalletErrors.UpdateFailed);

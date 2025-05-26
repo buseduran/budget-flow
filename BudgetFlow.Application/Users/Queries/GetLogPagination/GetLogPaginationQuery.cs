@@ -13,22 +13,22 @@ public class GetLogPaginationQuery : IRequest<Result<PaginatedList<LogResponse>>
     public int PageSize { get; set; } = 50;
     public LogType LogType { get; set; } = LogType.All;
     public int UserID { get; set; }
-    public class GetLogPaginationQueryHandler : IRequestHandler<GetLogPaginationQuery, Result<PaginatedList<LogResponse>>>
+}
+public class GetLogPaginationQueryHandler : IRequestHandler<GetLogPaginationQuery, Result<PaginatedList<LogResponse>>>
+{
+    private readonly IUserRepository _userRepository;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    public GetLogPaginationQueryHandler(IUserRepository userRepository, IHttpContextAccessor httpContextAccessor)
     {
-        private readonly IUserRepository userRepository;
-        private readonly IHttpContextAccessor httpContextAccessor;
-        public GetLogPaginationQueryHandler(IUserRepository userRepository, IHttpContextAccessor httpContextAccessor)
-        {
-            this.userRepository = userRepository;
-            this.httpContextAccessor = httpContextAccessor;
-        }
-        public async Task<Result<PaginatedList<LogResponse>>> Handle(GetLogPaginationQuery request, CancellationToken cancellationToken)
-        {
-            var result = await userRepository.GetLogsPaginatedAsync(request.Page, request.PageSize, request.LogType, request.UserID);
-            if (result == null)
-                return Result.Failure<PaginatedList<LogResponse>>(UserErrors.LogNotFound);
+        _userRepository = userRepository;
+        _httpContextAccessor = httpContextAccessor;
+    }
+    public async Task<Result<PaginatedList<LogResponse>>> Handle(GetLogPaginationQuery request, CancellationToken cancellationToken)
+    {
+        var result = await _userRepository.GetLogsPaginatedAsync(request.Page, request.PageSize, request.LogType, request.UserID);
+        if (result == null)
+            return Result.Failure<PaginatedList<LogResponse>>(UserErrors.LogNotFound);
 
-            return Result.Success(result);
-        }
+        return Result.Success(result);
     }
 }

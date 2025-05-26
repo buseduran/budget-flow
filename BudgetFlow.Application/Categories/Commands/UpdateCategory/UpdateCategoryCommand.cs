@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Errors;
 using MediatR;
 
@@ -11,16 +12,21 @@ public class UpdateCategoryCommand : IRequest<Result<bool>>
 
     public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryCommand, Result<bool>>
     {
-        private readonly ICategoryRepository categoryRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly ICurrentUserService _currentUserService;
 
-        public UpdateCategoryCommandHandler(ICategoryRepository categoryRepository)
+        public UpdateCategoryCommandHandler(
+            ICategoryRepository categoryRepository,
+            ICurrentUserService currentUserService)
         {
-            this.categoryRepository = categoryRepository;
+            _categoryRepository = categoryRepository;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Result<bool>> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
         {
-            var result = await categoryRepository.UpdateCategoryAsync(request.ID, request.Color);
+            var userID = _currentUserService.GetCurrentUserID();
+            var result = await _categoryRepository.UpdateCategoryAsync(request.ID, request.Color, userID);
             return result
                 ? Result.Success(true)
                 : Result.Failure<bool>(CategoryErrors.UpdateFailed);

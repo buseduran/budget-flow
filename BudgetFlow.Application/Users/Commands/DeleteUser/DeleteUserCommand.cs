@@ -13,14 +13,14 @@ public class DeleteUserCommand : IRequest<Result<bool>>
     }
     public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Result<bool>>
     {
-        private readonly IUserRepository userRepository;
+        private readonly IUserRepository _userRepository;
         public DeleteUserCommandHandler(IUserRepository userRepository)
         {
-            this.userRepository = userRepository;
+            _userRepository = userRepository;
         }
         public async Task<Result<bool>> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
         {
-            var result = await userRepository.DeleteAsync(request.ID);
+            var result = await _userRepository.DeleteAsync(request.ID);
             return result
                 ? Result.Success(true)
                 : Result.Failure<bool>(UserErrors.UserNotFound);

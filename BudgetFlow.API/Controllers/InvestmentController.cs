@@ -19,14 +19,14 @@ namespace BudgetFlow.API.Controllers;
 [Authorize]
 public class InvestmentController : ControllerBase
 {
-    private readonly IMediator mediator;
+    private readonly IMediator _mediator;
     /// <summary>
     /// Initializes a new instance of the <see cref="InvestmentController"/> class.
     /// </summary>
     /// <param name="mediator">The mediator instance for handling requests.</param>
     public InvestmentController(IMediator mediator)
     {
-        this.mediator = mediator;
+        _mediator = mediator;
     }
     /// <summary>
     /// Creates an Investment. 
@@ -38,7 +38,7 @@ public class InvestmentController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> CreateInvestmentAsync([FromBody] CreateInvestmentCommand createInvestmentCommand)
     {
-        var result = await mediator.Send(createInvestmentCommand);
+        var result = await _mediator.Send(createInvestmentCommand);
         return result.IsSuccess
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();
@@ -54,7 +54,7 @@ public class InvestmentController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> DeleteInvestmentAsync([FromRoute] int ID)
     {
-        var result = await mediator.Send(new DeleteInvestmentCommand(ID));
+        var result = await _mediator.Send(new DeleteInvestmentCommand(ID));
         return result.IsSuccess
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();
@@ -70,7 +70,7 @@ public class InvestmentController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> UpdateInvestmentAsync([FromBody] UpdateInvestmentCommand updateInvestmentCommand)
     {
-        var result = await mediator.Send(updateInvestmentCommand);
+        var result = await _mediator.Send(updateInvestmentCommand);
         return result.IsSuccess
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();
@@ -85,7 +85,7 @@ public class InvestmentController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<InvestmentResponse>))]
     public async Task<IResult> GetInvestmentsAsync([FromQuery] GetInvestmentsQuery GetInvestmentsQuery)
     {
-        var result = await mediator.Send(GetInvestmentsQuery);
+        var result = await _mediator.Send(GetInvestmentsQuery);
         return result.IsSuccess
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();
@@ -100,7 +100,7 @@ public class InvestmentController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PortfolioAssetResponse))]
     public async Task<IResult> GetAssetInvestmentsAsync(string Portfolio)
     {
-        var result = await mediator.Send(new GetPortfolioAssetsQuery(Portfolio));
+        var result = await _mediator.Send(new GetPortfolioAssetsQuery(Portfolio));
         return result.IsSuccess
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();

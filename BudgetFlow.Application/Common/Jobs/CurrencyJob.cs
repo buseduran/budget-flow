@@ -4,15 +4,15 @@ using Quartz;
 namespace BudgetFlow.Application.Common.Jobs;
 public class CurrencyJob : IJob
 {
-    private readonly IExchangeRateScraper exchangeRateScraper;
+    private readonly IExchangeRateScraper _exchangeRateScraper;
     public CurrencyJob(IExchangeRateScraper exchangeRateScraper)
     {
-        this.exchangeRateScraper = exchangeRateScraper;
+        _exchangeRateScraper = exchangeRateScraper;
     }
 
     public async Task Execute(IJobExecutionContext context)
     {
-        var result = await exchangeRateScraper.SyncExchangeRatesAsync();
+        var result = await _exchangeRateScraper.SyncExchangeRatesAsync();
         if (result.IsFailure)
         {
             throw new Exception(result.Error.ToString());

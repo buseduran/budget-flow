@@ -1,5 +1,5 @@
 using BudgetFlow.Application.Categories;
-using BudgetFlow.Application.Common.Interfaces;
+using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Application.Statistics.Queries.GetAssetInvestPagination;
 using BudgetFlow.Application.Statistics.Responses;

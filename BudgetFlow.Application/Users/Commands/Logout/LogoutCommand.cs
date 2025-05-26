@@ -1,6 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
-using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -10,30 +10,31 @@ public class LogoutCommand : IRequest<Result<bool>>
 {
     public class LogoutCommandHandler : IRequestHandler<LogoutCommand, Result<bool>>
     {
-        private readonly IHttpContextAccessor httpContextAccessor;
-        private readonly IUserRepository userRepository;
-        public LogoutCommandHandler(IHttpContextAccessor httpContextAccessor, IUserRepository userRepository)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IUserRepository _userRepository;
+        private readonly ICurrentUserService _currentUserService;
+        public LogoutCommandHandler(IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, ICurrentUserService currentUserService)
         {
-            this.httpContextAccessor = httpContextAccessor;
-            this.userRepository = userRepository;
+            _httpContextAccessor = httpContextAccessor;
+            _userRepository = userRepository;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Result<bool>> Handle(LogoutCommand request, CancellationToken cancellationToken)
         {
-            var token = httpContextAccessor.HttpContext?.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+            var token = _httpContextAccessor.HttpContext?.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
 
-            var context = httpContextAccessor.HttpContext;
+            var context = _httpContextAccessor.HttpContext;
 
             // Clear user identity
             context.User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity());
-            httpContextAccessor.HttpContext.Response.Cookies.Delete("AccessToken");
+            _httpContextAccessor.HttpContext.Response.Cookies.Delete("AccessToken");
 
-            GetCurrentUser getCurrentUser = new(httpContextAccessor);
-            int userID = getCurrentUser.GetCurrentUserID();
+            int userID = _currentUserService.GetCurrentUserID();
             if (userID == 0)
                 return Result.Failure<bool>(UserErrors.UserNotFound);
 
-            var revokeResult = await userRepository.RevokeTokenAsync(userID);
+            var revokeResult = await _userRepository.RevokeTokenAsync(userID);
             if (!revokeResult)
                 return Result.Failure<bool>(UserErrors.LogoutFailed);
 

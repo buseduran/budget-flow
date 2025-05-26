@@ -13,15 +13,15 @@ public class GetAssetRateQuery : IRequest<Result<AssetRateResponse>>
     }
     public class GetAssetRateQueryHandler : IRequestHandler<GetAssetRateQuery, Result<AssetRateResponse>>
     {
-        private readonly IAssetRepository assetRepository;
+        private readonly IAssetRepository _assetRepository;
         public GetAssetRateQueryHandler(IAssetRepository assetRepository)
         {
-            this.assetRepository = assetRepository;
+            _assetRepository = assetRepository;
         }
 
         public async Task<Result<AssetRateResponse>> Handle(GetAssetRateQuery request, CancellationToken cancellationToken)
         {
-            var rate = await assetRepository.GetAssetRateAsync(request.ID);
+            var rate = await _assetRepository.GetAssetRateAsync(request.ID);
             if (rate == null)
                 return Result.Failure<AssetRateResponse>(AssetErrors.AssetRateNotFound);
 

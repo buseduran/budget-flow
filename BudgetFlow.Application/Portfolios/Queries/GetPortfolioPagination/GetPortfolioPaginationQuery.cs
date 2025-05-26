@@ -1,9 +1,9 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Errors;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 
 namespace BudgetFlow.Application.Portfolios.Queries.GetPortfolioPagination;
 public class GetPortfolioPaginationQuery : IRequest<Result<PaginatedList<PortfolioResponse>>>
@@ -13,23 +13,26 @@ public class GetPortfolioPaginationQuery : IRequest<Result<PaginatedList<Portfol
     public int WalletID { get; set; }
     public class GetPortfolioPaginationQueryHandler : IRequestHandler<GetPortfolioPaginationQuery, Result<PaginatedList<PortfolioResponse>>>
     {
-        private readonly IPortfolioRepository portfolioRepository;
-        private readonly IHttpContextAccessor httpContextAccessor;
-        private readonly IUserWalletRepository userWalletRepository;
-        public GetPortfolioPaginationQueryHandler(IPortfolioRepository portfolioRepository, IHttpContextAccessor httpContextAccessor, IUserWalletRepository userWalletRepository)
+        private readonly IPortfolioRepository _portfolioRepository;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IUserWalletRepository _userWalletRepository;
+        public GetPortfolioPaginationQueryHandler(
+            IPortfolioRepository portfolioRepository,
+            ICurrentUserService currentUserService,
+            IUserWalletRepository userWalletRepository)
         {
-            this.portfolioRepository = portfolioRepository;
-            this.httpContextAccessor = httpContextAccessor;
-            this.userWalletRepository = userWalletRepository;
+            _portfolioRepository = portfolioRepository;
+            _currentUserService = currentUserService;
+            _userWalletRepository = userWalletRepository;
         }
         public async Task<Result<PaginatedList<PortfolioResponse>>> Handle(GetPortfolioPaginationQuery request, CancellationToken cancellationToken)
         {
-            int userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
-            var userWallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(request.WalletID, userID);
+            int userID = _currentUserService.GetCurrentUserID();
+            var userWallet = await _userWalletRepository.GetByWalletIdAndUserIdAsync(request.WalletID, userID);
             if (userWallet == null)
                 return Result.Failure<PaginatedList<PortfolioResponse>>(UserWalletErrors.UserWalletNotFound);
 
-            var result = await portfolioRepository.GetPortfoliosAsync(request.Page, request.PageSize, userID, request.WalletID);
+            var result = await _portfolioRepository.GetPortfoliosAsync(request.Page, request.PageSize, userID, request.WalletID);
             return result != null
                 ? Result.Success(result)
                 : Result.Failure<PaginatedList<PortfolioResponse>>(PortfolioErrors.PortfolioNotFound);

@@ -16,10 +16,10 @@ namespace BudgetFlow.API.Controllers;
 [Authorize]
 public class CategoryController : ControllerBase
 {
-    private readonly IMediator mediator;
+    private readonly IMediator _mediator;
     public CategoryController(IMediator mediator)
     {
-        this.mediator = mediator;
+        _mediator = mediator;
     }
 
     /// <summary>
@@ -32,7 +32,7 @@ public class CategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
     public async Task<IResult> CreateCategoryAsync([FromBody] CreateCategoryCommand createCategoryCommand)
     {
-        var result = await mediator.Send(createCategoryCommand);
+        var result = await _mediator.Send(createCategoryCommand);
         return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();
@@ -47,7 +47,7 @@ public class CategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<CategoryResponse>))]
     public async Task<IResult> GetCategoriesAsync([FromQuery] GetCategoryPaginationQuery getCategoryPaginationQuery)
     {
-        var result = await mediator.Send(getCategoryPaginationQuery);
+        var result = await _mediator.Send(getCategoryPaginationQuery);
         return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();
@@ -63,7 +63,7 @@ public class CategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> UpdateEntryAsync([FromBody] UpdateCategoryCommand updateCategoryCommand)
     {
-        var result = await mediator.Send(updateCategoryCommand);
+        var result = await _mediator.Send(updateCategoryCommand);
         return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();
@@ -79,7 +79,7 @@ public class CategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> DeleteEntryAsync([FromRoute] int ID)
     {
-        var result = await mediator.Send(new DeleteCategoryCommand(ID));
+        var result = await _mediator.Send(new DeleteCategoryCommand(ID));
         return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();

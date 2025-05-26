@@ -14,12 +14,12 @@ public class UpdateAccountCommand : IRequest<Result<bool>>
 
     public class UpdateAccountCommandHandler : IRequestHandler<UpdateAccountCommand, Result<bool>>
     {
-        private readonly IUserRepository userRepository;
-        private readonly IPasswordHasher passwordHasher;
+        private readonly IUserRepository _userRepository;
+        private readonly IPasswordHasher _passwordHasher;
         public UpdateAccountCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher)
         {
-            this.userRepository = userRepository;
-            this.passwordHasher = passwordHasher;
+            _userRepository = userRepository;
+            _passwordHasher = passwordHasher;
         }
 
         public async Task<Result<bool>> Handle(UpdateAccountCommand request, CancellationToken cancellationToken)
@@ -27,14 +27,14 @@ public class UpdateAccountCommand : IRequest<Result<bool>>
             bool result;
             if (String.IsNullOrWhiteSpace(request.Password))
             {
-                result = await userRepository.UpdateWithoutPasswordAsync(request.Name, request.OldEmail, request.Email);
+                result = await _userRepository.UpdateWithoutPasswordAsync(request.Name, request.OldEmail, request.Email);
                 return result
                      ? Result.Success(true)
                      : Result.Failure<bool>(UserErrors.UpdateFailed);
             }
 
-            request.Password = passwordHasher.Hash(request.Password);
-            result = await userRepository.UpdateAsync(request.Name, request.OldEmail, request.Email, request.Password);
+            request.Password = _passwordHasher.Hash(request.Password);
+            result = await _userRepository.UpdateAsync(request.Name, request.OldEmail, request.Email, request.Password);
 
             return result
                  ? Result.Success(true)

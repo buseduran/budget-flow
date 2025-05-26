@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Errors;
 using MediatR;
 
@@ -11,15 +12,18 @@ public class UpdatePortfolioCommand : IRequest<Result<bool>>
     public string Description { get; set; }
     public class UpdatePortfolioCommandHandler : IRequestHandler<UpdatePortfolioCommand, Result<bool>>
     {
-        private readonly IPortfolioRepository portfolioRepository;
-        public UpdatePortfolioCommandHandler(IPortfolioRepository portfolioRepository)
+        private readonly IPortfolioRepository _portfolioRepository;
+        private readonly ICurrentUserService _currentUserService;
+        public UpdatePortfolioCommandHandler(IPortfolioRepository portfolioRepository, ICurrentUserService currentUserService)
         {
-            this.portfolioRepository = portfolioRepository;
+            _portfolioRepository = portfolioRepository;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Result<bool>> Handle(UpdatePortfolioCommand request, CancellationToken cancellationToken)
         {
-            var result = await portfolioRepository.UpdatePortfolioAsync(request.ID, request.Name, request.Description);
+            var userID = _currentUserService.GetCurrentUserID();
+            var result = await _portfolioRepository.UpdatePortfolioAsync(request.ID, request.Name, request.Description, userID);
             return result
                 ? Result.Success(true)
                 : Result.Failure<bool>(PortfolioErrors.PortfolioUpdateFailed);

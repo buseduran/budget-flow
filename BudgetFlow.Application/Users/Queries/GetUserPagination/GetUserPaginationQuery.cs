@@ -11,14 +11,14 @@ public class GetUserPaginationQuery : IRequest<Result<PaginatedList<UserResponse
     public int PageSize { get; set; } = 50;
     public class GetUserPaginationQueryHandler : IRequestHandler<GetUserPaginationQuery, Result<PaginatedList<UserResponse>>>
     {
-        private readonly IUserRepository userRepository;
+        private readonly IUserRepository _userRepository;
         public GetUserPaginationQueryHandler(IUserRepository userRepository)
         {
-            this.userRepository = userRepository;
+            _userRepository = userRepository;
         }
         public async Task<Result<PaginatedList<UserResponse>>> Handle(GetUserPaginationQuery request, CancellationToken cancellationToken)
         {
-            var result = await userRepository.GetPaginatedAsync(request.Page, request.PageSize);
+            var result = await _userRepository.GetPaginatedAsync(request.Page, request.PageSize);
             if (result == null)
                 return Result.Failure<PaginatedList<UserResponse>>(UserErrors.LogNotFound);
 

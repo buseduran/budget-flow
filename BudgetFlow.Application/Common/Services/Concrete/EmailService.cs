@@ -7,15 +7,15 @@ using System.Net.Mail;
 namespace BudgetFlow.Application.Common.Services.Concrete;
 public class EmailService : IEmailService
 {
-    private readonly IConfiguration configuration;
+    private readonly IConfiguration _configuration;
     public EmailService(IConfiguration configuration)
     {
-        this.configuration = configuration;
+        _configuration = configuration;
     }
 
     public async Task SendEmailAsync(string to, string subject, string body, bool isHtml = true)
     {
-        var emailConfig = configuration.GetSection("EmailConfiguration");
+        var emailConfig = _configuration.GetSection("EmailConfiguration");
 
         var smtpClient = new SmtpClient(emailConfig["SmtpServer"])
         {

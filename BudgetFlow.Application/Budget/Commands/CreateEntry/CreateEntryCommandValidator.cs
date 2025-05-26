@@ -1,5 +1,4 @@
 using FluentValidation;
-using BudgetFlow.Application.Budget.Commands.CreateEntry;
 
 namespace BudgetFlow.Application.Budget.Commands.CreateEntry;
 

@@ -1,11 +1,8 @@
-using BudgetFlow.Application.Statistics.Queries.GetAnalysisEntries;
-using BudgetFlow.Application.Statistics.Queries.GetLastEntries;
-using BudgetFlow.Application.Statistics.Queries.GetAssetRevenue;
 using BudgetFlow.Application.Statistics.Queries.GetAssetInvestPagination;
 using BudgetFlow.Application.Statistics.Responses;
 using BudgetFlow.Domain.Enums;
 
-namespace BudgetFlow.Application.Common.Interfaces;
+namespace BudgetFlow.Application.Common.Interfaces.Repositories;
 
 public interface IStatisticsRepository
 {

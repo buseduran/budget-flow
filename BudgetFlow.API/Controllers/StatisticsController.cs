@@ -17,7 +17,7 @@ namespace BudgetFlow.API.Controllers;
 [Route("[controller]")]
 public class StatisticsController : ControllerBase
 {
-    private readonly IMediator mediator;
+    private readonly IMediator _mediator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StatisticsController"/> class.
@@ -25,7 +25,7 @@ public class StatisticsController : ControllerBase
     /// <param name="mediator">The mediator instance for handling requests.</param>
     public StatisticsController(IMediator mediator)
     {
-        this.mediator = mediator;
+        _mediator = mediator;
     }
 
     /// <summary>
@@ -39,7 +39,7 @@ public class StatisticsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AnalysisEntriesResponse))]
     public async Task<IResult> GetAnalysisEntriesAsync([FromQuery] GetAnalysisEntriesQuery getAnalysisEntriesQuery)
     {
-        var result = await mediator.Send(getAnalysisEntriesQuery);
+        var result = await _mediator.Send(getAnalysisEntriesQuery);
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();
@@ -55,7 +55,7 @@ public class StatisticsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<LastEntryResponse>))]
     public async Task<IResult> GetLastEntriesAsync([FromQuery] GetLastEntriesQuery getLastEntriesQuery)
     {
-        var result = await mediator.Send(getLastEntriesQuery);
+        var result = await _mediator.Send(getLastEntriesQuery);
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();
@@ -70,7 +70,7 @@ public class StatisticsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AssetRevenueResponse>))]
     public async Task<IResult> GetAssetRevenueAsync(string Portfolio)
     {
-        var result = await mediator.Send(new GetAssetRevenueQuery(Portfolio));
+        var result = await _mediator.Send(new GetAssetRevenueQuery(Portfolio));
         return result.IsSuccess
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();
@@ -86,7 +86,7 @@ public class StatisticsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedAssetInvestResponse))]
     public async Task<IResult> GetAssetInvestsPaginationAsync([FromQuery] GetAssetInvestPaginationQuery getAssetInvestPaginationQuery)
     {
-        var result = await mediator.Send(getAssetInvestPaginationQuery);
+        var result = await _mediator.Send(getAssetInvestPaginationQuery);
         return result.IsSuccess
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();

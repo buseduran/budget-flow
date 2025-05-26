@@ -18,12 +18,12 @@ public class RegisterCommand : IRequest<Result<bool>>
     //public string ClientUri { get; set; }
     public class CreateUserCommandHandler : IRequestHandler<RegisterCommand, Result<bool>>
     {
-        private readonly IUserRepository userRepository;
-        private readonly IPasswordHasher passwordHasher;
-        private readonly ITokenProvider tokenProvider;
-        private readonly IEmailService emailService;
-        private readonly IConfiguration configuration;
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IUserRepository _userRepository;
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly ITokenProvider _tokenProvider;
+        private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
+        private readonly IUnitOfWork _unitOfWork;
         public CreateUserCommandHandler(
             IUserRepository userRepository,
             IPasswordHasher passwordHasher,
@@ -32,12 +32,12 @@ public class RegisterCommand : IRequest<Result<bool>>
             IConfiguration configuration,
             IUnitOfWork unitOfWork)
         {
-            this.userRepository = userRepository;
-            this.passwordHasher = passwordHasher;
-            this.tokenProvider = tokenProvider;
-            this.emailService = emailService;
-            this.configuration = configuration;
-            this.unitOfWork = unitOfWork;
+            _userRepository = userRepository;
+            _passwordHasher = passwordHasher;
+            _tokenProvider = tokenProvider;
+            _emailService = emailService;
+            _configuration = configuration;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<Result<bool>> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -45,7 +45,7 @@ public class RegisterCommand : IRequest<Result<bool>>
             if (request.User.Password != request.User.ConfirmPassword)
                 return Result.Failure<bool>(UserErrors.PasswordsDoNotMatch);
 
-            var userExist = await userRepository.GetByEmailAsync(request.User.Email);
+            var userExist = await _userRepository.GetByEmailAsync(request.User.Email);
             if (userExist != null)
                 return Result.Failure<bool>(UserErrors.UserAlreadyExists);
 
@@ -53,13 +53,13 @@ public class RegisterCommand : IRequest<Result<bool>>
             {
                 Name = request.User.Name,
                 Email = request.User.Email,
-                PasswordHash = passwordHasher.Hash(request.User.Password)
+                PasswordHash = _passwordHasher.Hash(request.User.Password)
             };
 
-            await unitOfWork.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync();
             try
             {
-                var userID = await userRepository.CreateAsync(user);
+                var userID = await _userRepository.CreateAsync(user);
 
                 #region Create UserRole
                 var userRole = new UserRole()
@@ -67,13 +67,13 @@ public class RegisterCommand : IRequest<Result<bool>>
                     UserID = userID,
                     RoleID = Role.MemberID // Default role
                 };
-                await userRepository.CreateUserRoleAsync(userRole, saveChanges: false);
+                await _userRepository.CreateUserRoleAsync(userRole, saveChanges: false);
                 #endregion
 
                 #region Send e-mail confirmation
-                var emailConfig = configuration.GetSection("EmailConfiguration");
+                var emailConfig = _configuration.GetSection("EmailConfiguration");
 
-                var token = tokenProvider.GenerateEmailConfirmationToken(user);
+                var token = _tokenProvider.GenerateEmailConfirmationToken(user);
                 var confirmationLink = $"{emailConfig["ConfirmURI"]}?token={token}&email={user.Email}";
 
                 var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Resources", "Templates", "EmailConfirmTemplate.html");
@@ -81,22 +81,22 @@ public class RegisterCommand : IRequest<Result<bool>>
 
                 var emailBody = emailTemplate.Replace("{{confirmationLink}}", confirmationLink);
                 var emailSubject = "E-posta Doğrulama";
-                await emailService.SendEmailAsync(user.Email, emailSubject, emailBody);
+                await _emailService.SendEmailAsync(user.Email, emailSubject, emailBody);
                 #endregion
 
-                await unitOfWork.SaveChangesAsync();
-                await unitOfWork.CommitAsync();
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitAsync();
 
                 return Result.Success(true);
             }
             catch (EmailSendException)
             {
-                await unitOfWork.RollbackAsync();
+                await _unitOfWork.RollbackAsync();
                 return Result.Failure<bool>(UserErrors.EmailConfirmationMailFailed);
             }
             catch (Exception)
             {
-                await unitOfWork.RollbackAsync();
+                await _unitOfWork.RollbackAsync();
                 return Result.Failure<bool>(UserErrors.CreationFailed);
             }
         }

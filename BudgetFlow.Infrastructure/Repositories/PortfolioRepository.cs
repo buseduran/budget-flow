@@ -28,9 +28,11 @@ public class PortfolioRepository : IPortfolioRepository
         if (result > 0) return Portfolio.ID;
         return 0;
     }
-    public async Task<bool> DeletePortfolioAsync(int ID)
+    public async Task<bool> DeletePortfolioAsync(int ID, int UserID)
     {
-        var portfolio = await context.Portfolios.FindAsync(ID);
+        var portfolio = await context.Portfolios
+            .Where(p => p.ID == ID && p.UserID == UserID)
+            .FirstOrDefaultAsync();
         if (portfolio is null) return false;
 
         context.Portfolios.Remove(portfolio);
@@ -38,9 +40,11 @@ public class PortfolioRepository : IPortfolioRepository
         return true;
     }
 
-    public async Task<bool> UpdatePortfolioAsync(int ID, string Name, string Description)
+    public async Task<bool> UpdatePortfolioAsync(int ID, string Name, string Description, int UserID)
     {
-        var portfolio = await context.Portfolios.FindAsync(ID);
+        var portfolio = await context.Portfolios
+            .Where(p => p.ID == ID && p.UserID == UserID)
+            .FirstOrDefaultAsync();
         if (portfolio is null) return false;
 
         portfolio.Name = Name;
@@ -93,10 +97,10 @@ public class PortfolioRepository : IPortfolioRepository
         return new PaginatedList<PortfolioResponse>(result, count, Page, PageSize);
     }
 
-    public async Task<PortfolioResponse> GetPortfolioAsync(string Name)
+    public async Task<PortfolioResponse> GetPortfolioAsync(string Name, int UserID)
     {
         var portfolio = await context.Portfolios
-             .Where(e => e.Name == Name)
+             .Where(e => e.Name == Name && e.UserID == UserID)
              .Include(e => e.Investments)
              .Select(e => new PortfolioResponse
              {

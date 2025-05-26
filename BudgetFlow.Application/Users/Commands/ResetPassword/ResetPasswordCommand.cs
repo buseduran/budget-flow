@@ -14,20 +14,20 @@ public class ResetPasswordCommand : IRequest<Result<bool>>
     public string ConfirmPassword { get; set; }
     public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand, Result<bool>>
     {
-        private readonly IUserRepository userRepository;
-        private readonly IPasswordHasher passwordHasher;
-        private readonly ITokenProvider tokenProvider;
-        private readonly ITokenBlacklistService tokenBlacklistService;
+        private readonly IUserRepository _userRepository;
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly ITokenProvider _tokenProvider;
+        private readonly ITokenBlacklistService _tokenBlacklistService;
         public ResetPasswordCommandHandler(
             IUserRepository userRepository,
             IPasswordHasher passwordHasher,
             ITokenProvider tokenProvider,
             ITokenBlacklistService tokenBlacklistService)
         {
-            this.userRepository = userRepository;
-            this.passwordHasher = passwordHasher;
-            this.tokenProvider = tokenProvider;
-            this.tokenBlacklistService = tokenBlacklistService;
+            _userRepository = userRepository;
+            _passwordHasher = passwordHasher;
+            _tokenProvider = tokenProvider;
+            _tokenBlacklistService = tokenBlacklistService;
         }
 
         public async Task<Result<bool>> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
@@ -46,23 +46,23 @@ public class ResetPasswordCommand : IRequest<Result<bool>>
                 return Result.Failure<bool>(UserErrors.PasswordsDoNotMatch);
             #endregion
 
-            var user = await userRepository.FindByEmailAsync(request.Email);
+            var user = await _userRepository.FindByEmailAsync(request.Email);
             if (user == null)
                 return Result.Failure<bool>(UserErrors.UserNotFound);
 
             #region Check token is already used
-            if (tokenBlacklistService.IsBlacklisted(request.Token))
+            if (_tokenBlacklistService.IsBlacklisted(request.Token))
                 return Result.Failure<bool>(UserErrors.TokenAlreadyUsed);
 
-            if (!tokenProvider.VerifyPasswordResetToken(user.ID, request.Token))
+            if (!_tokenProvider.VerifyPasswordResetToken(user.ID, request.Token))
                 return Result.Failure<bool>(UserErrors.InvalidToken);
 
-            tokenBlacklistService.Blacklist(request.Token);
+            _tokenBlacklistService.Blacklist(request.Token);
             #endregion
 
             #region Update password
-            var passwordHash = passwordHasher.Hash(request.Password);
-            var result = await userRepository.UpdateAsync(user.Name, user.Email, request.Email, passwordHash);
+            var passwordHash = _passwordHasher.Hash(request.Password);
+            var result = await _userRepository.UpdateAsync(user.Name, user.Email, request.Email, passwordHash);
             return result
                 ? Result.Success(true)
                 : Result.Failure<bool>(UserErrors.UpdateFailed);

@@ -1,5 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Errors;
 using MediatR;
 
@@ -13,15 +14,18 @@ public class DeletePortfolioCommand : IRequest<Result<bool>>
     }
     public class DeletePortfolioCommandHandler : IRequestHandler<DeletePortfolioCommand, Result<bool>>
     {
-        private readonly IPortfolioRepository portfolioRepository;
-        public DeletePortfolioCommandHandler(IPortfolioRepository portfolioRepository)
+        private readonly IPortfolioRepository _portfolioRepository;
+        private readonly ICurrentUserService _currentUserService;
+        public DeletePortfolioCommandHandler(IPortfolioRepository portfolioRepository, ICurrentUserService currentUserService)
         {
-            this.portfolioRepository = portfolioRepository;
+            _portfolioRepository = portfolioRepository;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Result<bool>> Handle(DeletePortfolioCommand request, CancellationToken cancellationToken)
         {
-            var result = await portfolioRepository.DeletePortfolioAsync(request.ID);
+            var userID = _currentUserService.GetCurrentUserID();
+            var result = await _portfolioRepository.DeletePortfolioAsync(request.ID, userID);
             return result
             ? Result.Success(result)
             : Result.Failure<bool>(PortfolioErrors.PortfolioDeletionFailed);

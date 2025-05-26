@@ -7,14 +7,14 @@ using BudgetFlow.Domain.Errors;
 namespace BudgetFlow.Application.Common.Services.Concrete;
 public class WalletAuthService : IWalletAuthService
 {
-    private readonly IUserWalletRepository walletUserRepository;
+    private readonly IUserWalletRepository _walletUserRepository;
     public WalletAuthService(IUserWalletRepository walletUserRepository)
     {
-        this.walletUserRepository = walletUserRepository;
+        _walletUserRepository = walletUserRepository;
     }
     public async Task<Result<bool>> EnsureUserHasAccessAsync(int walletID, int userID, WalletRole requiredRole)
     {
-        var walletUser = await walletUserRepository.GetByWalletIdAndUserIdAsync(walletID, userID);
+        var walletUser = await _walletUserRepository.GetByWalletIdAndUserIdAsync(walletID, userID);
         if (walletUser == null)
             return Result.Failure<bool>(WalletErrors.UserNotFoundInWallet);
 

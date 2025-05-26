@@ -1,12 +1,10 @@
 ﻿using BudgetFlow.Application.Common.Interfaces;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Interfaces.Services;
-using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Infrastructure.Common.Persistence;
 using BudgetFlow.Infrastructure.Common.Persistence.Interceptors;
 using BudgetFlow.Infrastructure.Repositories;
-using BudgetFlow.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BudgetFlow.Infrastructure;

@@ -20,14 +20,14 @@ namespace BudgetFlow.API.Controllers
     [Authorize]
     public class BudgetController : ControllerBase
     {
-        private readonly IMediator mediator;
+        private readonly IMediator _mediator;
         /// <summary>
         /// Initializes a new instance of the <see cref="BudgetController"/> class.
         /// </summary>
         /// <param name="mediator">The mediator instance for handling requests</param>
         public BudgetController(IMediator mediator)
         {
-            this.mediator = mediator;
+            _mediator = mediator;
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace BudgetFlow.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
         public async Task<IResult> CreateEntryAsync([FromBody] CreateEntryCommand createEntryCommand)
         {
-            var result = await mediator.Send(createEntryCommand);
+            var result = await _mediator.Send(createEntryCommand);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();
@@ -56,7 +56,7 @@ namespace BudgetFlow.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
         public async Task<IResult> UpdateEntryAsync([FromBody] UpdateEntryCommand updateEntryCommand)
         {
-            var result = await mediator.Send(updateEntryCommand);
+            var result = await _mediator.Send(updateEntryCommand);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();
@@ -72,7 +72,7 @@ namespace BudgetFlow.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
         public async Task<IResult> DeleteEntryAsync([FromRoute] int ID)
         {
-            var result = await mediator.Send(new DeleteEntryCommand(ID));
+            var result = await _mediator.Send(new DeleteEntryCommand(ID));
             return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();
@@ -88,7 +88,7 @@ namespace BudgetFlow.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<EntryResponse>))]
         public async Task<IResult> GetEntriesPaginationAsync([FromQuery] GetEntryPaginationQuery getEntryPaginationQuery)
         {
-            var result = await mediator.Send(getEntryPaginationQuery);
+            var result = await _mediator.Send(getEntryPaginationQuery);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();

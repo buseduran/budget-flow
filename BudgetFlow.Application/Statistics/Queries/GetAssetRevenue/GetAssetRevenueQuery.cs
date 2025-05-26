@@ -1,4 +1,4 @@
-using BudgetFlow.Application.Common.Interfaces;
+using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Statistics.Responses;
 using MediatR;

@@ -7,32 +7,29 @@ using MediatR;
 namespace BudgetFlow.Application.Assets.Commands.SyncAsset;
 public class SyncAssetCommand : IRequest<Result<bool>>
 {
-    public AssetType AssetType { get; set; }
+    public AssetType _AssetType { get; set; }
     public class SyncAssetCommandHandler : IRequestHandler<SyncAssetCommand, Result<bool>>
     {
-        private readonly IStockScraper stockScraper;
-        private readonly MetalJob metalJob;
+        private readonly IStockScraper _stockScraper;
+        private readonly MetalJob _metalJob;
         public SyncAssetCommandHandler(
             IStockScraper stockScraper,
             MetalJob metalJob)
         {
-            this.stockScraper = stockScraper;
-            this.metalJob = metalJob;
+            _stockScraper = stockScraper;
+            _metalJob = metalJob;
         }
 
         public async Task<Result<bool>> Handle(SyncAssetCommand request, CancellationToken cancellationToken)
         {
-            if (request.AssetType == AssetType.Stock)
+            if (request._AssetType == AssetType.Stock)
             {
-                var stocks = await stockScraper.GetStocksAsync(request.AssetType);
+                var stocks = await _stockScraper.GetStocksAsync(request._AssetType);
             }
-            if (request.AssetType == AssetType.Metal)
+            if (request._AssetType == AssetType.Metal)
             {
-                await metalJob.ExecuteAsync();
+                await _metalJob.ExecuteAsync();
             }
-
-
-
 
             return Result.Success(true);
         }

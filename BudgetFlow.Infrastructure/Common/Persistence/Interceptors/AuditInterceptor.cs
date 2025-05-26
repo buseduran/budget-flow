@@ -1,7 +1,7 @@
-﻿using BudgetFlow.Application.Common.Utils;
+﻿using BudgetFlow.Application.Common.Interfaces.Services;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Common;
 using BudgetFlow.Domain.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -11,12 +11,12 @@ namespace BudgetFlow.Infrastructure.Common.Persistence.Interceptors;
 
 public class AuditInterceptor : SaveChangesInterceptor
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ICurrentUserService _currentUserService;
     private readonly List<(EntityEntry Entry, AuditLog Log, EntityState OriginalState)> _pendingLogs = new();
 
-    public AuditInterceptor(IHttpContextAccessor httpContextAccessor)
+    public AuditInterceptor(ICurrentUserService currentUserService)
     {
-        _httpContextAccessor = httpContextAccessor;
+        _currentUserService = currentUserService;
     }
 
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -27,7 +27,7 @@ public class AuditInterceptor : SaveChangesInterceptor
         var context = eventData.Context;
         if (context == null) return base.SavingChangesAsync(eventData, result, cancellationToken);
 
-        var userID = new GetCurrentUser(_httpContextAccessor).GetCurrentUserID();
+        var userID = _currentUserService.GetCurrentUserID();
 
         _pendingLogs.Clear();
 
@@ -85,7 +85,7 @@ public class AuditInterceptor : SaveChangesInterceptor
         }
 
         context.Set<AuditLog>().AddRange(_pendingLogs.Select(x => x.Log));
-        await context.SaveChangesAsync(cancellationToken); 
+        await context.SaveChangesAsync(cancellationToken);
 
         _pendingLogs.Clear();
 

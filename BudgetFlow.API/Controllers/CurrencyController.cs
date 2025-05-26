@@ -7,10 +7,10 @@ using System.Net.Mime;
 namespace BudgetFlow.API.Controllers;
 public class CurrencyController : ControllerBase
 {
-    private readonly IMediator mediator;
+    private readonly IMediator _mediator;
     public CurrencyController(IMediator mediator)
     {
-        this.mediator = mediator;
+        _mediator = mediator;
     }
 
     /// <summary>
@@ -22,7 +22,7 @@ public class CurrencyController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> SyncExchangeRatesAsync()
     {
-        var result = await mediator.Send(new SyncExchangeRatesCommand());
+        var result = await _mediator.Send(new SyncExchangeRatesCommand());
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();

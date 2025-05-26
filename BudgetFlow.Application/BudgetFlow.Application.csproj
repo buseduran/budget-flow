@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Roles\**" />
+    <EmbeddedResource Remove="Roles\**" />
+    <None Remove="Roles\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BudgetFlow.Domain\BudgetFlow.Domain.csproj" />
   </ItemGroup>
 
@@ -22,10 +28,6 @@
     <PackageReference Include="Quartz" Version="3.14.0" />
     <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.14.0" />
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.14.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Roles\" />
   </ItemGroup>
 
 </Project>

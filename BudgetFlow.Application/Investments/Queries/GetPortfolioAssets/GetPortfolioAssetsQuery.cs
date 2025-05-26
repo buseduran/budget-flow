@@ -1,9 +1,8 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
-using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Errors;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 
 namespace BudgetFlow.Application.Investments.Queries;
 public class GetPortfolioAssetsQuery : IRequest<Result<PortfolioAssetResponse>>
@@ -15,17 +14,17 @@ public class GetPortfolioAssetsQuery : IRequest<Result<PortfolioAssetResponse>>
     }
     public class GetPortfolioAssetsQueryHandler : IRequestHandler<GetPortfolioAssetsQuery, Result<PortfolioAssetResponse>>
     {
-        private readonly IInvestmentRepository investmentRepository;
-        private readonly IHttpContextAccessor httpContextAccessor;
-        public GetPortfolioAssetsQueryHandler(IInvestmentRepository investmentRepository, IHttpContextAccessor httpContextAccessor)
+        private readonly IInvestmentRepository _investmentRepository;
+        private readonly ICurrentUserService _currentUserService;
+        public GetPortfolioAssetsQueryHandler(IInvestmentRepository investmentRepository, ICurrentUserService currentUserService)
         {
-            this.investmentRepository = investmentRepository;
-            this.httpContextAccessor = httpContextAccessor;
+            _investmentRepository = investmentRepository;
+            _currentUserService = currentUserService;
         }
         public async Task<Result<PortfolioAssetResponse>> Handle(GetPortfolioAssetsQuery request, CancellationToken cancellationToken)
         {
-            var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
-            var investments = await investmentRepository.GetAssetInvestmentsAsync(request.Portfolio, userID);
+            var userID = _currentUserService.GetCurrentUserID();
+            var investments = await _investmentRepository.GetAssetInvestmentsAsync(request.Portfolio, userID);
 
             return investments != null
                 ? Result.Success(investments)

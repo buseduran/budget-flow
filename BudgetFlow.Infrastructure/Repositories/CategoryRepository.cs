@@ -44,9 +44,11 @@ public class CategoryRepository : ICategoryRepository
         return new PaginatedList<CategoryResponse>(categories, count, Page, PageSize);
     }
 
-    public async Task<bool> UpdateCategoryAsync(int ID, string Color)
+    public async Task<bool> UpdateCategoryAsync(int ID, string Color, int UserID)
     {
-        var category = await context.Categories.FindAsync(ID);
+        var category = await context.Categories
+            .Where(c => c.ID == ID && c.UserID == UserID)
+            .FirstOrDefaultAsync();
         if (category is null) return false;
 
         category.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);

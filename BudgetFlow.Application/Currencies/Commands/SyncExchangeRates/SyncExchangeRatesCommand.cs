@@ -1,5 +1,4 @@
-﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
-using BudgetFlow.Application.Common.Results;
+﻿using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Services.Abstract;
 using MediatR;
 
@@ -8,20 +7,17 @@ public class SyncExchangeRatesCommand : IRequest<Result<bool>>
 {
     public class SyncExchangeRatesCommandHandler : IRequestHandler<SyncExchangeRatesCommand, Result<bool>>
     {
-        private readonly ICurrencyRateRepository currencyRateRepository;
-        private readonly IExchangeRateScraper exchangeRateScraper;
+        private readonly IExchangeRateScraper _exchangeRateScraper;
         public SyncExchangeRatesCommandHandler(
-            ICurrencyRateRepository currencyRateRepository,
             IExchangeRateScraper exchangeRateScraper)
         {
-            this.currencyRateRepository = currencyRateRepository;
-            this.exchangeRateScraper = exchangeRateScraper;
+            _exchangeRateScraper = exchangeRateScraper;
         }
 
         public async Task<Result<bool>> Handle(SyncExchangeRatesCommand request, CancellationToken cancellationToken)
         {
             #region TCMB Scrapper
-            var result = await exchangeRateScraper.SyncExchangeRatesAsync();
+            var result = await _exchangeRateScraper.SyncExchangeRatesAsync();
             if (result.IsFailure)
                 return Result.Failure<bool>(result.Error);
             #endregion

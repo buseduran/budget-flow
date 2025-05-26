@@ -1,15 +1,14 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using FluentValidation;
 
 namespace BudgetFlow.API.Middlewares;
 public class GlobalExceptionHandler : IExceptionHandler
 {
-    private readonly ILogger<GlobalExceptionHandler> logger;
+    private readonly ILogger<GlobalExceptionHandler> _logger;
     public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
     {
-        this.logger = logger;
+        _logger = logger;
     }
 
     public async ValueTask<bool> TryHandleAsync(
@@ -19,7 +18,7 @@ public class GlobalExceptionHandler : IExceptionHandler
     {
         if (exception is FluentValidation.ValidationException validationException)
         {
-            logger.LogError(
+            _logger.LogError(
                 exception,
                 "Exception occurred: {Message}",
                 exception.Message

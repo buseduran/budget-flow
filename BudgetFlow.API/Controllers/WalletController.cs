@@ -20,7 +20,7 @@ namespace BudgetFlow.API.Controllers;
 [Authorize]
 public class WalletController : ControllerBase
 {
-    private readonly IMediator mediator;
+    private readonly IMediator _mediator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="WalletController"/> class.
@@ -28,7 +28,7 @@ public class WalletController : ControllerBase
     /// <param name="mediator">The mediator instance for handling requests.</param>
     public WalletController(IMediator mediator)
     {
-        this.mediator = mediator;
+        _mediator = mediator;
     }
 
     /// <summary>
@@ -41,7 +41,7 @@ public class WalletController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
     public async Task<IResult> CreateWalletAsync([FromBody] CreateWalletCommand createWalletCommand)
     {
-        var result = await mediator.Send(createWalletCommand);
+        var result = await _mediator.Send(createWalletCommand);
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();
@@ -56,7 +56,7 @@ public class WalletController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<WalletResponse>))]
     public async Task<IResult> GetWalletsAsync()
     {
-        var result = await mediator.Send(new GetWalletQuery());
+        var result = await _mediator.Send(new GetWalletQuery());
         return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();
@@ -73,7 +73,7 @@ public class WalletController : ControllerBase
     [Authorize]
     public async Task<IResult> UpdateCurrencyAsync([FromBody] UpdateCurrencyCommand updateCurrencyCommand)
     {
-        var result = await mediator.Send(updateCurrencyCommand);
+        var result = await _mediator.Send(updateCurrencyCommand);
         return result.IsSuccess
         ? Results.Ok(result.Value)
         : result.ToProblemDetails();
@@ -89,7 +89,7 @@ public class WalletController : ControllerBase
     [Authorize]
     public async Task<IResult> GetUserCurrencyAsync([FromQuery] GetUserCurrencyQuery getUserCurrencyQuery)
     {
-        var result = await mediator.Send(getUserCurrencyQuery);
+        var result = await _mediator.Send(getUserCurrencyQuery);
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();

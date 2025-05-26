@@ -4,23 +4,22 @@ using BudgetFlow.Domain.Enums;
 using Quartz;
 using BudgetFlow.Application.Common.Interfaces;
 using BudgetFlow.Domain.Entities;
-using BudgetFlow.Application.Common.Results;
 
 namespace BudgetFlow.Application.Common.Jobs;
 public class MetalJob : IJob
 {
-    private readonly IMetalScraper metalScraper;
-    private readonly IAssetRepository assetRepository;
-    private readonly IUnitOfWork unitOfWork;
+    private readonly IMetalScraper _metalScraper;
+    private readonly IAssetRepository _assetRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
     public MetalJob(
         IMetalScraper metalScraper,
         IAssetRepository assetRepository,
         IUnitOfWork unitOfWork)
     {
-        this.metalScraper = metalScraper;
-        this.assetRepository = assetRepository;
-        this.unitOfWork = unitOfWork;
+        _metalScraper = metalScraper;
+        _assetRepository = assetRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -31,14 +30,14 @@ public class MetalJob : IJob
     public async Task ExecuteAsync()
     {
         var assetType = AssetType.Metal;
-        var metals = await metalScraper.GetMetalsAsync(assetType);
+        var metals = await _metalScraper.GetMetalsAsync(assetType);
 
-        await unitOfWork.BeginTransactionAsync();
+        await _unitOfWork.BeginTransactionAsync();
         try
         {
             foreach (var metal in metals)
             {
-                var existingAsset = await assetRepository.GetByCodeAsync(metal.Code);
+                var existingAsset = await _assetRepository.GetByCodeAsync(metal.Code);
                 if (existingAsset != null)
                 {
                     // Update existing asset
@@ -55,23 +54,23 @@ public class MetalJob : IJob
                         Unit = existingAsset.Unit,
                         UpdatedAt = DateTime.UtcNow
                     };
-                    await assetRepository.UpdateAssetAsync(asset);
+                    await _assetRepository.UpdateAssetAsync(asset);
                 }
                 else
                 {
                     // Create new asset
                     metal.CreatedAt = DateTime.UtcNow;
                     metal.UpdatedAt = DateTime.UtcNow;
-                    await assetRepository.CreateAssetAsync(metal);
+                    await _assetRepository.CreateAssetAsync(metal);
                 }
             }
 
-            await unitOfWork.SaveChangesAsync();
-            await unitOfWork.CommitAsync();
+            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.CommitAsync();
         }
         catch (Exception)
         {
-            await unitOfWork.RollbackAsync();
+            await _unitOfWork.RollbackAsync();
             throw;
         }
     }

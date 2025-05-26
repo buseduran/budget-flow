@@ -1,12 +1,11 @@
 ﻿using BudgetFlow.Application.Common.Interfaces;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
-using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using BudgetFlow.Domain.Errors;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 
 namespace BudgetFlow.Application.Investments.Commands.CreateInvestment;
 public class CreateInvestmentCommand : IRequest<Result<bool>>
@@ -19,14 +18,14 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
     public int PortfolioId { get; set; }
     public class CreateInvestmentCommandHandler : IRequestHandler<CreateInvestmentCommand, Result<bool>>
     {
-        private readonly IInvestmentRepository investmentRepository;
-        private readonly IWalletRepository walletRepository;
-        private readonly IUserWalletRepository userWalletRepository;
-        private readonly IAssetRepository assetRepository;
-        private readonly IPortfolioRepository portfolioRepository;
-        private readonly IHttpContextAccessor httpContextAccessor;
-        private readonly ICurrencyRateRepository currencyRateRepository;
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IInvestmentRepository _investmentRepository;
+        private readonly IWalletRepository _walletRepository;
+        private readonly IUserWalletRepository _userWalletRepository;
+        private readonly IAssetRepository _assetRepository;
+        private readonly IPortfolioRepository _portfolioRepository;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly ICurrencyRateRepository _currencyRateRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         public CreateInvestmentCommandHandler(
             IInvestmentRepository investmentRepository,
@@ -34,32 +33,32 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
             IUserWalletRepository userWalletRepository,
             IAssetRepository assetRepository,
             IPortfolioRepository portfolioRepository,
-            IHttpContextAccessor httpContextAccessor,
+            ICurrentUserService currentUserService,
             ICurrencyRateRepository currencyRateRepository,
             IUnitOfWork unitOfWork)
         {
-            this.investmentRepository = investmentRepository;
-            this.walletRepository = walletRepository;
-            this.userWalletRepository = userWalletRepository;
-            this.assetRepository = assetRepository;
-            this.portfolioRepository = portfolioRepository;
-            this.httpContextAccessor = httpContextAccessor;
-            this.currencyRateRepository = currencyRateRepository;
-            this.unitOfWork = unitOfWork;
+            _investmentRepository = investmentRepository;
+            _walletRepository = walletRepository;
+            _userWalletRepository = userWalletRepository;
+            _assetRepository = assetRepository;
+            _portfolioRepository = portfolioRepository;
+            _currentUserService = currentUserService;
+            _currencyRateRepository = currencyRateRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<Result<bool>> Handle(CreateInvestmentCommand request, CancellationToken cancellationToken)
         {
-            var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
-            var portfolio = await portfolioRepository.GetPortfolioByIdAsync(request.PortfolioId);
+            var userID = _currentUserService.GetCurrentUserID();
+            var portfolio = await _portfolioRepository.GetPortfolioByIdAsync(request.PortfolioId);
             if (portfolio is null)
                 return Result.Failure<bool>(PortfolioErrors.PortfolioNotFound);
 
-            var wallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(portfolio.WalletID, userID);
+            var wallet = await _userWalletRepository.GetByWalletIdAndUserIdAsync(portfolio.WalletID, userID);
             if (wallet is null)
                 return Result.Failure<bool>(WalletErrors.WalletNotFound);
 
-            var asset = await assetRepository.GetAssetAsync(request.AssetId);
+            var asset = await _assetRepository.GetAssetAsync(request.AssetId);
 
             var investment = new Investment
             {
@@ -80,7 +79,7 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
             decimal exchangeRateToTRY = 1m;
             if (currency != CurrencyType.TRY)
             {
-                var currencyRate = await currencyRateRepository.GetCurrencyRateByType(currency);
+                var currencyRate = await _currencyRateRepository.GetCurrencyRateByType(currency);
                 exchangeRateToTRY = currencyRate.ForexSelling;
             }
 
@@ -92,9 +91,9 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
 
             investment.Currency = currency;
 
-            var walletAsset = await walletRepository.GetWalletAssetAsync(portfolio.WalletID, investment.AssetId);
+            var walletAsset = await _walletRepository.GetWalletAssetAsync(portfolio.WalletID, investment.AssetId);
 
-            await unitOfWork.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync();
             try
             {
                 if (walletAsset is not null)
@@ -107,8 +106,8 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                         walletAsset.Amount += investment.UnitAmount;
                         walletAsset.Balance = walletAsset.Amount * asset.SellPrice;
 
-                        var walletAssetUpdate = await walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
-                        var walletUpdate = await walletRepository.UpdateWalletAsync(userID, -investment.CurrencyAmount, -investment.AmountInTRY, saveChanges: false);
+                        var walletAssetUpdate = await _walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
+                        var walletUpdate = await _walletRepository.UpdateWalletAsync(userID, -investment.CurrencyAmount, -investment.AmountInTRY, saveChanges: false);
                     }
                     else
                     {
@@ -118,8 +117,8 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                         walletAsset.Amount -= investment.UnitAmount;
                         walletAsset.Balance = walletAsset.Amount * asset.SellPrice;
 
-                        var walletAssetUpdate = await walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
-                        var walletUpdate = await walletRepository.UpdateWalletAsync(userID, investment.CurrencyAmount, investment.AmountInTRY, saveChanges: false);
+                        var walletAssetUpdate = await _walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
+                        var walletUpdate = await _walletRepository.UpdateWalletAsync(userID, investment.CurrencyAmount, investment.AmountInTRY, saveChanges: false);
                     }
                 }
                 else
@@ -129,7 +128,7 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                         if (wallet.Wallet.Balance < investment.CurrencyAmount)
                             return Result.Failure<bool>(WalletErrors.InsufficientBalance);
 
-                        var createResult = await walletRepository.CreateWalletAssetAsync(new WalletAsset
+                        var createResult = await _walletRepository.CreateWalletAssetAsync(new WalletAsset
                         {
                             WalletId = portfolio.WalletID,
                             AssetId = investment.AssetId,
@@ -137,7 +136,7 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                             Balance = investment.CurrencyAmount
                         }, saveChanges: false);
 
-                        var walletUpdate = await walletRepository.UpdateWalletAsync(userID, -investment.CurrencyAmount, -investment.AmountInTRY, saveChanges: false);
+                        var walletUpdate = await _walletRepository.UpdateWalletAsync(userID, -investment.CurrencyAmount, -investment.AmountInTRY, saveChanges: false);
                     }
                     else
                     {
@@ -145,16 +144,16 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                     }
                 }
 
-                var investmentResult = await investmentRepository.CreateInvestmentAsync(investment, saveChanges: false);
+                var investmentResult = await _investmentRepository.CreateInvestmentAsync(investment, saveChanges: false);
 
-                await unitOfWork.SaveChangesAsync();
-                await unitOfWork.CommitAsync();
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitAsync();
 
                 return Result.Success(true);
             }
             catch (Exception ex)
             {
-                await unitOfWork.RollbackAsync();
+                await _unitOfWork.RollbackAsync();
                 return Result.Failure<bool>(GeneralErrors.FromMessage(ex.Message));
             }
         }

@@ -3,12 +3,10 @@ using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Interfaces.Services;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Services.Abstract;
-using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using BudgetFlow.Domain.Errors;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System.Text;
 
@@ -21,14 +19,15 @@ public class SendInvitationCommand : IRequest<Result<bool>>
 
     public class SendInvitationCommandHandler : IRequestHandler<SendInvitationCommand, Result<bool>>
     {
-        private readonly IUserRepository userRepository;
-        private readonly ITokenProvider tokenProvider;
-        private readonly IEmailService emailService;
-        private readonly IConfiguration configuration;
-        private readonly IInvitationRepository invitationRepository;
-        private readonly IUnitOfWork unitOfWork;
-        private readonly IUserWalletRepository userWalletRepository;
-        private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly IUserRepository _userRepository;
+        private readonly ITokenProvider _tokenProvider;
+        private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
+        private readonly IInvitationRepository _invitationRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUserWalletRepository _userWalletRepository;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IWalletAuthService _walletAuthService;
 
         public SendInvitationCommandHandler(
             IUserRepository userRepository,
@@ -38,16 +37,18 @@ public class SendInvitationCommand : IRequest<Result<bool>>
             IInvitationRepository invitationRepository,
             IUnitOfWork unitOfWork,
             IUserWalletRepository userWalletRepository,
-            IHttpContextAccessor httpContextAccessor)
+            ICurrentUserService currentUserService,
+            IWalletAuthService walletAuthService)
         {
-            this.userRepository = userRepository;
-            this.tokenProvider = tokenProvider;
-            this.emailService = emailService;
-            this.configuration = configuration;
-            this.invitationRepository = invitationRepository;
-            this.unitOfWork = unitOfWork;
-            this.userWalletRepository = userWalletRepository;
-            this.httpContextAccessor = httpContextAccessor;
+            _userRepository = userRepository;
+            _tokenProvider = tokenProvider;
+            _emailService = emailService;
+            _configuration = configuration;
+            _invitationRepository = invitationRepository;
+            _unitOfWork = unitOfWork;
+            _userWalletRepository = userWalletRepository;
+            _currentUserService = currentUserService;
+            _walletAuthService = walletAuthService;
         }
 
         public async Task<Result<bool>> Handle(SendInvitationCommand request, CancellationToken cancellationToken)
@@ -55,23 +56,24 @@ public class SendInvitationCommand : IRequest<Result<bool>>
             if (string.IsNullOrWhiteSpace(request.Email))
                 return Result.Failure<bool>(UserErrors.EmailCannotBeEmpty);
 
-            //role owner mı kontrolü yapılacak
-
-
-
+            // Ensure user has owner role
+            var authResult = await _walletAuthService.EnsureUserHasAccessAsync(request.WalletID, _currentUserService.GetCurrentUserID(), WalletRole.Owner);
+            if (!authResult.IsSuccess)
+                return Result.Failure<bool>(authResult.Error);
 
             #region Wallet Kontrolü
-            var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
-            var wallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(request.WalletID, userID);
+            var userID = _currentUserService.GetCurrentUserID();
+            var wallet = await _userWalletRepository.GetByWalletIdAndUserIdAsync(request.WalletID, userID);
             if (wallet is null)
                 return Result.Failure<bool>(WalletErrors.WalletNotFound);
             if (wallet.Role is WalletRole.Viewer)
                 return Result.Failure<bool>(WalletErrors.UserHasNoPermission);
             #endregion
 
-            await unitOfWork.BeginTransactionAsync();
-            try {
-                var token = tokenProvider.GenerateWalletInvitationToken(request.Email, request.WalletID);
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var token = _tokenProvider.GenerateWalletInvitationToken(request.Email, request.WalletID);
 
                 var invitation = new Invitation
                 {
@@ -80,7 +82,7 @@ public class SendInvitationCommand : IRequest<Result<bool>>
                     Expiration = DateTime.UtcNow.AddHours(24)
                 };
 
-                await invitationRepository.CreateAsync(invitation);
+                await _invitationRepository.CreateAsync(invitation);
 
                 var parameters = new Dictionary<string, string>
                 {
@@ -88,7 +90,7 @@ public class SendInvitationCommand : IRequest<Result<bool>>
                     { "email", request.Email }
                 };
 
-                var emailConfig = configuration.GetSection("EmailConfiguration");
+                var emailConfig = _configuration.GetSection("EmailConfiguration");
 
                 var uriBuilder = new UriBuilder(emailConfig["InvitationURI"])
                 {
@@ -105,16 +107,16 @@ public class SendInvitationCommand : IRequest<Result<bool>>
 
                 var subject = "Cüzdan Daveti";
 
-                await emailService.SendEmailAsync(request.Email, subject, emailBody);
+                await _emailService.SendEmailAsync(request.Email, subject, emailBody);
 
-                await unitOfWork.SaveChangesAsync();
-                await unitOfWork.CommitAsync();
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitAsync();
 
                 return Result.Success(true);
             }
             catch (Exception ex)
             {
-                await unitOfWork.RollbackAsync();
+                await _unitOfWork.RollbackAsync();
                 return Result.Failure<bool>(GeneralErrors.FromMessage(ex.Message));
             }
         }

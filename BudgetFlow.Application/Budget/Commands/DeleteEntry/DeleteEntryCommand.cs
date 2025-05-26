@@ -1,11 +1,10 @@
 ﻿using BudgetFlow.Application.Common.Interfaces;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
-using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Enums;
 using BudgetFlow.Domain.Errors;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 
 namespace BudgetFlow.Application.Budget.Commands.DeleteEntry;
 public class DeleteEntryCommand : IRequest<Result<bool>>
@@ -18,45 +17,45 @@ public class DeleteEntryCommand : IRequest<Result<bool>>
 
     public class DeleteEntryCommandHandler : IRequestHandler<DeleteEntryCommand, Result<bool>>
     {
-        private readonly IBudgetRepository budgetRepository;
-        private readonly IWalletRepository walletRepository;
-        private readonly IUserWalletRepository userWalletRepository;
-        private readonly ICategoryRepository categoryRepository;
-        private readonly IHttpContextAccessor httpContextAccessor;
-        private readonly ICurrencyRateRepository currencyRateRepository;
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IBudgetRepository _budgetRepository;
+        private readonly IWalletRepository _walletRepository;
+        private readonly IUserWalletRepository _userWalletRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly ICurrencyRateRepository _currencyRateRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         public DeleteEntryCommandHandler(
             IBudgetRepository budgetRepository,
             IWalletRepository walletRepository,
             IUserWalletRepository userWalletRepository,
             ICategoryRepository categoryRepository,
-            IHttpContextAccessor httpContextAccessor,
+            ICurrentUserService currentUserService,
             ICurrencyRateRepository currencyRateRepository,
             IUnitOfWork unitOfWork)
         {
-            this.budgetRepository = budgetRepository;
-            this.walletRepository = walletRepository;
-            this.userWalletRepository = userWalletRepository;
-            this.categoryRepository = categoryRepository;
-            this.httpContextAccessor = httpContextAccessor;
-            this.currencyRateRepository = currencyRateRepository;
-            this.unitOfWork = unitOfWork;
+            _budgetRepository = budgetRepository;
+            _walletRepository = walletRepository;
+            _userWalletRepository = userWalletRepository;
+            _categoryRepository = categoryRepository;
+            _currentUserService = currentUserService;
+            _currencyRateRepository = currencyRateRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<Result<bool>> Handle(DeleteEntryCommand request, CancellationToken cancellationToken)
         {
-            var userID = new GetCurrentUser(httpContextAccessor).GetCurrentUserID();
+            var userID = _currentUserService.GetCurrentUserID();
 
-            var existingEntry = await budgetRepository.GetEntryByIdAsync(request.ID);
+            var existingEntry = await _budgetRepository.GetEntryByIdAsync(request.ID);
             if (existingEntry == null)
                 return Result.Failure<bool>(EntryErrors.EntryNotFound);
 
-            var category = await categoryRepository.GetCategoryByIdAsync(existingEntry.Category.ID);
+            var category = await _categoryRepository.GetCategoryByIdAsync(existingEntry.Category.ID);
             if (category == null)
                 return Result.Failure<bool>(CategoryErrors.CategoryNotFound);
 
-            var wallet = await userWalletRepository.GetByWalletIdAndUserIdAsync(existingEntry.WalletID, userID);
+            var wallet = await _userWalletRepository.GetByWalletIdAndUserIdAsync(existingEntry.WalletID, userID);
             if (wallet == null)
                 return Result.Failure<bool>(EntryErrors.EntryNotFound); // veya WalletErrors.WalletNotFound
 
@@ -64,9 +63,9 @@ public class DeleteEntryCommand : IRequest<Result<bool>>
                 ? -Math.Abs(existingEntry.Amount)
                 : Math.Abs(existingEntry.Amount);
 
-            var currency= wallet.Wallet.Currency;
+            var currency = wallet.Wallet.Currency;
             decimal exchangeRateToTRY = 1m;
-            var currencyRate = await currencyRateRepository.GetCurrencyRateByType(currency);
+            var currencyRate = await _currencyRateRepository.GetCurrencyRateByType(currency);
             if (currency != CurrencyType.TRY)
             {
                 exchangeRateToTRY = currencyRate.ForexSelling;
@@ -76,21 +75,21 @@ public class DeleteEntryCommand : IRequest<Result<bool>>
                 ? -Math.Abs(existingEntry.Amount) * exchangeRateToTRY
                 : Math.Abs(existingEntry.Amount) * exchangeRateToTRY;
 
-            await unitOfWork.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync();
             try
             {
-                var walletUpdateResult = await walletRepository.UpdateWalletAsync(userID, balanceAdjustment, balanceAdjustmentInTRY, saveChanges: false);
+                var walletUpdateResult = await _walletRepository.UpdateWalletAsync(userID, balanceAdjustment, balanceAdjustmentInTRY, saveChanges: false);
 
-                var deleteResult = await budgetRepository.DeleteEntryAsync(request.ID, saveChanges: false);
+                var deleteResult = await _budgetRepository.DeleteEntryAsync(request.ID, saveChanges: false);
 
-                await unitOfWork.SaveChangesAsync();
-                await unitOfWork.CommitAsync();
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitAsync();
 
                 return Result.Success(true);
             }
             catch (Exception ex)
             {
-                await unitOfWork.RollbackAsync();
+                await _unitOfWork.RollbackAsync();
                 return Result.Failure<bool>(GeneralErrors.FromMessage(ex.Message));
             }
         }
