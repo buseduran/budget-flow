@@ -170,19 +170,31 @@ public class UserRepository : IUserRepository
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Where(x => logType == LogType.All || x.Action == logType.ToString())
-            .Select(x => new LogResponse
+            .Select(x => new
             {
-                ID = x.ID,
-                Action = x.Action,
-                TableName = x.TableName,
-                OldValues = x.OldValues,
-                NewValues = x.NewValues,
-                Timestamp = x.Timestamp,
-                PrimaryKey = x.PrimaryKey,
+                x.ID,
+                x.Action,
+                x.TableName,
+                x.OldValues,
+                x.NewValues,
+                x.Timestamp,
+                x.PrimaryKey
             })
             .ToListAsync();
+
+        var logResponses = items.Select(x => new LogResponse
+        {
+            ID = x.ID,
+            Action = Enum.Parse<LogType>(x.Action),
+            TableName = x.TableName,
+            OldValues = x.OldValues,
+            NewValues = x.NewValues,
+            Timestamp = x.Timestamp,
+            PrimaryKey = x.PrimaryKey
+        }).ToList();
+
         var totalCount = items.Count;
-        var paginatedList = new PaginatedList<LogResponse>(items, totalCount, page, pageSize);
+        var paginatedList = new PaginatedList<LogResponse>(logResponses, totalCount, page, pageSize);
         return paginatedList;
     }
 

@@ -17,11 +17,9 @@ public class GetLogPaginationQuery : IRequest<Result<PaginatedList<LogResponse>>
 public class GetLogPaginationQueryHandler : IRequestHandler<GetLogPaginationQuery, Result<PaginatedList<LogResponse>>>
 {
     private readonly IUserRepository _userRepository;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    public GetLogPaginationQueryHandler(IUserRepository userRepository, IHttpContextAccessor httpContextAccessor)
+    public GetLogPaginationQueryHandler(IUserRepository userRepository)
     {
         _userRepository = userRepository;
-        _httpContextAccessor = httpContextAccessor;
     }
     public async Task<Result<PaginatedList<LogResponse>>> Handle(GetLogPaginationQuery request, CancellationToken cancellationToken)
     {
