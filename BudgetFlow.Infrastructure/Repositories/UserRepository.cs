@@ -19,12 +19,14 @@ public class UserRepository : IUserRepository
         this.mapper = mapper;
     }
 
-    public async Task<int> CreateAsync(User user)
+    public async Task<int> CreateAsync(User user, bool saveChanges = true)
     {
         user.CreatedAt = DateTime.UtcNow;
         user.UpdatedAt = DateTime.UtcNow;
         await context.Users.AddAsync(user);
-        await context.SaveChangesAsync();
+        if (saveChanges)
+            await context.SaveChangesAsync();
+
         return user.ID;
     }
 
@@ -50,7 +52,7 @@ public class UserRepository : IUserRepository
             Name = user.Name,
             Email = user.Email,
             IsEmailConfirmed = user.IsEmailConfirmed,
-            PasswordHash= user.PasswordHash,
+            PasswordHash = user.PasswordHash,
             Wallets = user.UserWallets.Select(uw => new UserWalletResponse
             {
                 WalletID = uw.WalletID,
@@ -193,7 +195,7 @@ public class UserRepository : IUserRepository
         return roles;
     }
 
-    public async Task<bool> CreateUserRoleAsync(UserRole userRole, bool saveChanges = false)
+    public async Task<bool> CreateUserRoleAsync(UserRole userRole, bool saveChanges = true)
     {
         context.UserRoles.Add(userRole);
         if (saveChanges)

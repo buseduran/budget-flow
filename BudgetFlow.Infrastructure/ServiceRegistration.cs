@@ -5,6 +5,7 @@ using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Infrastructure.Common.Persistence;
 using BudgetFlow.Infrastructure.Common.Persistence.Interceptors;
 using BudgetFlow.Infrastructure.Repositories;
+using BudgetFlow.Infrastructure.Seed;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BudgetFlow.Infrastructure;
@@ -30,6 +31,8 @@ public static class ServiceRegistration
 
         services.AddScoped<ITokenProvider, TokenProvider>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        services.AddTransient<AdminUserSeeder>();
 
         //AuditInterceptor kaydı
         services.AddScoped<AuditInterceptor>();

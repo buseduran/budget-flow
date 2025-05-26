@@ -18,6 +18,7 @@ using FluentValidation.AspNetCore;
 using BudgetFlow.Application.Portfolios.Commands.CreatePortfolio;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using BudgetFlow.Infrastructure.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -163,18 +164,16 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// 🔃 Auto Migration
+// 🔃 Migration + Seed işlemleri
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<BudgetContext>();
+
+    // ➕ Migration
     context.Database.Migrate();
-}
 
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<BudgetContext>();
-
+    // ➕ Rolleri ekle
     if (!context.Roles.Any())
     {
         context.Roles.AddRange(
@@ -183,7 +182,12 @@ using (var scope = app.Services.CreateScope())
         );
         context.SaveChanges();
     }
+
+    // 👤 Admin user seed
+    var seeder = services.GetRequiredService<AdminUserSeeder>();
+    await seeder.SeedAsync();
 }
+
 
 
 // Dev Tools

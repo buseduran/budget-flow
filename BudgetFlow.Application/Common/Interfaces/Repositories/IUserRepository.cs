@@ -7,7 +7,7 @@ using BudgetFlow.Domain.Enums;
 namespace BudgetFlow.Application.Common.Interfaces.Repositories;
 public interface IUserRepository
 {
-    Task<int> CreateAsync(User user);
+    Task<int> CreateAsync(User user, bool saveChanges = true);
     Task<UserResponse> GetByIdAsync(int ID);
     Task<UserResponse> GetByEmailAsync(string email);
     Task<bool> UpdateAsync(string Name, string OldEmail, string Email, string PasswordHash);
@@ -23,5 +23,5 @@ public interface IUserRepository
     Task<PaginatedList<LogResponse>> GetLogsPaginatedAsync(int page, int pageSize, LogType logType, int userID);
     Task<PaginatedList<UserPaginationResponse>> GetPaginatedAsync(int page, int pageSize);
     Task<List<string>> GetUserRolesAsync(int userID);
-    Task<bool> CreateUserRoleAsync(UserRole userRole, bool saveChanges = false);
+    Task<bool> CreateUserRoleAsync(UserRole userRole, bool saveChanges = true);
 }
