@@ -12,16 +12,19 @@ namespace BudgetFlow.Application.Common.Services.Concrete;
 public class ExchangeRateScraper : IExchangeRateScraper
 {
     private readonly ICurrencyRateRepository _currencyRateRepository;
+    private readonly IAssetRepository _assetRepository;
     private readonly HttpClient _httpClient;
     private readonly IUnitOfWork _unitOfWork;
     private readonly string TcmbUrl;
     public ExchangeRateScraper(
         ICurrencyRateRepository currencyRateRepository,
+        IAssetRepository assetRepository,
         HttpClient httpClient,
         IUnitOfWork unitOfWork,
         IConfiguration configuration)
     {
         _currencyRateRepository = currencyRateRepository;
+        _assetRepository = assetRepository;
         _httpClient = httpClient;
         _unitOfWork = unitOfWork;
         TcmbUrl = configuration["Tcmb:ExchangeRateUrl"];
@@ -83,6 +86,32 @@ public class ExchangeRateScraper : IExchangeRateScraper
                 {
                     // Create new rate
                     await _currencyRateRepository.AddRatesAsync(new[] { rate }, saveChanges: false);
+                }
+
+                // Save to Asset table
+                var asset = new Asset
+                {
+                    Name = $"{rate.CurrencyType} Döviz Kuru",
+                    Code = rate.CurrencyType.ToString(),
+                    Symbol = rate.CurrencyType.ToString(),
+                    Unit = "TRY",
+                    AssetType = AssetType.Exchange,
+                    BuyPrice = rate.ForexBuying,
+                    SellPrice = rate.ForexSelling,
+                    Description = $"{rate.CurrencyType} Döviz Kuru - TCMB",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                var existingAsset = await _assetRepository.GetByCodeAsync(asset.Code);
+                if (existingAsset != null)
+                {
+                    asset.ID = existingAsset.ID;
+                    await _assetRepository.UpdateAssetAsync(asset, saveChanges: false);
+                }
+                else
+                {
+                    await _assetRepository.CreateAssetAsync(asset, saveChanges: false);
                 }
             }
 
