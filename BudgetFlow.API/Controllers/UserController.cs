@@ -218,7 +218,7 @@ public class UserController : ControllerBase
     [Authorize(Roles = Role.Admin)]
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<UserResponse>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<UserPaginationResponse>))]
     public async Task<IResult> GetUsersPaginationAsync([FromQuery] GetUserPaginationQuery getUserPaginationQuery)
     {
         var result = await _mediator.Send(getUserPaginationQuery);
