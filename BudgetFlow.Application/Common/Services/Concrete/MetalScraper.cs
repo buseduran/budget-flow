@@ -1,4 +1,5 @@
-﻿using BudgetFlow.Application.Common.Services.Abstract;
+﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using HtmlAgilityPack;
@@ -9,6 +10,7 @@ namespace BudgetFlow.Application.Common.Services.Concrete;
 public class MetalScraper : IMetalScraper
 {
     private readonly HttpClient _httpClient;
+    private readonly ICurrencyRateRepository _currencyRateRepository;
     private static readonly Dictionary<MetalType, (string Code, string Symbol, string Unit)> MetalTypes = new()
     {
         { MetalType.GoldQuarter, ("XAU-Q", "CAlt", "adet") },
@@ -20,9 +22,10 @@ public class MetalScraper : IMetalScraper
         { MetalType.SilverOunce, ("XAG-O", "OAg", "ons") }
     };
 
-    public MetalScraper(HttpClient httpClient)
+    public MetalScraper(HttpClient httpClient, ICurrencyRateRepository currencyRateRepository)
     {
         _httpClient = httpClient;
+        _currencyRateRepository = currencyRateRepository;
     }
 
     public async Task<IEnumerable<Asset>> GetMetalsAsync(AssetType assetType)
@@ -35,6 +38,11 @@ public class MetalScraper : IMetalScraper
 
         var now = DateTime.Now;
         var assets = new List<Asset>();
+
+        // Get USD/TRY exchange rate
+        var usdRate = await _currencyRateRepository.GetCurrencyRateByType(CurrencyType.USD);
+        if (usdRate == null)
+            return Enumerable.Empty<Asset>();
 
         #region Table
         var goldTable = htmlDoc.DocumentNode.SelectNodes("//div[@class='tBody']/ul");
@@ -60,6 +68,13 @@ public class MetalScraper : IMetalScraper
                 continue;
 
             var (code, symbol, unit) = MetalTypes[metalType.Value];
+
+            // Convert USD to TRY for GoldOunce and SilverOunce
+            if (metalType == MetalType.GoldOunce || metalType == MetalType.SilverOunce)
+            {
+                buyPrice *= usdRate.ForexSelling;
+                sellPrice *= usdRate.ForexSelling;
+            }
 
             assets.Add(new Asset
             {
