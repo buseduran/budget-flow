@@ -78,7 +78,7 @@ public class DeleteEntryCommand : IRequest<Result<bool>>
             await _unitOfWork.BeginTransactionAsync();
             try
             {
-                var walletUpdateResult = await _walletRepository.UpdateWalletAsync(userID, balanceAdjustment, balanceAdjustmentInTRY, saveChanges: false);
+                var walletUpdateResult = await _walletRepository.UpdateWalletAsync(wallet.WalletID, balanceAdjustment, balanceAdjustmentInTRY, saveChanges: false);
 
                 var deleteResult = await _budgetRepository.DeleteEntryAsync(request.ID, saveChanges: false);
 

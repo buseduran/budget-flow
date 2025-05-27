@@ -46,6 +46,7 @@ public class WalletRepository : IWalletRepository
             .Select(wallet => new WalletResponse
             {
                 ID = wallet.ID,
+                Name = wallet.Name,
                 Balance = wallet.Balance,
                 Currency = wallet.Currency,
             })
@@ -121,7 +122,7 @@ public class WalletRepository : IWalletRepository
             .Select(uw => new WalletResponse
             {
                 ID = uw.Wallet.ID,
-                Name = uw.User.Name,
+                Name = uw.Wallet.Name,
                 Balance = uw.Wallet.Balance,
                 Currency = uw.Wallet.Currency,
                 Role = uw.Role

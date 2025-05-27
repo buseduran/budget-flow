@@ -1,5 +1,4 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
-using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using BudgetFlow.Infrastructure.Contexts;
@@ -39,21 +38,6 @@ public class UserWalletRepository : IUserWalletRepository
     public Task<List<UserWallet>> GetUsersByWalletIdAsync(int walletID)
     {
         throw new NotImplementedException();
-    }
-
-    public async Task<List<WalletResponse>> GetWalletsByUserIdAsync(int userID)
-    {
-        var wallet = await context.UserWallets
-            .Include(uw => uw.Wallet)
-            .Where(uw => uw.UserID == userID)
-            .Select(uw => new WalletResponse
-            {
-                ID = uw.ID,
-                Balance = uw.Wallet.Balance,
-                Currency = uw.Wallet.Currency,
-            }).ToListAsync();
-
-        return wallet;
     }
 
     public Task<bool> RemoveUserFromWalletAsync(int walletID, int userID)

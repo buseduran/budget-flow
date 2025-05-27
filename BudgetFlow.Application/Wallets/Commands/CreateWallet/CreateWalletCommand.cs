@@ -21,6 +21,7 @@ public class CreateWalletCommand : IRequest<Result<bool>>
         private readonly ICurrentUserService _currentUserService;
         private readonly IUserWalletRepository _userWalletRepository;
         private readonly ICurrencyRateRepository _currencyRateRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
         public CreateWalletCommandHandler(
             IWalletRepository walletRepository,
@@ -29,7 +30,8 @@ public class CreateWalletCommand : IRequest<Result<bool>>
             ICategoryRepository categoryRepository,
             IUserWalletRepository userWalletRepository,
             ICurrencyRateRepository currencyRateRepository,
-        IUnitOfWork unitOfWork)
+            IUserRepository userRepository,
+            IUnitOfWork unitOfWork)
         {
             _walletRepository = walletRepository;
             _budgetRepository = budgetRepository;
@@ -37,6 +39,7 @@ public class CreateWalletCommand : IRequest<Result<bool>>
             _categoryRepository = categoryRepository;
             _userWalletRepository = userWalletRepository;
             _currencyRateRepository = currencyRateRepository;
+            _userRepository = userRepository;
             _unitOfWork = unitOfWork;
         }
         public async Task<Result<bool>> Handle(CreateWalletCommand request, CancellationToken cancellationToken)
@@ -45,6 +48,12 @@ public class CreateWalletCommand : IRequest<Result<bool>>
                 return Result.Failure<bool>(WalletErrors.InvalidOpeningBalance);
 
             var userID = _currentUserService.GetCurrentUserID();
+            if (userID <= 0)
+                return Result.Failure<bool>(UserErrors.UserNotFound);
+
+            var user = await _userRepository.GetByIdAsync(userID);
+            if (user == null)
+                return Result.Failure<bool>(UserErrors.UserNotFound);
 
             var hasExistingOwnerWallet = await _userWalletRepository.GetUserWalletByRoleAsync(userID, WalletRole.Owner);
             if (hasExistingOwnerWallet is not null)
@@ -84,6 +93,7 @@ public class CreateWalletCommand : IRequest<Result<bool>>
                 // Cüzdan oluştur
                 var wallet = new Wallet
                 {
+                    Name = $"{user.Name}",
                     Balance = request.Balance,
                     BalanceInTRY = request.Balance * exchangeRateToTRY,
                     Currency = request.Currency,

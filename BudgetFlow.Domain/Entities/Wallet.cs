@@ -4,6 +4,7 @@ using BudgetFlow.Domain.Enums;
 namespace BudgetFlow.Domain.Entities;
 public class Wallet : BaseEntity
 {
+    public string Name { get; set; }
     public decimal Balance { get; set; }
     public decimal BalanceInTRY { get; set; }
     public CurrencyType Currency { get; set; }

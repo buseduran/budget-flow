@@ -19,4 +19,5 @@ public class ContributionDetail
     public decimal Amount { get; set; }
     public decimal AmountInTRY { get; set; }
     public string Description { get; set; }
+    public EntryType Type { get; set; }
 }

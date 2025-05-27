@@ -26,13 +26,15 @@ public class LogoutCommand : IRequest<Result<bool>>
 
             var context = _httpContextAccessor.HttpContext;
 
+            int userID = _currentUserService.GetCurrentUserID();
+            if (userID == 0)
+                return Result.Failure<bool>(UserErrors.UserNotFound);
+
             // Clear user identity
             context.User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity());
             _httpContextAccessor.HttpContext.Response.Cookies.Delete("AccessToken");
 
-            int userID = _currentUserService.GetCurrentUserID();
-            if (userID == 0)
-                return Result.Failure<bool>(UserErrors.UserNotFound);
+           
 
             var revokeResult = await _userRepository.RevokeTokenAsync(userID);
             if (!revokeResult)

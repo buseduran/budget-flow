@@ -11,5 +11,4 @@ public interface IUserWalletRepository
     Task<UserWallet> GetUserWalletByRoleAsync(int userID, WalletRole walletRole);
     Task<bool> AddUserToWalletAsync(UserWallet walletUser);
     Task<bool> RemoveUserFromWalletAsync(int walletID, int userID);
-    Task<List<WalletResponse>> GetWalletsByUserIdAsync(int userID); //bu yanlış gibi çünkü başka walletları da olabilir
 }

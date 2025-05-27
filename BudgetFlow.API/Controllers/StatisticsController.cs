@@ -96,15 +96,15 @@ public class StatisticsController : ControllerBase
     /// <summary>
     /// Get Wallet Contributions. 
     /// </summary>
-    /// <param name="walletId"></param>
+    /// <param name="WalletID"></param>
     /// <param name="convertToTRY"></param>
     /// <returns></returns>
     [HttpGet("Wallet/{WalletID}/Contributions")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<WalletContributionResponse>))]
-    public async Task<IResult> GetWalletContributions(int walletId, [FromQuery] bool convertToTRY = false)
+    public async Task<IResult> GetWalletContributions(int WalletID, [FromQuery] bool convertToTRY = false)
     {
-        var result = await _mediator.Send(new GetWalletContributionsQuery(walletId, convertToTRY));
+        var result = await _mediator.Send(new GetWalletContributionsQuery(WalletID, convertToTRY));
         return result.IsSuccess
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();

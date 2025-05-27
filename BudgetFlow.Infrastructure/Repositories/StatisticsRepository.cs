@@ -288,11 +288,32 @@ public class StatisticsRepository : IStatisticsRepository
             return new List<WalletContributionResponse>();
 
         var contributions = new List<WalletContributionResponse>();
-        var totalContribution = 0m;
+
+        // Get total wallet balance
+        var wallet = await _context.Wallets
+            .Where(w => w.ID == walletId)
+            .Select(w => new { w.Balance, w.Currency })
+            .FirstOrDefaultAsync();
+
+        decimal totalWalletBalance = wallet.Balance;
+        if (convertToTRY && wallet.Currency != CurrencyType.TRY)
+        {
+            var currencyRate = await _context.CurrencyRates
+                .Where(c => c.CurrencyType == wallet.Currency)
+                .OrderByDescending(c => c.RetrievedAt)
+                .Select(c => c.ForexSelling)
+                .FirstOrDefaultAsync();
+
+            if (currencyRate > 0)
+            {
+                totalWalletBalance *= currencyRate;
+            }
+        }
 
         foreach (var userWallet in userWallets)
         {
             var userEntries = await _context.Entries
+                .Include(e => e.Category)
                 .Where(e => e.WalletID == walletId && e.UserID == userWallet.UserID)
                 .OrderByDescending(e => e.CreatedAt)
                 .ToListAsync();
@@ -307,22 +328,20 @@ public class StatisticsRepository : IStatisticsRepository
                     Date = e.CreatedAt,
                     Amount = e.Amount,
                     AmountInTRY = e.AmountInTRY,
-                    Description = e.Name
+                    Description = e.Name,
+                    Type = e.Category.Type
                 }).ToList()
             };
 
+            // Calculate total contribution (since expenses are already negative)
             userContribution.TotalContribution = userContribution.Details.Sum(d => d.Amount);
             userContribution.TotalContributionInTRY = userContribution.Details.Sum(d => d.AmountInTRY);
 
-            totalContribution += convertToTRY ? userContribution.TotalContributionInTRY : userContribution.TotalContribution;
-            contributions.Add(userContribution);
-        }
+            // Calculate percentage based on total wallet balance
+            var contributionAmount = convertToTRY ? userContribution.TotalContributionInTRY : userContribution.TotalContribution;
+            userContribution.Percentage = totalWalletBalance > 0 ? contributionAmount / totalWalletBalance * 100 : 0;
 
-        // yüzdelikleri hesapla
-        foreach (var contribution in contributions)
-        {
-            var contributionAmount = convertToTRY ? contribution.TotalContributionInTRY : contribution.TotalContribution;
-            contribution.Percentage = totalContribution > 0 ? contributionAmount / totalContribution * 100 : 0;
+            contributions.Add(userContribution);
         }
 
         return contributions;
