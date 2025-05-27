@@ -30,7 +30,6 @@ public class AssetRepository : IAssetRepository
         var asset = await context.Assets.FindAsync(Asset.ID);
         if (asset is null) return false;
 
-
         mapper.Map(Asset, asset);
         asset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 

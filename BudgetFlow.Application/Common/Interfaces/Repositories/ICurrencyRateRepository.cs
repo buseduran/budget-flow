@@ -7,4 +7,5 @@ public interface ICurrencyRateRepository
     Task DeleteRatesForDateAsync(DateTime date, bool saveChanges = true);
     Task AddRatesAsync(IEnumerable<CurrencyRate> rates, bool saveChanges = true);
     Task<CurrencyRate> GetCurrencyRateByType(CurrencyType currency);
+    Task UpdateRateAsync(CurrencyRate rate, bool saveChanges = true);
 }

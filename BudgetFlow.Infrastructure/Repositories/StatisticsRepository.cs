@@ -275,4 +275,56 @@ public class StatisticsRepository : IStatisticsRepository
             AssetInvests = new PaginatedList<AssetInvestResponse>(investments, count, query.Page, query.PageSize)
         };
     }
+
+    public async Task<List<WalletContributionResponse>> GetWalletContributionsAsync(int walletId, bool convertToTRY = false)
+    {
+        var userWallets = await _context.UserWallets
+            .Include(w => w.User)
+            .Include(w => w.Wallet)
+            .Where(w => w.WalletID == walletId)
+            .ToListAsync();
+
+        if (!userWallets.Any())
+            return new List<WalletContributionResponse>();
+
+        var contributions = new List<WalletContributionResponse>();
+        var totalContribution = 0m;
+
+        foreach (var userWallet in userWallets)
+        {
+            var userEntries = await _context.Entries
+                .Where(e => e.WalletID == walletId && e.UserID == userWallet.UserID)
+                .OrderByDescending(e => e.CreatedAt)
+                .ToListAsync();
+
+            var userContribution = new WalletContributionResponse
+            {
+                UserID = userWallet.UserID,
+                UserName = userWallet.User.Name,
+                Currency = userWallet.Wallet.Currency,
+                Details = userEntries.Select(e => new ContributionDetail
+                {
+                    Date = e.CreatedAt,
+                    Amount = e.Amount,
+                    AmountInTRY = e.AmountInTRY,
+                    Description = e.Name
+                }).ToList()
+            };
+
+            userContribution.TotalContribution = userContribution.Details.Sum(d => d.Amount);
+            userContribution.TotalContributionInTRY = userContribution.Details.Sum(d => d.AmountInTRY);
+
+            totalContribution += convertToTRY ? userContribution.TotalContributionInTRY : userContribution.TotalContribution;
+            contributions.Add(userContribution);
+        }
+
+        // yüzdelikleri hesapla
+        foreach (var contribution in contributions)
+        {
+            var contributionAmount = convertToTRY ? contribution.TotalContributionInTRY : contribution.TotalContribution;
+            contribution.Percentage = totalContribution > 0 ? contributionAmount / totalContribution * 100 : 0;
+        }
+
+        return contributions;
+    }
 }

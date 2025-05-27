@@ -3,6 +3,7 @@ using BudgetFlow.Application.Statistics.Queries.GetAnalysisEntries;
 using BudgetFlow.Application.Statistics.Queries.GetAssetInvestPagination;
 using BudgetFlow.Application.Statistics.Queries.GetAssetRevenue;
 using BudgetFlow.Application.Statistics.Queries.GetLastEntries;
+using BudgetFlow.Application.Statistics.Queries.GetWalletContributions;
 using BudgetFlow.Application.Statistics.Responses;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -87,6 +88,23 @@ public class StatisticsController : ControllerBase
     public async Task<IResult> GetAssetInvestsPaginationAsync([FromQuery] GetAssetInvestPaginationQuery getAssetInvestPaginationQuery)
     {
         var result = await _mediator.Send(getAssetInvestPaginationQuery);
+        return result.IsSuccess
+               ? Results.Ok(result.Value)
+               : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Get Wallet Contributions. 
+    /// </summary>
+    /// <param name="walletId"></param>
+    /// <param name="convertToTRY"></param>
+    /// <returns></returns>
+    [HttpGet("Wallet/{WalletID}/Contributions")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<WalletContributionResponse>))]
+    public async Task<IResult> GetWalletContributions(int walletId, [FromQuery] bool convertToTRY = false)
+    {
+        var result = await _mediator.Send(new GetWalletContributionsQuery(walletId, convertToTRY));
         return result.IsSuccess
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();

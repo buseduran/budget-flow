@@ -37,4 +37,11 @@ public class CurrencyRateRepository : ICurrencyRateRepository
             .FirstOrDefaultAsync(c => c.CurrencyType == currency);
         return currencyRate;
     }
+
+    public async Task UpdateRateAsync(CurrencyRate rate, bool saveChanges = true)
+    {
+        context.CurrencyRates.Update(rate);
+        if (saveChanges)
+            await context.SaveChangesAsync();
+    }
 }

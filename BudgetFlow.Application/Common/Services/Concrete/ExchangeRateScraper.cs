@@ -76,19 +76,19 @@ public class ExchangeRateScraper : IExchangeRateScraper
                 var existingRate = await _currencyRateRepository.GetCurrencyRateByType(rate.CurrencyType);
                 if (existingRate != null)
                 {
-                    // Update existing rate
+                    // Update existing one
                     existingRate.ForexBuying = rate.ForexBuying;
                     existingRate.ForexSelling = rate.ForexSelling;
                     existingRate.RetrievedAt = DateTime.UtcNow;
-                    await _currencyRateRepository.AddRatesAsync(new[] { existingRate }, saveChanges: false);
+                    await _currencyRateRepository.UpdateRateAsync(existingRate, saveChanges: false);
                 }
                 else
                 {
-                    // Create new rate
+                    // Create new one
                     await _currencyRateRepository.AddRatesAsync(new[] { rate }, saveChanges: false);
                 }
 
-                // Save to Asset table
+                #region Save to Asset Table
                 var asset = new Asset
                 {
                     Name = $"{rate.CurrencyType} Döviz Kuru",
@@ -113,6 +113,8 @@ public class ExchangeRateScraper : IExchangeRateScraper
                 {
                     await _assetRepository.CreateAssetAsync(asset, saveChanges: false);
                 }
+                #endregion
+
             }
 
             await _unitOfWork.SaveChangesAsync();

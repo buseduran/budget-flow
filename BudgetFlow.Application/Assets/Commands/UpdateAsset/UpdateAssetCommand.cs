@@ -10,7 +10,6 @@ namespace BudgetFlow.Application.Assets.Commands.UpdateAsset;
 public class UpdateAssetCommand : IRequest<Result<bool>>
 {
     public int ID { get; set; }
-    public AssetDto Asset { get; set; }
     public IFormFile Symbol { get; set; }
     public class UpdateAssetCommandHandler : IRequestHandler<UpdateAssetCommand, Result<bool>>
     {
@@ -31,14 +30,7 @@ public class UpdateAssetCommand : IRequest<Result<bool>>
             Asset asset = new()
             {
                 ID = request.ID,
-                Name = request.Asset.Name,
-                AssetType = request.Asset.AssetType,
-                BuyPrice = request.Asset.BuyPrice,
-                SellPrice = request.Asset.SellPrice,
-                Description = request.Asset.Description,
                 Symbol = image,
-                Code = request.Asset.Code,
-                Unit = request.Asset.Unit
             };
 
             var result = await _assetRepository.UpdateAssetAsync(asset);

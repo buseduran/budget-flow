@@ -15,4 +15,5 @@ public interface IStatisticsRepository
     Task<List<LastEntryResponse>> GetLastEntriesAsync(int walletId);
     Task<List<AssetRevenueResponse>> GetAssetRevenueAsync(string portfolio);
     Task<PaginatedAssetInvestResponse> GetAssetInvestsPaginationAsync(GetAssetInvestPaginationQuery query);
+    Task<List<WalletContributionResponse>> GetWalletContributionsAsync(int walletId, bool convertToTRY = false);
 }
