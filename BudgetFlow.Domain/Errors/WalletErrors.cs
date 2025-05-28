@@ -13,6 +13,7 @@ public static class WalletErrors
     public static Error UserIsNotOwner => new("Wallet.UserIsNotOwner", "Bu işlemi gerçekleştirmek için gerekli yetkiye sahip değilsiniz.");
     public static Error UserWalletCreationFailed => new("Wallet.UserWalletCreationFailed", "Cüzdan kullanıcı ilişkisi oluşturulurken bir hata oluştu.");
     public static Error UserWalletAlreadyExists => new("Wallet.UserWalletAlreadyExists", "Kullanıcının zaten bir cüzdanı bulunmaktadır.");
+    public static Error UserWalletAlreadyJoined => new("Wallet.UserWalletAlreadyExists", "Kullanıcının daha önce bu cüzdana katıldı.");
     public static Error UserHasNoPermission => new("Wallet.UserHasNoPermission", "Bu cüzdanda bu işlemi yapma izniniz yok.");
     public static Error InvalidCurrency => new("Wallet.InvalidCurrency", "Geçersiz para birimi.");
     public static Error CurrencyRateNotFound => new("Wallet.CurrencyRateNotFound", "Para birimi kuru bulunamadı.");

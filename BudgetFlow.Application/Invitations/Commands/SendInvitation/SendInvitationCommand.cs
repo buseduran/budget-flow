@@ -70,6 +70,16 @@ public class SendInvitationCommand : IRequest<Result<bool>>
                 return Result.Failure<bool>(WalletErrors.UserHasNoPermission);
             #endregion
 
+            #region Ensure target user is registered
+            var targetUser = await _userRepository.GetByEmailAsync(request.Email);
+            if (targetUser is null)
+                return Result.Failure<bool>(UserErrors.UserNotFound);
+
+            var targetUserWallet = await _userWalletRepository.GetByWalletIdAndUserIdAsync(wallet.WalletID, userID);
+            if (targetUser is not null)
+                return Result.Failure<bool>(WalletErrors.UserWalletAlreadyJoined);
+            #endregion
+
             await _unitOfWork.BeginTransactionAsync();
             try
             {

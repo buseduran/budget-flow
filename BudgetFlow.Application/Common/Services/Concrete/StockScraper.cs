@@ -1,98 +1,56 @@
-﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+﻿using BudgetFlow.Application.Common.Models;
 using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
-using HtmlAgilityPack;
 using System.Globalization;
+using System.Text.Json;
 
 namespace BudgetFlow.Application.Common.Services.Concrete
 {
     public class StockScraper : IStockScraper
     {
-        private readonly IAssetRepository _assetRepository;
+        private readonly HttpClient _httpClient;
+        private const string MidasApiUrl = "https://www.getmidas.com/wp-json/midas-api/v1/midas_table_data?sortId=xu100-bist-100-hisseleri&return=table";
 
-        public StockScraper(IAssetRepository assetRepository)
+        public StockScraper(HttpClient httpClient)
         {
-            _assetRepository = assetRepository;
+            _httpClient = httpClient;
+
+            // Headers'ı elle ekle
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36");
+            _httpClient.DefaultRequestHeaders.Add("Accept", "application/json, text/javascript, */*; q=0.01");
+            _httpClient.DefaultRequestHeaders.Add("Accept-Language", "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7");
+            _httpClient.DefaultRequestHeaders.Add("Referer", "https://www.getmidas.com/");
+            _httpClient.DefaultRequestHeaders.Add("Origin", "https://www.getmidas.com");
         }
 
         public async Task<IEnumerable<Asset>> GetStocksAsync(AssetType assetType)
         {
-            List<Asset> assets = [];
-            var cultureInfo = new CultureInfo("tr-TR");
+            var response = await _httpClient.GetStringAsync(MidasApiUrl);
 
-            #region HTML verisi alınır
-            HttpClient client = new();
-            //var apiUrl = Environment.GetEnvironmentVariable("API_URL") ?? "";
-            var apiUrl = "https://uzmanpara.milliyet.com.tr/canli-borsa/";
-            var html = await client.GetStringAsync(apiUrl);
-            #endregion
+            // API'den gelen cevap şu formatta: "\"[{...},{...}]\""
+            // Önce dış stringi çöz
+            var jsonArrayString = JsonSerializer.Deserialize<string>(response);
 
-            #region Tablo verileri alınır
-            HtmlDocument htmlDocument = new();
-            htmlDocument.LoadHtml(html);
-            var nodes = htmlDocument.DocumentNode
-                .Descendants("tr")
-                .Where(node => node.GetAttributeValue("class", "").Contains("zebra"))
-                .ToList();
-            #endregion
-
-            #region Veriler modele dönüştürülür
-            foreach (var node in nodes)
+            // Sonra gerçek listeyi deserialize et
+            var midasItems = JsonSerializer.Deserialize<List<MidasItem>>(jsonArrayString, new JsonSerializerOptions
             {
-                var stockName = node.Id.ToString().Split("h_tr_id_").Last();
-                var stockPrice = node
-                    .Descendants("td")
-                    .Where(x => x.GetAttributeValue("id", "").Contains("h_td_fiyat"))
-                    .ToList().First().InnerText;
-                var stockPercentage = node
-                    .Descendants("td")
-                    .Where(x => x.GetAttributeValue("id", "").Contains("h_td_yuzde"))
-                    .ToList().First().InnerText;
-                var date = node
-                    .Descendants("td")
-                    .Where(x => x.GetAttributeValue("id", "").Contains("h_td_zaman"))
-                    .ToList().First().InnerText;
+                PropertyNameCaseInsensitive = true
+            });
 
-                decimal.TryParse(stockPrice, NumberStyles.Currency, cultureInfo, out var price);
-                double.TryParse(stockPercentage, NumberStyles.Any, cultureInfo, out var percentage);
-
-                var existAsset = await _assetRepository.GetByCodeAsync(stockName);
-                // check if not exist in db
-                if (existAsset != null)
-                {
-
-                }
-                Asset asset = new()
-                {
-                    Name = stockName,
-                    Code = stockName,
-                    BuyPrice = price,
-                    SellPrice = price,
-                    Description = percentage.ToString(),
-                    Unit = "",
-                    AssetType = assetType,
-                };
-                assets.Add(asset);
-                //var result = await assetRepository.CreateAssetAsync(asset);
-                //return result
-
-                //else it will update
-                //var asset = await assetRepository.GetAssetByCodeAsync(stockName);
-                //if (asset != null)
-                //{
-                //    asset.BuyPrice = price;
-                //    asset.SellPrice = price;
-                //    asset.Description = percentage.ToString();
-                //    asset.Unit = "";
-                //    asset.AssetType = assetType;
-                //}
-                //var result = await assetRepository.UpdateAssetAsync(asset);
-
-            }
-            #endregion
+            // DTO'yu Domain modeli Asset'e dönüştür
+            var assets = midasItems.Select(item => new Asset
+            {
+                Name = item.Code, // API'de Name olmayabilir, Code kullanıyorum
+                AssetType = assetType,
+                Code = item.Code,
+                BuyPrice = item.Bid,
+                SellPrice = item.Ask,
+                Description = $"Change: {item.DailyChange} ({item.DailyChangePercent}%)",
+                Unit = "lot"
+            }).ToList();
 
             return assets;
-        }
+        }   
     }
 }
