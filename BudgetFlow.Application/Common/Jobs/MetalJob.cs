@@ -31,6 +31,7 @@ public class MetalJob : IJob
     {
         var assetType = AssetType.Metal;
         var metals = await _metalScraper.GetMetalsAsync(assetType);
+        Console.WriteLine(metals);
 
         await _unitOfWork.BeginTransactionAsync();
         try
