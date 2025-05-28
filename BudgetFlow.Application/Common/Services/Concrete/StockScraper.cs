@@ -27,21 +27,16 @@ namespace BudgetFlow.Application.Common.Services.Concrete
         public async Task<IEnumerable<Asset>> GetStocksAsync(AssetType assetType)
         {
             var response = await _httpClient.GetStringAsync(MidasApiUrl);
-
-            // API'den gelen cevap şu formatta: "\"[{...},{...}]\""
-            // Önce dış stringi çöz
             var jsonArrayString = JsonSerializer.Deserialize<string>(response);
 
-            // Sonra gerçek listeyi deserialize et
             var midasItems = JsonSerializer.Deserialize<List<MidasItem>>(jsonArrayString, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
 
-            // DTO'yu Domain modeli Asset'e dönüştür
             var assets = midasItems.Select(item => new Asset
             {
-                Name = item.Code, // API'de Name olmayabilir, Code kullanıyorum
+                Name = item.Code,
                 AssetType = assetType,
                 Code = item.Code,
                 BuyPrice = item.Bid,

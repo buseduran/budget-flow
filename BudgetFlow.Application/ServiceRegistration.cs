@@ -41,8 +41,10 @@ public static class ServiceRegistration
 
         services.AddHttpClient<IExchangeRateScraper, ExchangeRateScraper>();
         services.AddHttpClient<IMetalScraper, MetalScraper>();
+        services.AddHttpClient<IStockScraper, StockScraper>();
 
         services.AddScoped<MetalJob>();
+        services.AddScoped<StockJob>();
 
         services.AddQuartz(q =>
         {
