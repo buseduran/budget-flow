@@ -45,6 +45,7 @@ public static class ServiceRegistration
 
         services.AddScoped<MetalJob>();
         services.AddScoped<StockJob>();
+        services.AddScoped<CurrencyJob>();
 
         services.AddQuartz(q =>
         {

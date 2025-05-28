@@ -12,6 +12,11 @@ public class CurrencyJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
+        await ExecuteAsync();
+    }
+
+    public async Task ExecuteAsync()
+    {
         var result = await _exchangeRateScraper.SyncExchangeRatesAsync();
         if (result.IsFailure)
         {
