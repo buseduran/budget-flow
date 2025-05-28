@@ -11,18 +11,13 @@ public class GetAssetPaginationQuery : IRequest<Result<PaginatedList<AssetRespon
 {
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 50;
-    public int WalletID { get; set; }
     public class GetAssetPaginationQueryHandler : IRequestHandler<GetAssetPaginationQuery, Result<PaginatedList<AssetResponse>>>
     {
         private readonly IAssetRepository _assetRepository;
-        private readonly IUserWalletRepository _userWalletRepository;
-        private readonly ICurrentUserService _currentUserService;
 
-        public GetAssetPaginationQueryHandler(IAssetRepository assetRepository, IUserWalletRepository userWalletRepository, ICurrentUserService currentUserService)
+        public GetAssetPaginationQueryHandler(IAssetRepository assetRepository)
         {
             _assetRepository = assetRepository;
-            _userWalletRepository = userWalletRepository;
-            _currentUserService = currentUserService;
         }
 
         public async Task<Result<PaginatedList<AssetResponse>>> Handle(GetAssetPaginationQuery request, CancellationToken cancellationToken)

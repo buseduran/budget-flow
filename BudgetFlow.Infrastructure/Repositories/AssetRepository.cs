@@ -23,7 +23,9 @@ public class AssetRepository : IAssetRepository
         Asset.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
         await context.Assets.AddAsync(Asset);
-        return saveChanges ? await context.SaveChangesAsync() > 0 : true;
+        if (saveChanges)  
+            await context.SaveChangesAsync();
+        return true;
     }
     public async Task<bool> UpdateAssetAsync(Asset Asset, bool saveChanges = true)
     {
