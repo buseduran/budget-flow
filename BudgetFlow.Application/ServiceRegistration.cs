@@ -7,6 +7,7 @@ using BudgetFlow.Application.Common.Utils;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Caching.Memory;
 using Quartz;
 using System.Reflection;
 
@@ -29,6 +30,8 @@ public static class ServiceRegistration
         services.AddValidatorsFromAssembly(assembly);
 
         services.AddHttpContextAccessor();
+        services.AddMemoryCache();
+        services.AddSingleton<ICacheService, CacheService>();
 
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ITokenProvider, TokenProvider>();
@@ -43,20 +46,19 @@ public static class ServiceRegistration
         services.AddHttpClient<IMetalScraper, MetalScraper>();
         services.AddHttpClient<IStockScraper, StockScraper>();
 
+        services.AddScoped<CurrencyJob>();
         services.AddScoped<MetalJob>();
         services.AddScoped<StockJob>();
-        services.AddScoped<CurrencyJob>();
 
+        #region Jobs
         services.AddQuartz(q =>
         {
             var jobKey = new JobKey("StockJob");
-
             q.AddJob<StockJob>(opts => opts.WithIdentity(jobKey));
-
             q.AddTrigger(opts => opts
                 .ForJob(jobKey)
                 .WithIdentity("StockJob-trigger")
-                .WithCronSchedule("0 0 * * * ?")); // Every hour
+                .WithCronSchedule("0 */15 * * * ?")); // Every 15 minutes
         });
 
         services.AddQuartz(q =>
@@ -76,8 +78,9 @@ public static class ServiceRegistration
             q.AddTrigger(opts => opts
                 .ForJob(jobKey)
                 .WithIdentity("MetalJob-trigger")
-                .WithCronSchedule("0 0 * * * ?")); // Every hour
+                .WithCronSchedule("0 */15 * * * ?")); // Every 15 minutes
         });
+        #endregion
 
         services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
     }

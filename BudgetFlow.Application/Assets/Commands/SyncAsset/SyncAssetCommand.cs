@@ -28,16 +28,9 @@ public class SyncAssetCommand : IRequest<Result<bool>>
 
         public async Task<Result<bool>> Handle(SyncAssetCommand request, CancellationToken cancellationToken)
         {
-            //if (request.assetType == AssetType.Stock)
-            //{
-            await _currencyJob.ExecuteAsync();
-            await _stockJob.ExecuteAsync();
-            //}
-            //if (request.assetType == AssetType.Metal)
-            //{
-            await _metalJob.ExecuteAsync();
-            //}
-
+            await _currencyJob.ExecuteAsync(); //usd, eur, gbp
+            await _stockJob.ExecuteAsync(); // midas
+            await _metalJob.ExecuteAsync(); // gold, silver
             return Result.Success(true);
         }
     }

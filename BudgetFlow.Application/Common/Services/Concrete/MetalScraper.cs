@@ -4,6 +4,7 @@ using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using HtmlAgilityPack;
 using System.Globalization;
+using Microsoft.Extensions.Configuration;
 
 namespace BudgetFlow.Application.Common.Services.Concrete;
 
@@ -11,6 +12,7 @@ public class MetalScraper : IMetalScraper
 {
     private readonly HttpClient _httpClient;
     private readonly ICurrencyRateRepository _currencyRateRepository;
+    private readonly string _bigParaUrl;
     private static readonly Dictionary<MetalType, (string Code, string Symbol, string Unit)> MetalTypes = new()
     {
         { MetalType.GoldQuarter, ("XAU-Q", "CAlt", "adet") },
@@ -22,16 +24,16 @@ public class MetalScraper : IMetalScraper
         { MetalType.SilverOunce, ("XAG-O", "OAg", "ons") }
     };
 
-    public MetalScraper(HttpClient httpClient, ICurrencyRateRepository currencyRateRepository)
+    public MetalScraper(HttpClient httpClient, ICurrencyRateRepository currencyRateRepository, IConfiguration configuration)
     {
         _httpClient = httpClient;
         _currencyRateRepository = currencyRateRepository;
+        _bigParaUrl = configuration["ScraperUrls:BigPara"];
     }
 
     public async Task<IEnumerable<Asset>> GetMetalsAsync(AssetType assetType)
     {
-        var url = "https://bigpara.hurriyet.com.tr/altin/";
-        var html = await _httpClient.GetStringAsync(url);
+        var html = await _httpClient.GetStringAsync(_bigParaUrl);
 
         var htmlDoc = new HtmlDocument();
         htmlDoc.LoadHtml(html);

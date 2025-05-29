@@ -65,6 +65,20 @@ public class QuartzSchedulerService
 
         await scheduler.ScheduleJob(metalJob, metalTrigger);
         #endregion
+
+        #region  Stock Job
+        IJobDetail stockJob = JobBuilder.Create<StockJob>()
+            .WithIdentity("stockJob", "group1")
+            .Build();
+
+        ITrigger stockTrigger = TriggerBuilder.Create()
+            .WithIdentity("stockTrigger", "group1")
+            .StartNow()
+            .WithSimpleSchedule(x => x
+                .WithIntervalInSeconds(1800) //30 minutes
+                .RepeatForever())
+            .Build();
+        #endregion
     }
     public async Task StopAsync()
     {
