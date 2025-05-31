@@ -60,6 +60,7 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
             var investment = new Investment
             {
                 AssetId = request.AssetId,
+                UserId = userID,
                 UnitAmount = request.UnitAmount,
                 Description = request.Description,
                 Date = DateTime.SpecifyKind(request.Date, DateTimeKind.Utc),

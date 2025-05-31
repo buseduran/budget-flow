@@ -299,4 +299,71 @@ public class StatisticsRepository : IStatisticsRepository
 
         return contributions;
     }
+
+    public async Task<PortfolioAssetResponse> GetAssetInvestmentsAsync(int portfolioID, int userID)
+    {
+        var walletID = await _context.Portfolios
+           .Where(p => p.ID == portfolioID)
+           .Select(p => p.WalletID).FirstOrDefaultAsync();
+
+        var investmentsRaw = await _context.Investments
+            .Where(e => e.Portfolio.ID == portfolioID)
+            .GroupBy(e => new
+            {
+                e.AssetId,
+                AssetType = e.Asset.AssetType,
+                AssetName = e.Asset.Name,
+                e.Asset.SellPrice,
+                e.Asset.Description
+            })
+            .Select(g => new
+            {
+                g.Key.AssetId,
+                g.Key.AssetType,
+                g.Key.AssetName,
+                g.Key.SellPrice,
+                g.Key.Description,
+                TotalUnitAmount = g.Sum(e => e.UnitAmount),
+                TotalCurrencyAmount = g.Sum(e => e.CurrencyAmount),
+                Code = g.OrderByDescending(e => e.CreatedAt).First().Asset.Code,
+                Unit = g.OrderByDescending(e => e.CreatedAt).First().Asset.Unit,
+                Symbol = g.OrderByDescending(e => e.CreatedAt).First().Asset.Symbol,
+                CreatedAt = g.Max(e => e.CreatedAt),
+                UpdatedAt = g.Max(e => e.UpdatedAt)
+            })
+            .ToListAsync();
+
+        var userAssets = await _context.WalletAssets
+            .Where(u => u.WalletId == walletID)
+            .ToListAsync();
+
+        var investments = investmentsRaw
+            .Select(i =>
+            {
+                var userAsset = userAssets.FirstOrDefault(u => u.AssetId == i.AssetId);
+                return new PortfolioAssetInvestmentsResponse
+                {
+                    Description = i.Description,
+                    Name = i.AssetName,
+                    AssetType = i.AssetType.ToString(),
+                    Code = i.Code,
+                    Unit = i.Unit,
+                    Symbol = i.Symbol,
+                    CreatedAt = i.CreatedAt,
+                    UpdatedAt = i.UpdatedAt,
+                    AssetId = i.AssetId,
+                    PortfolioId = portfolioID,
+                    UnitAmount = userAsset?.Amount ?? 0,
+                    CurrencyAmount = userAsset?.Balance ?? 0
+                };
+            })
+            .OrderByDescending(i => i.CreatedAt)
+            .Take(5)
+            .ToList();
+
+        return new PortfolioAssetResponse
+        {
+            Investments = investments
+        };
+    }
 }

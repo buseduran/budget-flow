@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
 
 namespace BudgetFlow.API.Controllers;
-[ApiController]
+[ApiController] 
 [Route("[controller]")]
 [Authorize]
 public class AssetController : ControllerBase
@@ -77,9 +77,9 @@ public class AssetController : ControllerBase
     [HttpPost("Sync")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IResult> SyncAssetsAsync([FromBody] SyncAssetCommand syncAssetCommand)
+    public async Task<IResult> SyncAssetsAsync()
     {
-        var result = await _mediator.Send(syncAssetCommand);
+        var result = await _mediator.Send(new SyncAssetCommand());
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();

@@ -105,4 +105,15 @@ public class WalletRepository : IWalletRepository
 
         return wallets;
     }
+
+    public async Task<IEnumerable<Wallet>> GetAllAsync()
+    {
+        return await context.Wallets.ToListAsync();
+    }
+
+    public async Task UpdateAsync(Wallet wallet)
+    {
+        context.Wallets.Update(wallet);
+        await context.SaveChangesAsync();
+    }
 }

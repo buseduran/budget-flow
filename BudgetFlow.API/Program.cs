@@ -19,6 +19,8 @@ using BudgetFlow.Application.Portfolios.Commands.CreatePortfolio;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using BudgetFlow.Infrastructure.Seed;
+using BudgetFlow.Infrastructure.Repositories;
+using BudgetFlow.Application.Common.Interfaces.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -188,8 +190,6 @@ using (var scope = app.Services.CreateScope())
     await seeder.SeedAsync();
 }
 
-
-
 // Dev Tools
 if (app.Environment.IsDevelopment())
 {
@@ -201,7 +201,6 @@ if (app.Environment.IsDevelopment())
     });
     app.UseHttpsRedirection();
 }
-
 
 app.UseExceptionHandler();
 app.UseCors();

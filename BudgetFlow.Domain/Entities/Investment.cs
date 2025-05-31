@@ -14,4 +14,6 @@ public class Investment : BaseEntity
     public Portfolio Portfolio { get; set; }
     public int AssetId { get; set; }
     public Asset Asset { get; set; }
+    public int UserId { get; set; }
+    public User User { get; set; }
 }

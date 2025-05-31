@@ -12,4 +12,6 @@ public interface IWalletRepository
     Task<bool> CreateWalletAssetAsync(WalletAsset walletAsset, bool saveChanges = true);
     Task<bool> UpdateWalletAssetAsync(int ID, decimal Amount, decimal Balance, bool saveChanges = true);
     Task<List<WalletResponse>> GetWalletsAsync(int UserID);
+    Task<IEnumerable<Wallet>> GetAllAsync();
+    Task UpdateAsync(Wallet wallet);
 }

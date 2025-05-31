@@ -12,6 +12,7 @@ public class InvestmentPaginationResponse
     public string Unit { get; set; }
     public InvestmentType Type { get; set; }
     public DateTime Date { get; set; }
+    public string UserName { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }

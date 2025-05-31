@@ -9,6 +9,9 @@ public class GetUserPaginationQuery : IRequest<Result<PaginatedList<UserPaginati
 {
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 50;
+    public string Search { get; set; }
+    public bool? IsEmailConfirmed { get; set; }
+
     public class GetUserPaginationQueryHandler : IRequestHandler<GetUserPaginationQuery, Result<PaginatedList<UserPaginationResponse>>>
     {
         private readonly IUserRepository _userRepository;
@@ -18,7 +21,7 @@ public class GetUserPaginationQuery : IRequest<Result<PaginatedList<UserPaginati
         }
         public async Task<Result<PaginatedList<UserPaginationResponse>>> Handle(GetUserPaginationQuery request, CancellationToken cancellationToken)
         {
-            var result = await _userRepository.GetPaginatedAsync(request.Page, request.PageSize);
+            var result = await _userRepository.GetPaginatedAsync(request.Page, request.PageSize, request.Search, request.IsEmailConfirmed);
             if (result == null)
                 return Result.Failure<PaginatedList<UserPaginationResponse>>(UserErrors.LogNotFound);
 

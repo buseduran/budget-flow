@@ -215,11 +215,22 @@ public class UserRepository : IUserRepository
         return true;
     }
 
-    public async Task<PaginatedList<UserPaginationResponse>> GetPaginatedAsync(int page, int pageSize)
+    public async Task<PaginatedList<UserPaginationResponse>> GetPaginatedAsync(int page, int pageSize, string search = null, bool? isEmailConfirmed = null)
     {
         var query = context.Users
             .OrderByDescending(x => x.CreatedAt)
             .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(x => x.Name.Contains(search));
+        }
+
+        if (isEmailConfirmed.HasValue)
+        {
+            query = query.Where(x => x.IsEmailConfirmed == isEmailConfirmed.Value);
+        }
+
         var items = await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -239,6 +250,7 @@ public class UserRepository : IUserRepository
                 UpdatedAt = x.UpdatedAt
             })
             .ToListAsync();
+
         var totalCount = await query.CountAsync();
         var paginatedList = new PaginatedList<UserPaginationResponse>(items, totalCount, page, pageSize);
         return paginatedList;

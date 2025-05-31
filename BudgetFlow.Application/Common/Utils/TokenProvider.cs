@@ -243,7 +243,7 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
 
         try
         {
-            var result = await handler.ValidateTokenAsync(token, parameters);
+            var result = handler.ValidateTokenAsync(token, parameters).Result;
             Console.WriteLine($"Token Validation Result: {result.IsValid}");
 
             if (!result.IsValid)

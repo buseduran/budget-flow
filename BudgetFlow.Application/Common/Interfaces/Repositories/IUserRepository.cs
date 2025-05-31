@@ -21,7 +21,7 @@ public interface IUserRepository
     Task<User> FindByEmailAsync(string email);
     Task<bool> ConfirmEmailAsync(string email, bool IsEmailConfirmed);
     Task<PaginatedList<LogResponse>> GetLogsPaginatedAsync(int page, int pageSize, LogType logType, int userID);
-    Task<PaginatedList<UserPaginationResponse>> GetPaginatedAsync(int page, int pageSize);
+    Task<PaginatedList<UserPaginationResponse>> GetPaginatedAsync(int page, int pageSize, string search = null, bool? isEmailConfirmed = null);
     Task<List<string>> GetUserRolesAsync(int userID);
     Task<bool> CreateUserRoleAsync(UserRole userRole, bool saveChanges = true);
 }

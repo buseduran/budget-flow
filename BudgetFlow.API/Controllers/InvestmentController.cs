@@ -1,4 +1,5 @@
 ﻿using BudgetFlow.Application.Common.Extensions;
+using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Application.Investments;
 using BudgetFlow.Application.Investments.Commands.CreateInvestment;
 using BudgetFlow.Application.Investments.Commands.DeleteInvestment;
@@ -82,25 +83,10 @@ public class InvestmentController : ControllerBase
     /// <returns></returns>
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<InvestmentResponse>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<InvestmentPaginationResponse>))]
     public async Task<IResult> GetInvestmentsAsync([FromQuery] GetInvestmentsQuery GetInvestmentsQuery)
     {
         var result = await _mediator.Send(GetInvestmentsQuery);
-        return result.IsSuccess
-               ? Results.Ok(result.Value)
-               : result.ToProblemDetails();
-    }
-
-    /// <summary>
-    /// Get Assets by Portfolio for Dashboard. 
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("Last/{Portfolio}")]
-    [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PortfolioAssetResponse))]
-    public async Task<IResult> GetAssetInvestmentsAsync(string Portfolio)
-    {
-        var result = await _mediator.Send(new GetPortfolioAssetsQuery(Portfolio));
         return result.IsSuccess
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();

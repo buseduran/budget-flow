@@ -12,7 +12,6 @@ public record GetAssetInvestPaginationQuery : IRequest<Result<PaginatedAssetInve
     public int WalletID { get; set; }
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 10;
-    public bool ConvertToTRY { get; set; } = false;
 }
 
 public class GetAssetInvestPaginationQueryHandler : IRequestHandler<GetAssetInvestPaginationQuery, Result<PaginatedAssetInvestResponse>>

@@ -1,13 +1,7 @@
-﻿namespace BudgetFlow.Application.Investments;
+﻿namespace BudgetFlow.Application.Statistics.Responses;
 public class PortfolioAssetResponse
 {
-    public List<PortfolioAssetInfoResponse> AssetInfo { get; set; }
     public List<PortfolioAssetInvestmentsResponse> Investments { get; set; }
-}
-public class PortfolioAssetInfoResponse
-{
-    public string Name { get; set; }
-    public string Unit { get; set; }
 }
 public class PortfolioAssetInvestmentsResponse
 {

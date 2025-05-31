@@ -12,4 +12,5 @@ public interface IStatisticsRepository
     Task<List<AssetRevenueResponse>> GetAssetRevenueAsync(string portfolio);
     Task<PaginatedAssetInvestResponse> GetAssetInvestsPaginationAsync(GetAssetInvestPaginationQuery query);
     Task<List<WalletContributionResponse>> GetWalletContributionsAsync(int walletId);
+    Task<PortfolioAssetResponse> GetAssetInvestmentsAsync(int portfolioID, int userID);
 }

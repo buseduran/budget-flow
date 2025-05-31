@@ -3,6 +3,7 @@ using BudgetFlow.Application.Statistics.Queries.GetAnalysisEntries;
 using BudgetFlow.Application.Statistics.Queries.GetAssetInvestPagination;
 using BudgetFlow.Application.Statistics.Queries.GetAssetRevenue;
 using BudgetFlow.Application.Statistics.Queries.GetLastEntries;
+using BudgetFlow.Application.Statistics.Queries.GetPortfolioAssets;
 using BudgetFlow.Application.Statistics.Queries.GetWalletContributions;
 using BudgetFlow.Application.Statistics.Responses;
 using MediatR;
@@ -97,7 +98,6 @@ public class StatisticsController : ControllerBase
     /// Get Wallet Contributions. 
     /// </summary>
     /// <param name="WalletID"></param>
-    /// <param name="convertToTRY"></param>
     /// <returns></returns>
     [HttpGet("Wallet/{WalletID}/Contributions")]
     [Produces(MediaTypeNames.Application.Json)]
@@ -105,6 +105,21 @@ public class StatisticsController : ControllerBase
     public async Task<IResult> GetWalletContributions(int WalletID)
     {
         var result = await _mediator.Send(new GetWalletContributionsQuery(WalletID));
+        return result.IsSuccess
+               ? Results.Ok(result.Value)
+               : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Get Assets by Portfolio for Dashboard. 
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("Portfolio/{PortfolioID}")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PortfolioAssetResponse))]
+    public async Task<IResult> GetAssetInvestmentsAsync(int PortfolioID)
+    {
+        var result = await _mediator.Send(new GetPortfolioAssetsQuery(PortfolioID));
         return result.IsSuccess
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();

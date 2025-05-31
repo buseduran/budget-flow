@@ -4,6 +4,7 @@ using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Utils;
 using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Enums;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,7 +24,7 @@ public class AssetRepository : IAssetRepository
         Asset.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
         await context.Assets.AddAsync(Asset);
-        if (saveChanges)  
+        if (saveChanges)
             await context.SaveChangesAsync();
         return true;
     }
@@ -47,9 +48,21 @@ public class AssetRepository : IAssetRepository
         return true;
     }
 
-    public async Task<PaginatedList<AssetResponse>> GetAssetsAsync(int Page, int PageSize)
+    public async Task<PaginatedList<AssetResponse>> GetAssetsAsync(int Page, int PageSize, string search = null, AssetType? assetType = null)
     {
-        var assets = await context.Assets
+        var query = context.Assets.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(a => a.Name.Contains(search));
+        }
+
+        if (assetType.HasValue)
+        {
+            query = query.Where(a => a.AssetType == assetType.Value);
+        }
+
+        var assets = await query
             .OrderByDescending(c => c.CreatedAt)
             .Skip((Page - 1) * PageSize)
             .Take(PageSize)
@@ -66,7 +79,8 @@ public class AssetRepository : IAssetRepository
                 Unit = e.Unit
             })
             .ToListAsync();
-        var count = await context.Assets.CountAsync();
+
+        var count = await query.CountAsync();
 
         return new PaginatedList<AssetResponse>(assets, count, Page, PageSize);
     }
@@ -140,5 +154,27 @@ public class AssetRepository : IAssetRepository
             })
             .FirstOrDefaultAsync();
         return asset;
+    }
+
+    public async Task<IEnumerable<Asset>> GetAllAsync()
+    {
+        return await context.Assets.ToListAsync();
+    }
+
+    public async Task<Asset> GetByIdAsync(int id)
+    {
+        return await context.Assets.FindAsync(id);
+    }
+
+    public async Task<decimal> GetCurrentValueAsync(int id)
+    {
+        var asset = await context.Assets.FindAsync(id);
+        return asset?.SellPrice ?? 0;
+    }
+
+    public async Task UpdateAsync(Asset asset)
+    {
+        context.Assets.Update(asset);
+        await context.SaveChangesAsync();
     }
 }

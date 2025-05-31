@@ -1,30 +1,33 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Services.Abstract;
+using BudgetFlow.Application.Statistics.Responses;
 using BudgetFlow.Domain.Errors;
 using MediatR;
 
-namespace BudgetFlow.Application.Investments.Queries;
+namespace BudgetFlow.Application.Statistics.Queries.GetPortfolioAssets;
 public class GetPortfolioAssetsQuery : IRequest<Result<PortfolioAssetResponse>>
 {
-    public string Portfolio { get; set; }
-    public GetPortfolioAssetsQuery(string Portfolio)
+    public int PortfolioID { get; set; }
+    public GetPortfolioAssetsQuery(int PortfolioID)
     {
-        this.Portfolio = Portfolio;
+        this.PortfolioID = PortfolioID;
     }
     public class GetPortfolioAssetsQueryHandler : IRequestHandler<GetPortfolioAssetsQuery, Result<PortfolioAssetResponse>>
     {
-        private readonly IInvestmentRepository _investmentRepository;
+        private readonly IStatisticsRepository _statisticsRepository;
         private readonly ICurrentUserService _currentUserService;
-        public GetPortfolioAssetsQueryHandler(IInvestmentRepository investmentRepository, ICurrentUserService currentUserService)
+        public GetPortfolioAssetsQueryHandler(
+            IStatisticsRepository statisticsRepository,
+            ICurrentUserService currentUserService)
         {
-            _investmentRepository = investmentRepository;
+            _statisticsRepository = statisticsRepository;
             _currentUserService = currentUserService;
         }
         public async Task<Result<PortfolioAssetResponse>> Handle(GetPortfolioAssetsQuery request, CancellationToken cancellationToken)
         {
             var userID = _currentUserService.GetCurrentUserID();
-            var investments = await _investmentRepository.GetAssetInvestmentsAsync(request.Portfolio, userID);
+            var investments = await _statisticsRepository.GetAssetInvestmentsAsync(request.PortfolioID, userID);
 
             return investments != null
                 ? Result.Success(investments)
