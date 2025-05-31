@@ -68,8 +68,8 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
             };
 
             investment.CurrencyAmount = investment.Type == InvestmentType.Buy
-                ? investment.UnitAmount * asset.BuyPrice
-                : investment.UnitAmount * asset.SellPrice;
+                ? investment.UnitAmount * asset.SellPrice
+                : investment.UnitAmount * asset.BuyPrice;
 
             var walletAsset = await _walletRepository.GetWalletAssetAsync(portfolio.WalletID, investment.AssetId);
 
@@ -81,7 +81,7 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                     if (investment.Type == InvestmentType.Buy)
                     {
                         walletAsset.Amount += investment.UnitAmount;
-                        walletAsset.Balance = walletAsset.Amount * asset.BuyPrice;
+                        walletAsset.Balance = walletAsset.Amount * asset.SellPrice;
 
                         var walletAssetUpdate = await _walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
                         var walletUpdate = await _walletRepository.UpdateWalletAsync(userID, -investment.CurrencyAmount, saveChanges: false);
