@@ -39,10 +39,10 @@ public class InvitationController : ControllerBase
     /// </summary>  
     /// <param name="joinWalletCommand">The command containing wallet join details.</param>  
     /// <returns>A result indicating the success or failure of the operation.</returns>  
-    [HttpPost("Join")]
+    [HttpGet("Join")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IResult> JoinWalletByInvitationAsync([FromBody] JoinWalletCommand joinWalletCommand)
+    public async Task<IResult> JoinWalletByInvitationAsync([FromQuery] JoinWalletCommand joinWalletCommand)
     {
         var result = await _mediator.Send(joinWalletCommand);
         return result.IsSuccess
