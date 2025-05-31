@@ -80,9 +80,6 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                 {
                     if (investment.Type == InvestmentType.Buy)
                     {
-                        if (wallet.Wallet.Balance < investment.CurrencyAmount)
-                            return Result.Failure<bool>(WalletErrors.InsufficientBalance);
-
                         walletAsset.Amount += investment.UnitAmount;
                         walletAsset.Balance = walletAsset.Amount * asset.SellPrice;
 
@@ -105,9 +102,6 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                 {
                     if (investment.Type == InvestmentType.Buy)
                     {
-                        if (wallet.Wallet.Balance < investment.CurrencyAmount)
-                            return Result.Failure<bool>(WalletErrors.InsufficientBalance);
-
                         var createResult = await _walletRepository.CreateWalletAssetAsync(new WalletAsset
                         {
                             WalletId = portfolio.WalletID,

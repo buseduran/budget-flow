@@ -58,10 +58,6 @@ public class UpdateEntryCommand : IRequest<Result<bool>>
                 : -Math.Abs(mappedEntry.Amount);
 
             var difference = newAmount - existingEntry.Amount;
-
-            var wallet = await _userWalletRepository.GetByWalletIdAndUserIdAsync(request.Entry.WalletID, userID);
-            if (category.Type == EntryType.Expense && wallet.Wallet.Balance < Math.Abs(difference) && difference < 0)
-                return Result.Failure<bool>(WalletErrors.InsufficientBalance);
             #endregion
 
             #region Wallet ve Entry Güncelle

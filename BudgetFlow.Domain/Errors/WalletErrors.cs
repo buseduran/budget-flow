@@ -6,7 +6,6 @@ public static class WalletErrors
     public static Error WalletNotFound => new("Wallet.NotFound", "Cüzdan bulunamadı.");
     public static Error CreationFailed => new("Wallet.CreationFailed", "Cüzdan oluşturulamadı.");
     public static Error UpdateFailed => new("Wallet.UpdateFailed", "Cüzdan bakiyesi güncellenemedi.");
-    public static Error InsufficientBalance => new("Wallet.InsufficientBalance", "Cüzdan bakiyesi yetersiz.");
     public static Error NoBalanceForAsset => new("Wallet.NoBalanceForAsset", "Bu varlık için bakiye bulunmamaktadır.");
     public static Error InvalidOpeningBalance => new("Wallet.InvalidOpeningBalance", "Açılış bakiyesi 0'dan büyük olmalı.");
     public static Error UserNotFoundInWallet => new("Wallet.UserNotFoundInWallet", "Cüzdan kullanıcısı bulunamadı.");

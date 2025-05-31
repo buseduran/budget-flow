@@ -86,9 +86,6 @@ public class DeleteInvestmentCommand : IRequest<Result<bool>>
                 }
                 else
                 {
-                    if (wallet.Wallet.Balance < investment.CurrencyAmount)
-                        return Result.Failure<bool>(WalletErrors.InsufficientBalance);
-
                     walletAsset.Amount += investment.UnitAmount;
                     walletAsset.Balance += investment.CurrencyAmount;
 

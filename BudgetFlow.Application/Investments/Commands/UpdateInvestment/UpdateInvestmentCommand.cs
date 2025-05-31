@@ -84,9 +84,6 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
                     if (walletAsset.Amount + unitDifference < 0)
                         return Result.Failure<bool>(WalletAssetErrors.NotEnoughAssetAmount);
 
-                    if (userWallet.Wallet.Balance - balanceDifference < 0)
-                        return Result.Failure<bool>(WalletErrors.InsufficientBalance);
-
                     walletAsset.Amount += unitDifference;
                     walletAsset.Balance += balanceDifference;
 

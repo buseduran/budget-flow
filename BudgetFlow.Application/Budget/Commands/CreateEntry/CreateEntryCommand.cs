@@ -27,7 +27,6 @@ public class CreateEntryCommand : IRequest<Result<bool>>
         private readonly ICurrentUserService _currentUserService;
         private readonly IWalletAuthService _walletAuthService;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ICurrencyRateRepository _currencyRateRepository;
         public CreateEntryCommandHandler(
             IBudgetRepository budgetRepository,
             IWalletRepository walletRepository,
@@ -36,8 +35,7 @@ public class CreateEntryCommand : IRequest<Result<bool>>
             IMapper mapper,
             ICurrentUserService currentUserService,
             IWalletAuthService walletAuthService,
-            IUnitOfWork unitOfWork,
-            ICurrencyRateRepository currencyRateRepository)
+            IUnitOfWork unitOfWork)
         {
             _budgetRepository = budgetRepository;
             _walletRepository = walletRepository;
@@ -47,7 +45,6 @@ public class CreateEntryCommand : IRequest<Result<bool>>
             _currentUserService = currentUserService;
             _walletAuthService = walletAuthService;
             _unitOfWork = unitOfWork;
-            _currencyRateRepository = currencyRateRepository;
         }
 
         public async Task<Result<bool>> Handle(CreateEntryCommand request, CancellationToken cancellationToken)
@@ -77,11 +74,6 @@ public class CreateEntryCommand : IRequest<Result<bool>>
             var category = await _categoryRepository.GetCategoryByIdAsync(mappedEntry.CategoryID);
             if (category is null)
                 return Result.Failure<bool>(CategoryErrors.CategoryNotFound);
-
-            #region Check user's wallet balance is enough
-            if ((category.Type == EntryType.Expense) && (wallet.Wallet.Balance < Math.Abs(mappedEntry.Amount)))
-                return Result.Failure<bool>(WalletErrors.InsufficientBalance);
-            #endregion
 
             #region Create entry and Update wallet
             await _unitOfWork.BeginTransactionAsync();
