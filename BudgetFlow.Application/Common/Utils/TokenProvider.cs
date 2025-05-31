@@ -182,11 +182,27 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
             Issuer = configuration["Jwt:Issuer"],
             Audience = configuration["Jwt:Audience"]
         };
+
+        Console.WriteLine("Token Generation Debug Info:");
+        Console.WriteLine($"Email: {email}");
+        Console.WriteLine($"WalletId: {walletId}");
+        Console.WriteLine($"SecretKey: {secretKey}");
+        Console.WriteLine($"ExpirationHours: {expirationHours}");
+        Console.WriteLine($"Issuer: {configuration["Jwt:Issuer"]}");
+        Console.WriteLine($"Audience: {configuration["Jwt:Audience"]}");
+        Console.WriteLine($"Expires: {descriptor.Expires}");
+
         var handler = new JsonWebTokenHandler();
-        return handler.CreateToken(descriptor);
+        var token = handler.CreateToken(descriptor);
+
+        Console.WriteLine($"Generated Token: {token}");
+        return token;
     }
     public async Task<(bool IsValid, int WalletID, string email)> VerifyWalletInvitationToken(string token)
     {
+        Console.WriteLine("Token Verification Debug Info:");
+        Console.WriteLine($"Input Token: {token}");
+
         var handler = new JsonWebTokenHandler();
         var secretKey = configuration["Jwt:Secret"];
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -201,9 +217,16 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
             ClockSkew = TimeSpan.Zero
         };
 
+        Console.WriteLine($"SecretKey: {secretKey}");
+        Console.WriteLine($"Issuer: {configuration["Jwt:Issuer"]}");
+        Console.WriteLine($"Audience: {configuration["Jwt:Audience"]}");
+
         var result = await handler.ValidateTokenAsync(token, parameters);
+
+        Console.WriteLine($"Token Validation Result: {result.IsValid}");
         if (!result.IsValid)
         {
+            Console.WriteLine("Token validation failed");
             return (false, 0, null);
         }
 
@@ -211,7 +234,11 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
         var walletIdClaim = claims.FirstOrDefault(c => c.Type == "walletId");
         var emailClaim = claims.FirstOrDefault(c => c.Type == "email");
 
+        Console.WriteLine($"WalletId Claim: {walletIdClaim?.Value}");
+        Console.WriteLine($"Email Claim: {emailClaim?.Value}");
+
         var success = int.TryParse(walletIdClaim.Value, out int walletId);
+        Console.WriteLine($"WalletId Parse Success: {success}, Value: {walletId}");
 
         return (success, walletId, emailClaim.Value);
     }
