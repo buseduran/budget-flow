@@ -10,17 +10,14 @@ public class SyncAssetCommand : IRequest<Result<bool>>
     public AssetType assetType { get; set; }
     public class SyncAssetCommandHandler : IRequestHandler<SyncAssetCommand, Result<bool>>
     {
-        private readonly IStockScraper _stockScraper;
         private readonly MetalJob _metalJob;
         private readonly StockJob _stockJob;
         private readonly CurrencyJob _currencyJob;
         public SyncAssetCommandHandler(
-            IStockScraper stockScraper,
             MetalJob metalJob,
             StockJob stockJob,
             CurrencyJob currencyJob)
         {
-            _stockScraper = stockScraper;
             _metalJob = metalJob;
             _stockJob = stockJob;
             _currencyJob = currencyJob;

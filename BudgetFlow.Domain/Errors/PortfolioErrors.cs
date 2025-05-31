@@ -8,4 +8,5 @@ public static class PortfolioErrors
     public static Error PortfolioCreationFailed => new("Portfolio.CreationFailed", "Portföy oluşturulamadı.");
     public static Error PortfolioUpdateFailed => new("Portfolio.UpdateFailed", "Portföy güncellenemedi.");
     public static Error PortfolioDeletionFailed => new("Portfolio.DeletionFailed", "Portföy silinemedi.");
+    public static Error PortfolioHasInvestments => new("Portfolio.HasInvestments", "Bu portföye ait yatırım kayıtları bulunmaktadır. Önce yatırımları silmelisiniz.");
 }

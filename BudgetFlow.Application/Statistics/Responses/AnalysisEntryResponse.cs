@@ -7,5 +7,4 @@ public class AnalysisEntryResponse
 {
     public CategoryResponse Category { get; set; }
     public decimal Amount { get; set; }
-    public CurrencyType Currency { get; set; }
 }

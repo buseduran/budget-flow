@@ -6,7 +6,5 @@ public class Wallet : BaseEntity
 {
     public string Name { get; set; }
     public decimal Balance { get; set; }
-    public decimal BalanceInTRY { get; set; }
-    public CurrencyType Currency { get; set; }
     public ICollection<User> User { get; set; }
 }

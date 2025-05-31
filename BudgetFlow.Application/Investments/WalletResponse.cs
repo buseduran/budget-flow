@@ -6,6 +6,5 @@ public class WalletResponse
     public int ID { get; set; }
     public string Name { get; set; }
     public decimal Balance { get; set; }
-    public CurrencyType Currency { get; set; }
     public WalletRole Role { get; set; }
 }

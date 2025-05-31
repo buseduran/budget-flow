@@ -41,8 +41,6 @@ public class InvestmentRepository : IInvestmentRepository
 
         investment.UnitAmount = Investment.UnitAmount;
         investment.CurrencyAmount = Investment.CurrencyAmount;
-        investment.AmountInTRY = Investment.AmountInTRY;
-        investment.ExchangeRate = Investment.ExchangeRate;
         investment.Description = Investment.Description;
         investment.Date = Investment.Date;
 
@@ -63,9 +61,7 @@ public class InvestmentRepository : IInvestmentRepository
                 UnitAmount = i.UnitAmount,
                 Unit = i.Asset.Unit,
                 CurrencyAmount = i.CurrencyAmount,
-                AmountInTRY = i.AmountInTRY,
                 Type = i.Type,
-                Currency = i.Currency,
                 ExchangeRate = i.ExchangeRate,
                 Description = i.Description,
                 Date = i.Date,
@@ -172,7 +168,6 @@ public class InvestmentRepository : IInvestmentRepository
                 Name = i.Asset.Name,
                 CurrencyAmount = i.CurrencyAmount,
                 UnitAmount = i.UnitAmount,
-                AmountInTRY = i.AmountInTRY,
                 Description = i.Description,
                 Date = i.Date,
                 CreatedAt = i.CreatedAt,

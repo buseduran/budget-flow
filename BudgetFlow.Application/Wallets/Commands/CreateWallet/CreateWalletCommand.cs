@@ -11,7 +11,6 @@ namespace BudgetFlow.Application.Wallets.Commands.CreateWallet;
 public class CreateWalletCommand : IRequest<Result<bool>>
 {
     public decimal Balance { get; set; }
-    public CurrencyType Currency { get; set; }
 
     public class CreateWalletCommandHandler : IRequestHandler<CreateWalletCommand, Result<bool>>
     {
@@ -72,31 +71,11 @@ public class CreateWalletCommand : IRequest<Result<bool>>
                 };
                 await _categoryRepository.CreateCategoryAsync(category, saveChanges: false);
 
-                #region ExchangeRate alınır.
-                if (!Enum.IsDefined(typeof(CurrencyType), request.Currency))
-                {
-                    return Result.Failure<bool>(WalletErrors.InvalidCurrency);
-                }
-
-                var currencyRate = await _currencyRateRepository.GetCurrencyRateByType(request.Currency);
-                if (currencyRate == null)
-                    return Result.Failure<bool>(WalletErrors.CurrencyRateNotFound);
-
-                decimal exchangeRateToTRY = 1m;
-
-                if (request.Currency != CurrencyType.TRY)
-                {
-                    exchangeRateToTRY = currencyRate.ForexSelling;
-                }
-                #endregion
-
                 // Cüzdan oluştur
                 var wallet = new Wallet
                 {
                     Name = $"{user.Name}",
                     Balance = request.Balance,
-                    BalanceInTRY = request.Balance * exchangeRateToTRY,
-                    Currency = request.Currency,
                 };
                 await _walletRepository.CreateWalletAsync(wallet, saveChanges: false);
 
@@ -117,12 +96,10 @@ public class CreateWalletCommand : IRequest<Result<bool>>
                 {
                     Name = "Başlangıç Bakiyesi",
                     Amount = request.Balance,
-                    AmountInTRY = request.Balance * exchangeRateToTRY,
                     Date = DateTime.UtcNow,
                     CategoryID = category.ID,
                     UserID = userID,
                     WalletID = wallet.ID,
-                    Currency = request.Currency
                 };
                 var entryResult = await _budgetRepository.CreateEntryAsync(entry, saveChanges: false);
 

@@ -21,16 +21,12 @@ public class StatisticsRepository : IStatisticsRepository
     public async Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(
         int userID,
         string Range,
-        CurrencyType currencyType,
-        int walletID,
-        decimal exchangeRateToTRY,
-        bool convertToTRY)
+        int walletID)
     {
         var startDate = GetDateForRange.GetStartDateForRange(Range);
         var endDate = DateTime.UtcNow;
         var previousStartDate = GetDateForRange.GetPreviousStartDateForRange(Range);
         var previousEndDate = startDate.AddDays(-1);
-
 
         var groupedEntries = await _context.Entries
             .Where(e => e.UserID == userID &&
@@ -90,8 +86,7 @@ public class StatisticsRepository : IStatisticsRepository
                     Color = e.Value.Color,
                     Type = e.Key.Type
                 },
-                Currency = convertToTRY ? CurrencyType.TRY : currencyType,
-                Amount = convertToTRY ? e.Value.CurrentAmount * exchangeRateToTRY : e.Value.CurrentAmount
+                Amount = e.Value.CurrentAmount
             })
             .ToList();
 
@@ -106,27 +101,26 @@ public class StatisticsRepository : IStatisticsRepository
                     Color = e.Value.Color,
                     Type = e.Key.Type
                 },
-                Currency = convertToTRY ? CurrencyType.TRY : currencyType,
-                Amount = convertToTRY ? e.Value.CurrentAmount * exchangeRateToTRY : e.Value.CurrentAmount
+                Amount = e.Value.CurrentAmount
             })
             .ToList();
 
         #region Calculate Trending
         var currentIncomeTotal = entryDictionary
            .Where(e => e.Key.Type == EntryType.Income)
-           .Sum(e => convertToTRY ? e.Value.CurrentAmount * exchangeRateToTRY : e.Value.CurrentAmount);
+           .Sum(e => e.Value.CurrentAmount);
 
         var previousIncomeTotal = entryDictionary
             .Where(e => e.Key.Type == EntryType.Income)
-            .Sum(e => convertToTRY ? e.Value.PreviousAmount * exchangeRateToTRY : e.Value.PreviousAmount);
+            .Sum(e => e.Value.PreviousAmount);
 
         var currentExpenseTotal = entryDictionary
             .Where(e => e.Key.Type == EntryType.Expense)
-            .Sum(e => convertToTRY ? e.Value.CurrentAmount * exchangeRateToTRY : e.Value.CurrentAmount);
+            .Sum(e => e.Value.CurrentAmount);
 
         var previousExpenseTotal = entryDictionary
             .Where(e => e.Key.Type == EntryType.Expense)
-            .Sum(e => convertToTRY ? e.Value.PreviousAmount * exchangeRateToTRY : e.Value.PreviousAmount);
+            .Sum(e => e.Value.PreviousAmount);
 
         decimal incomeTrend = previousIncomeTotal == 0 ? (currentIncomeTotal != 0 ? 100 : 0) :
             (currentIncomeTotal - previousIncomeTotal) / previousIncomeTotal * 100;
@@ -155,9 +149,6 @@ public class StatisticsRepository : IStatisticsRepository
                 ID = e.ID,
                 Name = e.Name,
                 Amount = e.Amount,
-                AmountInTRY = e.AmountInTRY,
-                ExchangeRate = e.ExchangeRate,
-                Currency = e.Currency,
                 Category = new CategoryResponse
                 {
                     ID = e.CategoryID,
@@ -206,8 +197,7 @@ public class StatisticsRepository : IStatisticsRepository
             {
                 ID = i.ID,
                 UnitAmount = i.UnitAmount,
-                CurrencyAmount = query.ConvertToTRY ? i.AmountInTRY : i.CurrencyAmount,
-                AmountInTRY = i.AmountInTRY,
+                CurrencyAmount = i.CurrencyAmount,
                 ExchangeRate = i.ExchangeRate,
                 Date = i.Date,
                 Type = i.Type,
@@ -228,11 +218,6 @@ public class StatisticsRepository : IStatisticsRepository
                 g.Key.Symbol,
             }).FirstOrDefaultAsync();
 
-        var wallet = await _context.Wallets
-            .Where(w => w.ID == query.WalletID)
-            .Select(w => new { w.Currency })
-            .FirstOrDefaultAsync();
-
         var userAsset = await _context.WalletAssets
             .Where(u => u.AssetId == query.AssetID && u.WalletId == query.WalletID)
             .Select(u => new
@@ -240,21 +225,6 @@ public class StatisticsRepository : IStatisticsRepository
                 u.Amount,
                 u.Balance
             }).FirstOrDefaultAsync();
-
-        decimal totalPrice = userAsset.Balance;
-        if (query.ConvertToTRY && wallet.Currency != CurrencyType.TRY)
-        {
-            var currencyRate = await _context.CurrencyRates
-                .Where(c => c.CurrencyType == wallet.Currency)
-                .OrderByDescending(c => c.RetrievedAt)
-                .Select(c => c.ForexSelling)
-                .FirstOrDefaultAsync();
-
-            if (currencyRate > 0)
-            {
-                totalPrice *= currencyRate;
-            }
-        }
 
         var count = await _context.Investments
             .Where(i => i.PortfolioId == query.PortfolioID && i.AssetId == query.AssetID)
@@ -270,13 +240,13 @@ public class StatisticsRepository : IStatisticsRepository
                 Unit = assetInvestMainResponse.Unit,
                 Symbol = assetInvestMainResponse.Symbol,
                 TotalAmount = userAsset.Amount,
-                TotalPrice = totalPrice
+                TotalPrice = userAsset.Balance
             },
             AssetInvests = new PaginatedList<AssetInvestResponse>(investments, count, query.Page, query.PageSize)
         };
     }
 
-    public async Task<List<WalletContributionResponse>> GetWalletContributionsAsync(int walletId, bool convertToTRY = false)
+    public async Task<List<WalletContributionResponse>> GetWalletContributionsAsync(int walletId)
     {
         var userWallets = await _context.UserWallets
             .Include(w => w.User)
@@ -292,23 +262,9 @@ public class StatisticsRepository : IStatisticsRepository
         // Get total wallet balance
         var wallet = await _context.Wallets
             .Where(w => w.ID == walletId)
-            .Select(w => new { w.Balance, w.Currency })
+            .Select(w => new { w.Balance })
             .FirstOrDefaultAsync();
 
-        decimal totalWalletBalance = wallet.Balance;
-        if (convertToTRY && wallet.Currency != CurrencyType.TRY)
-        {
-            var currencyRate = await _context.CurrencyRates
-                .Where(c => c.CurrencyType == wallet.Currency)
-                .OrderByDescending(c => c.RetrievedAt)
-                .Select(c => c.ForexSelling)
-                .FirstOrDefaultAsync();
-
-            if (currencyRate > 0)
-            {
-                totalWalletBalance *= currencyRate;
-            }
-        }
 
         foreach (var userWallet in userWallets)
         {
@@ -322,12 +278,10 @@ public class StatisticsRepository : IStatisticsRepository
             {
                 UserID = userWallet.UserID,
                 UserName = userWallet.User.Name,
-                Currency = userWallet.Wallet.Currency,
                 Details = userEntries.Select(e => new ContributionDetail
                 {
                     Date = e.CreatedAt,
                     Amount = e.Amount,
-                    AmountInTRY = e.AmountInTRY,
                     Description = e.Name,
                     Type = e.Category.Type
                 }).ToList()
@@ -335,11 +289,10 @@ public class StatisticsRepository : IStatisticsRepository
 
             // Calculate total contribution (since expenses are already negative)
             userContribution.TotalContribution = userContribution.Details.Sum(d => d.Amount);
-            userContribution.TotalContributionInTRY = userContribution.Details.Sum(d => d.AmountInTRY);
 
             // Calculate percentage based on total wallet balance
-            var contributionAmount = convertToTRY ? userContribution.TotalContributionInTRY : userContribution.TotalContribution;
-            userContribution.Percentage = totalWalletBalance > 0 ? contributionAmount / totalWalletBalance * 100 : 0;
+            var contributionAmount = userContribution.TotalContribution;
+            userContribution.Percentage = wallet.Balance > 0 ? contributionAmount / wallet.Balance * 100 : 0;
 
             contributions.Add(userContribution);
         }

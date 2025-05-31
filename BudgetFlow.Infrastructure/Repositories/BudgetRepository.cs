@@ -35,9 +35,6 @@ public class BudgetRepository : IBudgetRepository
 
         entry.Name = Entry.Name;
         entry.Amount = Entry.Amount;
-        entry.AmountInTRY = Entry.AmountInTRY;
-        entry.ExchangeRate = Entry.ExchangeRate;
-        entry.Currency = Entry.Currency;
         entry.Date = DateTime.SpecifyKind(Entry.Date, DateTimeKind.Utc);
         entry.CategoryID = Entry.CategoryID;
         entry.WalletID = Entry.WalletID;
@@ -77,9 +74,6 @@ public class BudgetRepository : IBudgetRepository
                 ID = e.ID,
                 Name = e.Name,
                 Amount = e.Amount,
-                AmountInTRY = e.AmountInTRY,
-                ExchangeRate = e.ExchangeRate,
-                Currency = e.Currency,
                 Date = e.Date,
                 Category = new CategoryResponse
                 {
@@ -116,7 +110,6 @@ public class BudgetRepository : IBudgetRepository
                     Type = e.Category.Type
                 },
                 WalletID = e.WalletID,
-                Currency = e.Currency
             })
             .FirstOrDefaultAsync();
         return entry;

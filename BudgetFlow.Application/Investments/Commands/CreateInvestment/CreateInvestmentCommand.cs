@@ -24,7 +24,6 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
         private readonly IAssetRepository _assetRepository;
         private readonly IPortfolioRepository _portfolioRepository;
         private readonly ICurrentUserService _currentUserService;
-        private readonly ICurrencyRateRepository _currencyRateRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public CreateInvestmentCommandHandler(
@@ -34,7 +33,6 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
             IAssetRepository assetRepository,
             IPortfolioRepository portfolioRepository,
             ICurrentUserService currentUserService,
-            ICurrencyRateRepository currencyRateRepository,
             IUnitOfWork unitOfWork)
         {
             _investmentRepository = investmentRepository;
@@ -43,7 +41,6 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
             _assetRepository = assetRepository;
             _portfolioRepository = portfolioRepository;
             _currentUserService = currentUserService;
-            _currencyRateRepository = currencyRateRepository;
             _unitOfWork = unitOfWork;
         }
 
@@ -74,23 +71,6 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                 ? investment.UnitAmount * asset.BuyPrice
                 : investment.UnitAmount * asset.SellPrice;
 
-            #region AmountInTRY alanını güncelle
-            var currency = wallet.Wallet.Currency;
-            decimal exchangeRateToTRY = 1m;
-            if (currency != CurrencyType.TRY)
-            {
-                var currencyRate = await _currencyRateRepository.GetCurrencyRateByType(currency);
-                exchangeRateToTRY = currencyRate.ForexSelling;
-            }
-
-            investment.AmountInTRY = investment.Type == InvestmentType.Buy
-                ? investment.CurrencyAmount * exchangeRateToTRY
-                : investment.CurrencyAmount * exchangeRateToTRY;
-            investment.ExchangeRate = exchangeRateToTRY;
-            #endregion
-
-            investment.Currency = currency;
-
             var walletAsset = await _walletRepository.GetWalletAssetAsync(portfolio.WalletID, investment.AssetId);
 
             await _unitOfWork.BeginTransactionAsync();
@@ -107,7 +87,7 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                         walletAsset.Balance = walletAsset.Amount * asset.SellPrice;
 
                         var walletAssetUpdate = await _walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
-                        var walletUpdate = await _walletRepository.UpdateWalletAsync(userID, -investment.CurrencyAmount, -investment.AmountInTRY, saveChanges: false);
+                        var walletUpdate = await _walletRepository.UpdateWalletAsync(userID, -investment.CurrencyAmount, saveChanges: false);
                     }
                     else
                     {
@@ -118,7 +98,7 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                         walletAsset.Balance = walletAsset.Amount * asset.SellPrice;
 
                         var walletAssetUpdate = await _walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
-                        var walletUpdate = await _walletRepository.UpdateWalletAsync(userID, investment.CurrencyAmount, investment.AmountInTRY, saveChanges: false);
+                        var walletUpdate = await _walletRepository.UpdateWalletAsync(userID, investment.CurrencyAmount, saveChanges: false);
                     }
                 }
                 else
@@ -136,7 +116,7 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                             Balance = investment.CurrencyAmount
                         }, saveChanges: false);
 
-                        var walletUpdate = await _walletRepository.UpdateWalletAsync(userID, -investment.CurrencyAmount, -investment.AmountInTRY, saveChanges: false);
+                        var walletUpdate = await _walletRepository.UpdateWalletAsync(userID, -investment.CurrencyAmount, saveChanges: false);
                     }
                     else
                     {

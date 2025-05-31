@@ -22,7 +22,6 @@ public class DeleteEntryCommand : IRequest<Result<bool>>
         private readonly IUserWalletRepository _userWalletRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly ICurrentUserService _currentUserService;
-        private readonly ICurrencyRateRepository _currencyRateRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public DeleteEntryCommandHandler(
@@ -31,7 +30,6 @@ public class DeleteEntryCommand : IRequest<Result<bool>>
             IUserWalletRepository userWalletRepository,
             ICategoryRepository categoryRepository,
             ICurrentUserService currentUserService,
-            ICurrencyRateRepository currencyRateRepository,
             IUnitOfWork unitOfWork)
         {
             _budgetRepository = budgetRepository;
@@ -39,7 +37,6 @@ public class DeleteEntryCommand : IRequest<Result<bool>>
             _userWalletRepository = userWalletRepository;
             _categoryRepository = categoryRepository;
             _currentUserService = currentUserService;
-            _currencyRateRepository = currencyRateRepository;
             _unitOfWork = unitOfWork;
         }
 
@@ -63,22 +60,10 @@ public class DeleteEntryCommand : IRequest<Result<bool>>
                 ? -Math.Abs(existingEntry.Amount)
                 : Math.Abs(existingEntry.Amount);
 
-            var currency = wallet.Wallet.Currency;
-            decimal exchangeRateToTRY = 1m;
-            var currencyRate = await _currencyRateRepository.GetCurrencyRateByType(currency);
-            if (currency != CurrencyType.TRY)
-            {
-                exchangeRateToTRY = currencyRate.ForexSelling;
-            }
-
-            decimal balanceAdjustmentInTRY = category.Type == EntryType.Income
-                ? -Math.Abs(existingEntry.Amount) * exchangeRateToTRY
-                : Math.Abs(existingEntry.Amount) * exchangeRateToTRY;
-
             await _unitOfWork.BeginTransactionAsync();
             try
             {
-                var walletUpdateResult = await _walletRepository.UpdateWalletAsync(wallet.WalletID, balanceAdjustment, balanceAdjustmentInTRY, saveChanges: false);
+                var walletUpdateResult = await _walletRepository.UpdateWalletAsync(wallet.WalletID, balanceAdjustment, saveChanges: false);
 
                 var deleteResult = await _budgetRepository.DeleteEntryAsync(request.ID, saveChanges: false);
 

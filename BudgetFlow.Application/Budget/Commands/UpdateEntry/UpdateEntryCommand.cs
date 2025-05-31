@@ -22,7 +22,6 @@ public class UpdateEntryCommand : IRequest<Result<bool>>
         private readonly ICurrentUserService _currentUserService;
         private readonly IMapper _mapper;
         private readonly IUserWalletRepository _userWalletRepository;
-        private readonly ICurrencyRateRepository _currencyRateRepository;
         private readonly IUnitOfWork _unitOfWork;
         public UpdateEntryCommandHandler(
             IBudgetRepository budgetRepository,
@@ -31,8 +30,7 @@ public class UpdateEntryCommand : IRequest<Result<bool>>
             IMapper mapper,
             ICategoryRepository categoryRepository,
             IUserWalletRepository userWalletRepository,
-            IUnitOfWork unitOfWork,
-            ICurrencyRateRepository currencyRateRepository)
+            IUnitOfWork unitOfWork)
         {
             _budgetRepository = budgetRepository;
             _currentUserService = currentUserService;
@@ -41,7 +39,6 @@ public class UpdateEntryCommand : IRequest<Result<bool>>
             _categoryRepository = categoryRepository;
             _userWalletRepository = userWalletRepository;
             _unitOfWork = unitOfWork;
-            _currencyRateRepository = currencyRateRepository;
         }
         public async Task<Result<bool>> Handle(UpdateEntryCommand request, CancellationToken cancellationToken)
         {
@@ -60,27 +57,7 @@ public class UpdateEntryCommand : IRequest<Result<bool>>
                 ? Math.Abs(mappedEntry.Amount)
                 : -Math.Abs(mappedEntry.Amount);
 
-            #region AmountInTRY alanını güncelle
-            var userWallet = await _userWalletRepository.GetByWalletIdAndUserIdAsync(request.Entry.WalletID, userID);
-            decimal exchangeRateToTRY = 1m;
-            if (userWallet.Wallet.Currency != CurrencyType.TRY)
-            {
-                var currencyRate = await _currencyRateRepository.GetCurrencyRateByType(userWallet.Wallet.Currency);
-                if (currencyRate is null)
-                    return Result.Failure<bool>(CurrencyRateErrors.FetchFailed);
-                exchangeRateToTRY = currencyRate.ForexSelling;
-            }
-            mappedEntry.AmountInTRY = category.Type == EntryType.Income
-                             ? Math.Abs(mappedEntry.Amount * exchangeRateToTRY)
-                             : -Math.Abs(mappedEntry.Amount * exchangeRateToTRY);
-            mappedEntry.ExchangeRate = exchangeRateToTRY;
-            mappedEntry.Currency = userWallet.Wallet.Currency;
-            #endregion
-
             var difference = newAmount - existingEntry.Amount;
-            var differenceInTry = category.Type == EntryType.Income
-                ? Math.Abs(difference * exchangeRateToTRY)
-                : -Math.Abs(difference * exchangeRateToTRY);
 
             var wallet = await _userWalletRepository.GetByWalletIdAndUserIdAsync(request.Entry.WalletID, userID);
             if (category.Type == EntryType.Expense && wallet.Wallet.Balance < Math.Abs(difference) && difference < 0)
@@ -91,10 +68,9 @@ public class UpdateEntryCommand : IRequest<Result<bool>>
             await _unitOfWork.BeginTransactionAsync();
             try
             {
-                await _walletRepository.UpdateWalletAsync(userID, difference, differenceInTry, saveChanges: false);
+                await _walletRepository.UpdateWalletAsync(userID, difference, saveChanges: false);
 
                 mappedEntry.Amount = newAmount;
-                mappedEntry.Currency = existingEntry.Currency;
 
                 await _budgetRepository.UpdateEntryAsync(request.ID, mappedEntry, saveChanges: false);
 

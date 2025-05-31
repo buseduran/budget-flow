@@ -22,7 +22,6 @@ public class DeleteInvestmentCommand : IRequest<Result<bool>>
         private readonly IPortfolioRepository _portfolioRepository;
         private readonly IAssetRepository _assetRepository;
         private readonly IWalletRepository _walletRepository;
-        private readonly ICurrencyRateRepository _currencyRateRepository;
         private readonly IUnitOfWork _unitOfWork;
         public DeleteInvestmentCommandHandler(
             IInvestmentRepository investmentRepository,
@@ -31,7 +30,6 @@ public class DeleteInvestmentCommand : IRequest<Result<bool>>
             IPortfolioRepository portfolioRepository,
             IAssetRepository assetRepository,
             IWalletRepository walletRepository,
-            ICurrencyRateRepository currencyRateRepository,
             IUnitOfWork unitOfWork)
         {
             _investmentRepository = investmentRepository;
@@ -40,7 +38,6 @@ public class DeleteInvestmentCommand : IRequest<Result<bool>>
             _portfolioRepository = portfolioRepository;
             _assetRepository = assetRepository;
             _walletRepository = walletRepository;
-            _currencyRateRepository = currencyRateRepository;
             _unitOfWork = unitOfWork;
         }
         public async Task<Result<bool>> Handle(DeleteInvestmentCommand request, CancellationToken cancellationToken)
@@ -79,38 +76,26 @@ public class DeleteInvestmentCommand : IRequest<Result<bool>>
             {
                 if (investment.Type == InvestmentType.Buy)
                 {
-                    if (walletAsset.Amount < investment.UnitAmount)
+                    if (walletAsset.Amount - investment.UnitAmount < 0)
                         return Result.Failure<bool>(WalletAssetErrors.NotEnoughAssetAmount);
 
-                    // Satın alma siliniyor: varlık azaltılır, para geri verilir
                     walletAsset.Amount -= investment.UnitAmount;
                     walletAsset.Balance -= investment.CurrencyAmount;
 
-                    var assetUpdate = await _walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
-                    if (!assetUpdate)
-                        return Result.Failure<bool>(WalletAssetErrors.UserAssetUpdateFailed);
-
-                    var walletUpdate = await _walletRepository.UpdateWalletAsync(portfolio.WalletID, investment.CurrencyAmount, investment.AmountInTRY, saveChanges: false);
-                    if (!walletUpdate)
-                        return Result.Failure<bool>(WalletErrors.UpdateFailed);
+                    await _walletRepository.UpdateWalletAsync(wallet.Wallet.ID, investment.CurrencyAmount, saveChanges: false);
                 }
                 else
                 {
-                    // Satış siliniyor: varlık artırılır, para geri alınır
                     if (wallet.Wallet.Balance < investment.CurrencyAmount)
                         return Result.Failure<bool>(WalletErrors.InsufficientBalance);
 
                     walletAsset.Amount += investment.UnitAmount;
-                    walletAsset.Balance = walletAsset.Amount * asset.SellPrice;
+                    walletAsset.Balance += investment.CurrencyAmount;
 
-                    var assetUpdate = await _walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
-                    if (!assetUpdate)
-                        return Result.Failure<bool>(WalletAssetErrors.UserAssetUpdateFailed);
-
-                    var walletUpdate = await _walletRepository.UpdateWalletAsync(portfolio.WalletID, -investment.CurrencyAmount, -investment.AmountInTRY, saveChanges: false);
-                    if (!walletUpdate)
-                        return Result.Failure<bool>(WalletErrors.UpdateFailed);
+                    await _walletRepository.UpdateWalletAsync(wallet.Wallet.ID, -investment.CurrencyAmount, saveChanges: false);
                 }
+
+                await _walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
 
                 var deleteResult = await _investmentRepository.DeleteInvestmentAsync(request.ID);
                 if (!deleteResult)

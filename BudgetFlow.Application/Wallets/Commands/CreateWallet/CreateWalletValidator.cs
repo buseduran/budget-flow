@@ -8,8 +8,5 @@ public class CreateWalletValidator : AbstractValidator<CreateWalletCommand>
     {
         RuleFor(x => x.Balance)
             .GreaterThanOrEqualTo(0).WithMessage("Bakiye 0'dan küçük olamaz.");
-
-        RuleFor(x => x.Currency)
-            .IsInEnum().WithMessage("Geçersiz para birimi.");
     }
 }

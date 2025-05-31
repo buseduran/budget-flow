@@ -102,9 +102,9 @@ public class StatisticsController : ControllerBase
     [HttpGet("Wallet/{WalletID}/Contributions")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<WalletContributionResponse>))]
-    public async Task<IResult> GetWalletContributions(int WalletID, [FromQuery] bool convertToTRY = false)
+    public async Task<IResult> GetWalletContributions(int WalletID)
     {
-        var result = await _mediator.Send(new GetWalletContributionsQuery(WalletID, convertToTRY));
+        var result = await _mediator.Send(new GetWalletContributionsQuery(WalletID));
         return result.IsSuccess
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();

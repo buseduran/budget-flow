@@ -1,10 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Extensions;
 using BudgetFlow.Application.Investments;
 using BudgetFlow.Application.Wallets.Commands.CreateWallet;
-using BudgetFlow.Application.Wallets.Commands.UpdateCurrency;
-using BudgetFlow.Application.Wallets.Queries.GetUserCurrency;
 using BudgetFlow.Application.Wallets.Queries.GetWalletPagination;
-using BudgetFlow.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -60,38 +57,5 @@ public class WalletController : ControllerBase
         return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();
-    }
-
-    /// <summary>
-    /// Updates Currency of the Wallet
-    /// </summary>
-    /// <param name="updateCurrencyCommand"></param>
-    /// <returns></returns>
-    [HttpPut("Currency")]
-    [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
-    [Authorize]
-    public async Task<IResult> UpdateCurrencyAsync([FromBody] UpdateCurrencyCommand updateCurrencyCommand)
-    {
-        var result = await _mediator.Send(updateCurrencyCommand);
-        return result.IsSuccess
-        ? Results.Ok(result.Value)
-        : result.ToProblemDetails();
-    }
-
-    /// <summary>
-    /// Get User Currency
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("Currency")]
-    [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CurrencyType))]
-    [Authorize]
-    public async Task<IResult> GetUserCurrencyAsync([FromQuery] GetUserCurrencyQuery getUserCurrencyQuery)
-    {
-        var result = await _mediator.Send(getUserCurrencyQuery);
-        return result.IsSuccess
-            ? Results.Ok(result.Value)
-            : result.ToProblemDetails();
     }
 }

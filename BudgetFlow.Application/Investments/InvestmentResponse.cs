@@ -9,9 +9,6 @@ public class InvestmentResponse
     public decimal CurrencyAmount { get; set; }
     public decimal UnitAmount { get; set; }
     public string Unit { get; set; }
-    public CurrencyType Currency { get; set; }
-    public decimal AmountInTRY { get; set; }
-    public decimal ExchangeRate { get; set; }
     public int AssetID { get; set; }
     public int PortfolioID { get; set; }
     public InvestmentType Type { get; set; }

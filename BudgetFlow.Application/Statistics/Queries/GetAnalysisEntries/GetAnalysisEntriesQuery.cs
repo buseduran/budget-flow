@@ -39,20 +39,11 @@ public record GetAnalysisEntriesQuery : IRequest<Result<AnalysisEntriesResponse>
             if (userWallet == null)
                 return Result.Failure<AnalysisEntriesResponse>(UserWalletErrors.UserWalletNotFound);
 
-            decimal exchangeRateToTRY = 1m;
-            if (request.ConvertToTRY && userWallet.Wallet.Currency != CurrencyType.TRY)
-            {
-                var rate = await _currencyRateRepository.GetCurrencyRateByType(userWallet.Wallet.Currency);
-                exchangeRateToTRY = rate.ForexSelling;
-            }
 
             var entries = await _statisticsRepository.GetAnalysisEntriesAsync(
                 userID,
                 request.Range,
-                userWallet.Wallet.Currency,
-                request.WalletID,
-                exchangeRateToTRY,
-                request.ConvertToTRY);
+                request.WalletID);
 
             return entries != null
                ? Result.Success(entries)

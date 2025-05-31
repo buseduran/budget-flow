@@ -45,7 +45,6 @@ public class ExchangeRateScraper : IExchangeRateScraper
                     var code = x.Attribute("Kod")?.Value!;
                     return new CurrencyRate
                     {
-                        CurrencyType = Enum.Parse<CurrencyType>(code),
                         ForexBuying = decimal.TryParse(x.Element("ForexBuying")?.Value, out var buy) ? buy : 0,
                         ForexSelling = decimal.TryParse(x.Element("ForexSelling")?.Value, out var sell) ? sell : 0,
                         RetrievedAt = DateTime.UtcNow
@@ -73,32 +72,19 @@ public class ExchangeRateScraper : IExchangeRateScraper
         {
             foreach (var rate in latestRates)
             {
-                var existingRate = await _currencyRateRepository.GetCurrencyRateByType(rate.CurrencyType);
-                if (existingRate != null)
-                {
-                    // Update existing one
-                    existingRate.ForexBuying = rate.ForexBuying;
-                    existingRate.ForexSelling = rate.ForexSelling;
-                    existingRate.RetrievedAt = DateTime.UtcNow;
-                    await _currencyRateRepository.UpdateRateAsync(existingRate, saveChanges: false);
-                }
-                else
-                {
-                    // Create new one
-                    await _currencyRateRepository.AddRatesAsync(new[] { rate }, saveChanges: false);
-                }
+                await _currencyRateRepository.AddRatesAsync(new[] { rate }, saveChanges: false);
 
                 #region Save to Asset Table
                 var asset = new Asset
                 {
-                    Name = $"{rate.CurrencyType} Döviz Kuru",
-                    Code = rate.CurrencyType.ToString(),
-                    Symbol = rate.CurrencyType.ToString(),
+                    Name = "Döviz Kuru",
+                    Code = "FOREX",
+                    Symbol = "FOREX",
                     Unit = "TRY",
                     AssetType = AssetType.Exchange,
                     BuyPrice = rate.ForexBuying,
                     SellPrice = rate.ForexSelling,
-                    Description = $"{rate.CurrencyType} Döviz Kuru - TCMB",
+                    Description = "Döviz Kuru - TCMB",
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -114,7 +100,6 @@ public class ExchangeRateScraper : IExchangeRateScraper
                     await _assetRepository.CreateAssetAsync(asset, saveChanges: false);
                 }
                 #endregion
-
             }
 
             await _unitOfWork.SaveChangesAsync();

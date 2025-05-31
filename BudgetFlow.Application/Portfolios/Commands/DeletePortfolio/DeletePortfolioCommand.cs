@@ -26,9 +26,15 @@ public class DeletePortfolioCommand : IRequest<Result<bool>>
         {
             var userID = _currentUserService.GetCurrentUserID();
             var result = await _portfolioRepository.DeletePortfolioAsync(request.ID, userID);
-            return result
-            ? Result.Success(result)
-            : Result.Failure<bool>(PortfolioErrors.PortfolioDeletionFailed);
+            if (!result)
+            {
+                var portfolio = await _portfolioRepository.GetPortfolioByIdAsync(request.ID);
+                if (portfolio is null)
+                    return Result.Failure<bool>(PortfolioErrors.PortfolioNotFound);
+
+                return Result.Failure<bool>(PortfolioErrors.PortfolioHasInvestments);
+            }
+            return Result.Success(result);
         }
     }
 }

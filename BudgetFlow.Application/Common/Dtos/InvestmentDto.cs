@@ -6,7 +6,6 @@ public class InvestmentDto
     public int AssetId { get; set; }
     public decimal UnitAmount { get; set; }
     public decimal CurrencyAmount { get; set; }
-    public decimal AmountInTRY { get; set; }
     public decimal ExchangeRate { get; set; }
     public string Description { get; set; }
     public InvestmentType Type { get; set; }

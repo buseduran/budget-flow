@@ -87,37 +87,16 @@ public class CreateEntryCommand : IRequest<Result<bool>>
             await _unitOfWork.BeginTransactionAsync();
             try
             {
-                //userın currency'sini al ve ata
-                var currency = wallet.Wallet.Currency;
-                mappedEntry.Currency = currency;
-
-                #region TRY ile işlem yapılmıyorsa dönüşüm yapılır.
-                decimal exchangeRateToTRY = 1m;
-                var currencyRate = await _currencyRateRepository.GetCurrencyRateByType(currency);
-                if (currencyRate is null)
-                    return Result.Failure<bool>(CurrencyRateErrors.FetchFailed);
-
-                if (currency != CurrencyType.TRY)
-                {
-                    exchangeRateToTRY = currencyRate.ForexSelling;
-                }
-                mappedEntry.AmountInTRY = mappedEntry.Amount * exchangeRateToTRY;
-                mappedEntry.ExchangeRate = exchangeRateToTRY;
-                #endregion
-
                 // Miktarı kategori tipine göre ayarla
                 mappedEntry.Amount = category.Type == EntryType.Income
                     ? Math.Abs(mappedEntry.Amount)
                     : -Math.Abs(mappedEntry.Amount);
-                mappedEntry.AmountInTRY = category.Type == EntryType.Income
-                   ? Math.Abs(mappedEntry.AmountInTRY)
-                   : -Math.Abs(mappedEntry.AmountInTRY);
 
                 // Entry ekle
                 await _budgetRepository.CreateEntryAsync(mappedEntry, saveChanges: false);
 
                 // Cüzdan güncelle
-                await _walletRepository.UpdateWalletAsync(wallet.WalletID, mappedEntry.Amount, mappedEntry.AmountInTRY, saveChanges: false);
+                await _walletRepository.UpdateWalletAsync(wallet.WalletID, mappedEntry.Amount, saveChanges: false);
 
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitAsync();

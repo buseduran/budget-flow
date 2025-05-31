@@ -57,8 +57,7 @@ public class UserRepository : IUserRepository
             {
                 WalletID = uw.WalletID,
                 Role = uw.Role,
-                Balance = uw.Wallet.Balance,
-                Currency = uw.Wallet.Currency.ToString()
+                Balance = uw.Wallet.Balance
             }).ToList()
         };
 
@@ -235,7 +234,6 @@ public class UserRepository : IUserRepository
                     WalletID = uw.WalletID,
                     Role = uw.Role,
                     Balance = uw.Wallet.Balance,
-                    Currency = uw.Wallet.Currency.ToString()
                 }).ToList(),
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt

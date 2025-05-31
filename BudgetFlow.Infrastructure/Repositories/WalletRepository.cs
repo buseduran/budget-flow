@@ -25,7 +25,7 @@ public class WalletRepository : IWalletRepository
         return wallet.ID;
     }
 
-    public async Task<bool> UpdateWalletAsync(int ID, decimal Amount, decimal AmountInTRY, bool saveChanges = true)
+    public async Task<bool> UpdateWalletAsync(int ID, decimal Amount, bool saveChanges = true)
     {
         var wallet = await context.Wallets
             .FirstOrDefaultAsync(wallet => wallet.ID == ID);
@@ -33,7 +33,6 @@ public class WalletRepository : IWalletRepository
 
         wallet.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
         wallet.Balance += Amount;
-        wallet.BalanceInTRY += AmountInTRY;
         if (saveChanges)
             await context.SaveChangesAsync();
         return true;
@@ -48,30 +47,7 @@ public class WalletRepository : IWalletRepository
                 ID = wallet.ID,
                 Name = wallet.Name,
                 Balance = wallet.Balance,
-                Currency = wallet.Currency,
             })
-            .FirstOrDefaultAsync();
-
-        return wallet;
-    }
-
-    public async Task<bool> UpdateCurrencyAsync(int WalletID, CurrencyType Currency)
-    {
-        var wallet = await context.Wallets
-            .FirstOrDefaultAsync(wallet => wallet.ID == WalletID);
-        if (wallet is null) return false;
-
-        wallet.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-        wallet.Currency = Currency;
-
-        return await context.SaveChangesAsync() > 0;
-    }
-
-    public async Task<CurrencyType> GetUserCurrencyAsync(int WalletID)
-    {
-        var wallet = await context.Wallets
-            .Where(wallet => wallet.ID == WalletID)
-            .Select(wallet => wallet.Currency)
             .FirstOrDefaultAsync();
 
         return wallet;
@@ -124,7 +100,6 @@ public class WalletRepository : IWalletRepository
                 ID = uw.Wallet.ID,
                 Name = uw.Wallet.Name,
                 Balance = uw.Wallet.Balance,
-                Currency = uw.Wallet.Currency,
                 Role = uw.Role
             }).ToListAsync();
 

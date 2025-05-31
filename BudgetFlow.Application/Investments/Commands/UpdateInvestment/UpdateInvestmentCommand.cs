@@ -25,7 +25,6 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
         private readonly IPortfolioRepository _portfolioRepository;
         private readonly IUserWalletRepository _userWalletRepository;
         private readonly ICurrentUserService _currentUserService;
-        private readonly ICurrencyRateRepository _currencyRateRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public UpdateInvestmentCommandHandler(
@@ -35,7 +34,6 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
             IPortfolioRepository portfolioRepository,
             IUserWalletRepository userWalletRepository,
             ICurrentUserService currentUserService,
-            ICurrencyRateRepository currencyRateRepository,
             IUnitOfWork unitOfWork)
         {
             _investmentRepository = investmentRepository;
@@ -44,7 +42,6 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
             _portfolioRepository = portfolioRepository;
             _userWalletRepository = userWalletRepository;
             _currentUserService = currentUserService;
-            _currencyRateRepository = currencyRateRepository;
             _unitOfWork = unitOfWork;
         }
 
@@ -71,46 +68,29 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
             if (asset is null)
                 return Result.Failure<bool>(AssetErrors.AssetNotFound);
 
-            var type = existingInvestment.Type;
-
-            decimal newCurrencyAmount = type == InvestmentType.Buy
-                ? request.UnitAmount * asset.BuyPrice
-                : request.UnitAmount * asset.SellPrice;
-
-
             var walletAsset = await _walletRepository.GetWalletAssetAsync(portfolio.WalletID, existingInvestment.AssetID);
             if (walletAsset is null)
-                return Result.Failure<bool>(WalletAssetErrors.NotEnoughAssetAmount);
+                return Result.Failure<bool>(WalletAssetErrors.NotFound);
 
-            decimal unitDifference = request.UnitAmount - existingInvestment.UnitAmount;
-            decimal balanceDifference = newCurrencyAmount - existingInvestment.CurrencyAmount;
-
-            #region AmountInTRY güncelle
-            var currency = userWallet.Wallet.Currency;
-            decimal exchangeRateToTRY = 1m;
-
-            if (currency != CurrencyType.TRY)
-            {
-                var currencyRate = await _currencyRateRepository.GetCurrencyRateByType(currency);
-                exchangeRateToTRY = currencyRate.ForexSelling;
-            }
-            decimal balanceDifferenceInTRY = balanceDifference * exchangeRateToTRY;
-            #endregion
-
+            var newCurrencyAmount = request.UnitAmount * (existingInvestment.Type == InvestmentType.Buy ? asset.BuyPrice : asset.SellPrice);
+            var unitDifference = request.UnitAmount - existingInvestment.UnitAmount;
+            var balanceDifference = newCurrencyAmount - existingInvestment.CurrencyAmount;
 
             await _unitOfWork.BeginTransactionAsync();
-
             try
             {
-                if (type == InvestmentType.Buy)
+                if (existingInvestment.Type == InvestmentType.Buy)
                 {
-                    if (userWallet.Wallet.Balance < balanceDifference)
+                    if (walletAsset.Amount + unitDifference < 0)
+                        return Result.Failure<bool>(WalletAssetErrors.NotEnoughAssetAmount);
+
+                    if (userWallet.Wallet.Balance - balanceDifference < 0)
                         return Result.Failure<bool>(WalletErrors.InsufficientBalance);
 
                     walletAsset.Amount += unitDifference;
                     walletAsset.Balance += balanceDifference;
 
-                    await _walletRepository.UpdateWalletAsync(userWallet.Wallet.ID, -balanceDifference, -balanceDifferenceInTRY, saveChanges: false);
+                    await _walletRepository.UpdateWalletAsync(userWallet.Wallet.ID, -balanceDifference,  saveChanges: false);
                 }
                 else
                 {
@@ -120,7 +100,7 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
                     walletAsset.Amount -= unitDifference;
                     walletAsset.Balance -= balanceDifference;
 
-                    await _walletRepository.UpdateWalletAsync(userWallet.Wallet.ID, balanceDifference, balanceDifferenceInTRY, saveChanges: false);
+                    await _walletRepository.UpdateWalletAsync(userWallet.Wallet.ID, balanceDifference,saveChanges: false);
                 }
 
                 await _walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
@@ -128,16 +108,12 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
                 existingInvestment.Description = request.Description;
                 existingInvestment.UnitAmount = request.UnitAmount;
                 existingInvestment.CurrencyAmount = newCurrencyAmount;
-                existingInvestment.AmountInTRY = newCurrencyAmount * exchangeRateToTRY;
-                existingInvestment.ExchangeRate = exchangeRateToTRY;
                 existingInvestment.Date = DateTime.SpecifyKind(request.Date, DateTimeKind.Utc);
 
                 var investmentDto = new InvestmentDto
                 {
                     UnitAmount = request.UnitAmount,
                     CurrencyAmount = newCurrencyAmount,
-                    AmountInTRY = newCurrencyAmount * exchangeRateToTRY,
-                    ExchangeRate = exchangeRateToTRY,
                     Description = request.Description,
                     Date = DateTime.SpecifyKind(request.Date, DateTimeKind.Utc),
                 };

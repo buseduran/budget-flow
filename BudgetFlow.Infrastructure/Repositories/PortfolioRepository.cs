@@ -32,8 +32,12 @@ public class PortfolioRepository : IPortfolioRepository
     {
         var portfolio = await context.Portfolios
             .Where(p => p.ID == ID && p.UserID == UserID)
+            .Include(p => p.Investments)
             .FirstOrDefaultAsync();
         if (portfolio is null) return false;
+
+        if (portfolio.Investments.Any())
+            return false;
 
         context.Portfolios.Remove(portfolio);
         await context.SaveChangesAsync();
