@@ -72,7 +72,7 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
             if (walletAsset is null)
                 return Result.Failure<bool>(WalletAssetErrors.NotFound);
 
-            var newCurrencyAmount = request.UnitAmount * (existingInvestment.Type == InvestmentType.Buy ? asset.BuyPrice : asset.SellPrice);
+            var newCurrencyAmount = request.UnitAmount * (existingInvestment.Type == InvestmentType.Buy ? asset.SellPrice : asset.BuyPrice);
             var unitDifference = request.UnitAmount - existingInvestment.UnitAmount;
             var balanceDifference = newCurrencyAmount - existingInvestment.CurrencyAmount;
 
