@@ -175,7 +175,8 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
             Subject = new ClaimsIdentity(new[]
             {
                 new Claim("email", email),
-                new Claim("walletId", walletId.ToString())
+                new Claim("walletId", walletId.ToString()),
+                new Claim("purpose", "wallet_invitation")
             }),
             Expires = DateTime.UtcNow.AddHours(expirationHours),
             SigningCredentials = credentials,
@@ -203,6 +204,25 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
         Console.WriteLine("Token Verification Debug Info:");
         Console.WriteLine($"Input Token: {token}");
 
+        // Remove Bearer prefix if exists
+        if (token.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        {
+            token = token.Substring(7);
+            Console.WriteLine($"Token after removing Bearer prefix: {token}");
+        }
+
+        // URL decode the token
+        try
+        {
+            token = Uri.UnescapeDataString(token);
+            Console.WriteLine($"Token after URL decode: {token}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error decoding token: {ex.Message}");
+            return (false, 0, null);
+        }
+
         var handler = new JsonWebTokenHandler();
         var secretKey = configuration["Jwt:Secret"];
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -221,26 +241,43 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
         Console.WriteLine($"Issuer: {configuration["Jwt:Issuer"]}");
         Console.WriteLine($"Audience: {configuration["Jwt:Audience"]}");
 
-        var result = await handler.ValidateTokenAsync(token, parameters);
-
-        Console.WriteLine($"Token Validation Result: {result.IsValid}");
-        if (!result.IsValid)
+        try
         {
-            Console.WriteLine("Token validation failed");
+            var result = await handler.ValidateTokenAsync(token, parameters);
+            Console.WriteLine($"Token Validation Result: {result.IsValid}");
+
+            if (!result.IsValid)
+            {
+                Console.WriteLine("Token validation failed");
+                return (false, 0, null);
+            }
+
+            var claims = result.ClaimsIdentity.Claims.ToList();
+            var walletIdClaim = claims.FirstOrDefault(c => c.Type == "walletId");
+            var emailClaim = claims.FirstOrDefault(c => c.Type == "email");
+            var purposeClaim = claims.FirstOrDefault(c => c.Type == "purpose");
+
+            Console.WriteLine($"WalletId Claim: {walletIdClaim?.Value}");
+            Console.WriteLine($"Email Claim: {emailClaim?.Value}");
+            Console.WriteLine($"Purpose Claim: {purposeClaim?.Value}");
+
+            if (purposeClaim?.Value != "wallet_invitation")
+            {
+                Console.WriteLine("Invalid token purpose");
+                return (false, 0, null);
+            }
+
+            var success = int.TryParse(walletIdClaim.Value, out int walletId);
+            Console.WriteLine($"WalletId Parse Success: {success}, Value: {walletId}");
+
+            return (success, walletId, emailClaim.Value);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error validating token: {ex.Message}");
+            Console.WriteLine($"Error details: {ex}");
             return (false, 0, null);
         }
-
-        var claims = result.ClaimsIdentity.Claims.ToList();
-        var walletIdClaim = claims.FirstOrDefault(c => c.Type == "walletId");
-        var emailClaim = claims.FirstOrDefault(c => c.Type == "email");
-
-        Console.WriteLine($"WalletId Claim: {walletIdClaim?.Value}");
-        Console.WriteLine($"Email Claim: {emailClaim?.Value}");
-
-        var success = int.TryParse(walletIdClaim.Value, out int walletId);
-        Console.WriteLine($"WalletId Parse Success: {success}, Value: {walletId}");
-
-        return (success, walletId, emailClaim.Value);
     }
 
 
