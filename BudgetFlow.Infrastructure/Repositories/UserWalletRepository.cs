@@ -31,6 +31,7 @@ public class UserWalletRepository : IUserWalletRepository
     {
         var userWallet = await context.UserWallets
             .Include(uw => uw.Wallet)
+            .Include(uw => uw.User)
             .FirstOrDefaultAsync(uw => uw.WalletID == walletID && uw.UserID == userID);
         return userWallet;
     }

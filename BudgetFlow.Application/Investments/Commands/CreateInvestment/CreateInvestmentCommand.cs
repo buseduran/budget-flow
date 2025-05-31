@@ -71,6 +71,9 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                 ? investment.UnitAmount * asset.SellPrice
                 : investment.UnitAmount * asset.BuyPrice;
 
+            investment.ExchangeRate = investment.Type == InvestmentType.Buy
+                ? asset.SellPrice : asset.BuyPrice;
+
             var walletAsset = await _walletRepository.GetWalletAssetAsync(portfolio.WalletID, investment.AssetId);
 
             await _unitOfWork.BeginTransactionAsync();

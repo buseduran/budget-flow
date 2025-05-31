@@ -75,7 +75,7 @@ public class SendInvitationCommand : IRequest<Result<bool>>
             if (targetUser is null)
                 return Result.Failure<bool>(UserErrors.UserNotFound);
 
-            var targetUserWallet = await _userWalletRepository.GetByWalletIdAndUserIdAsync(wallet.WalletID, userID);
+            var targetUserWallet = await _userWalletRepository.GetByWalletIdAndUserIdAsync(wallet.WalletID, targetUser.ID);
             if (targetUser is not null)
                 return Result.Failure<bool>(WalletErrors.UserWalletAlreadyJoined);
             #endregion
