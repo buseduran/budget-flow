@@ -88,7 +88,7 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                     }
                     else
                     {
-                        if (walletAsset.Amount < investment.UnitAmount || walletAsset.Balance < investment.CurrencyAmount)
+                        if (walletAsset.Amount < investment.UnitAmount)
                             return Result.Failure<bool>(WalletAssetErrors.NotEnoughAssetAmount);
 
                         walletAsset.Amount -= investment.UnitAmount;
