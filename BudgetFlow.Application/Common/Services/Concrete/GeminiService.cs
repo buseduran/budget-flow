@@ -9,13 +9,13 @@ namespace BudgetFlow.Application.Common.Services.Concrete;
 public class GeminiService : IGeminiService
 {
     private readonly HttpClient _httpClient;
-    private readonly string _apiKey;
+    private readonly string _apiUrl;
     private readonly string _basePrompt;
 
     public GeminiService(HttpClient httpClient, IConfiguration config)
     {
         _httpClient = httpClient;
-        _apiKey = config["Gemini:ApiKey"];
+        _apiUrl = config["Gemini:ApiUrl"];
         _basePrompt = @"
             Aşağıdaki gelir/gider verilerini profesyonelce analiz et. 
             Gelir ve gider dağılımlarını değerlendir, tasarruf oranına dair çıkarım yap ve 1-2 kısa öneri ver. 
@@ -62,9 +62,7 @@ public class GeminiService : IGeminiService
             }
         };
 
-        var request = new HttpRequestMessage(HttpMethod.Post,
-            $"https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key={_apiKey}");
-
+        var request = new HttpRequestMessage(HttpMethod.Post, _apiUrl);
         request.Content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
 
         var response = await _httpClient.SendAsync(request);

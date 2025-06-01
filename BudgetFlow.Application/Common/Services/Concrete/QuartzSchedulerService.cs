@@ -74,9 +74,10 @@ public class QuartzSchedulerService
         ITrigger geminiTrigger = TriggerBuilder.Create()
             .WithIdentity("geminiTrigger", "group1")
             .StartNow()
-            .WithSimpleSchedule(x => x
-                .WithIntervalInSeconds(60) //2 minutes
-                .RepeatForever())
+            .WithDailyTimeIntervalSchedule(x =>
+                x.WithIntervalInHours(24)
+                 .OnEveryDay()
+                 .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(4, 0))) // her gün 04:00
             .Build();
 
         await scheduler.ScheduleJob(geminiJob, geminiTrigger);

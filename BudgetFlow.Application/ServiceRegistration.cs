@@ -92,7 +92,7 @@ public static class ServiceRegistration
             q.AddTrigger(opts => opts
                 .ForJob(jobKey)
                 .WithIdentity("GeminiAnalysisJob-trigger")
-                .WithCronSchedule("0 */2 * * * ?")); // Every 2 minutes
+                .WithCronSchedule("0 0 4 * * ?")); // Every day at 04:00
         });
 
 
