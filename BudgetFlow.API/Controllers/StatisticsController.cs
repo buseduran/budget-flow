@@ -3,6 +3,7 @@ using BudgetFlow.Application.Statistics.Queries.GetAnalysisEntries;
 using BudgetFlow.Application.Statistics.Queries.GetAssetInvestPagination;
 using BudgetFlow.Application.Statistics.Queries.GetAssetRevenue;
 using BudgetFlow.Application.Statistics.Queries.GetLastEntries;
+using BudgetFlow.Application.Statistics.Queries.GetLastInvestments;
 using BudgetFlow.Application.Statistics.Queries.GetPortfolioAssets;
 using BudgetFlow.Application.Statistics.Queries.GetWalletContributions;
 using BudgetFlow.Application.Statistics.Responses;
@@ -58,6 +59,22 @@ public class StatisticsController : ControllerBase
     public async Task<IResult> GetLastEntriesAsync([FromQuery] GetLastEntriesQuery getLastEntriesQuery)
     {
         var result = await _mediator.Send(getLastEntriesQuery);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Get Last Investments for Dashboard. 
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("LatestInvestments")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<LastEntryResponse>))]
+    public async Task<IResult> GetLastInvestmentsAsync([FromQuery] GetLastInvestmentsQuery getLastInvestmentsQuery)
+    {
+        var result = await _mediator.Send(getLastInvestmentsQuery);
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();

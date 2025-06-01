@@ -1,5 +1,6 @@
 using BudgetFlow.Application.Statistics.Queries.GetAssetInvestPagination;
 using BudgetFlow.Application.Statistics.Responses;
+using BudgetFlow.Application.Investments;
 
 namespace BudgetFlow.Application.Common.Interfaces.Repositories;
 
@@ -13,4 +14,5 @@ public interface IStatisticsRepository
     Task<PaginatedAssetInvestResponse> GetAssetInvestsPaginationAsync(GetAssetInvestPaginationQuery query);
     Task<List<WalletContributionResponse>> GetWalletContributionsAsync(int walletId);
     Task<PortfolioAssetResponse> GetAssetInvestmentsAsync(int portfolioID, int userID);
+    Task<List<InvestmentPaginationResponse>> GetLastInvestmentsAsync(int walletId);
 }

@@ -1,6 +1,7 @@
 using BudgetFlow.Application.Categories;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Utils;
+using BudgetFlow.Application.Investments;
 using BudgetFlow.Application.Statistics.Queries.GetAssetInvestPagination;
 using BudgetFlow.Application.Statistics.Responses;
 using BudgetFlow.Domain.Enums;
@@ -163,6 +164,31 @@ public class StatisticsRepository : IStatisticsRepository
             .ToListAsync();
 
         return entries;
+    }
+    public async Task<List<InvestmentPaginationResponse>> GetLastInvestmentsAsync(int portfolioId)
+    {
+        var investments = await _context.Investments
+            .Where(i => i.Portfolio.ID == portfolioId)
+            .OrderByDescending(i => i.CreatedAt)
+            .Take(5)
+            .Select(i => new InvestmentPaginationResponse
+            {
+                ID = i.ID,
+                UnitAmount = i.UnitAmount,
+                CurrencyAmount = i.CurrencyAmount,
+                Date = i.Date,
+                Type = i.Type,
+                UserName = i.User.Name,
+                ExchangeRate = i.ExchangeRate,
+                Name = i.Asset.Name,
+                Description = i.Asset.Description,
+                Unit = i.Asset.Unit,
+                CreatedAt = i.CreatedAt,
+                UpdatedAt = i.UpdatedAt
+            })
+            .ToListAsync();
+
+        return investments;
     }
 
     public async Task<List<AssetRevenueResponse>> GetAssetRevenueAsync(string portfolio)
