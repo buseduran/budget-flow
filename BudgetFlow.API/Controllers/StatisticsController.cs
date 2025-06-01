@@ -5,8 +5,10 @@ using BudgetFlow.Application.Statistics.Queries.GetAssetRevenue;
 using BudgetFlow.Application.Statistics.Queries.GetLastEntries;
 using BudgetFlow.Application.Statistics.Queries.GetLastInvestments;
 using BudgetFlow.Application.Statistics.Queries.GetPortfolioAssets;
+using BudgetFlow.Application.Statistics.Queries.GetSummaryReport;
 using BudgetFlow.Application.Statistics.Queries.GetWalletContributions;
 using BudgetFlow.Application.Statistics.Responses;
+using BudgetFlow.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
@@ -137,6 +139,21 @@ public class StatisticsController : ControllerBase
     public async Task<IResult> GetAssetInvestmentsAsync(int PortfolioID)
     {
         var result = await _mediator.Send(new GetPortfolioAssetsQuery(PortfolioID));
+        return result.IsSuccess
+               ? Results.Ok(result.Value)
+               : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Get Summary Report. 
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("Summary")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SummaryReportResponse))]
+    public async Task<IResult> GetSummaryReport(int WalletID)
+    {
+        var result = await _mediator.Send(new GetSummaryReportQuery(WalletID));
         return result.IsSuccess
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();

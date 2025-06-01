@@ -1,4 +1,5 @@
 ﻿using BudgetFlow.Application.Common.Interfaces;
+using BudgetFlow.Application.Common.Scrapers.Abstract;
 using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;

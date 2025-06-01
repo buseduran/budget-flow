@@ -16,4 +16,5 @@ public static class WalletErrors
     public static Error UserHasNoPermission => new("Wallet.UserHasNoPermission", "Bu cüzdanda bu işlemi yapma izniniz yok.");
     public static Error InvalidCurrency => new("Wallet.InvalidCurrency", "Geçersiz para birimi.");
     public static Error CurrencyRateNotFound => new("Wallet.CurrencyRateNotFound", "Para birimi kuru bulunamadı.");
+    public static Error SummaryReportNotFound => new("Wallet.SummaryReportNotFound", "Cüzdan için özet rapor bulunamadı.");
 }

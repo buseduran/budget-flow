@@ -19,17 +19,14 @@ public record GetAnalysisEntriesQuery : IRequest<Result<AnalysisEntriesResponse>
         private readonly IStatisticsRepository _statisticsRepository;
         private readonly IUserWalletRepository _userWalletRepository;
         private readonly ICurrentUserService _currentUserService;
-        private readonly ICurrencyRateRepository _currencyRateRepository;
         public GetAnalysisEntriesQueryHandler(
             IStatisticsRepository statisticsRepository,
             IUserWalletRepository userWalletRepository,
-            ICurrentUserService currentUserService,
-            ICurrencyRateRepository currencyRateRepository)
+            ICurrentUserService currentUserService)
         {
             _statisticsRepository = statisticsRepository;
             _userWalletRepository = userWalletRepository;
             _currentUserService = currentUserService;
-            _currencyRateRepository = currencyRateRepository;
         }
 
         public async Task<Result<AnalysisEntriesResponse>> Handle(GetAnalysisEntriesQuery request, CancellationToken cancellationToken)

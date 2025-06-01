@@ -1,7 +1,7 @@
 ﻿using BudgetFlow.Application.Common.Interfaces;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
-using BudgetFlow.Application.Common.Services.Abstract;
+using BudgetFlow.Application.Common.Scrapers.Abstract;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using BudgetFlow.Domain.Errors;
@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Xml.Linq;
 
-namespace BudgetFlow.Application.Common.Services.Concrete;
+namespace BudgetFlow.Application.Common.Scrapers.Concrete;
 public class ExchangeRateScraper : IExchangeRateScraper
 {
     private readonly ICurrencyRateRepository _currencyRateRepository;
@@ -109,9 +109,7 @@ public class ExchangeRateScraper : IExchangeRateScraper
                     assetsToUpdate.Add(existingAsset);
                 }
                 else
-                {
                     assetsToInsert.Add(asset);
-                }
             }
             #endregion
 

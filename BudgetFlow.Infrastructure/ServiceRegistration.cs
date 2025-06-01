@@ -28,6 +28,7 @@ public static class ServiceRegistration
         services.AddScoped<ICurrencyRateRepository, CurrencyRateRepository>();
         services.AddScoped<IStatisticsRepository, StatisticsRepository>();
         services.AddScoped<IWalletAssetRepository, WalletAssetRepository>();
+        services.AddScoped<ISummaryReportRepository, SummaryReportRepository>();
         #endregion
 
         services.AddScoped<ITokenProvider, TokenProvider>();

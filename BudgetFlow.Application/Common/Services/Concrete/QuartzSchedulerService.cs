@@ -66,18 +66,20 @@ public class QuartzSchedulerService
         await scheduler.ScheduleJob(metalJob, metalTrigger);
         #endregion
 
-        #region  Stock Job
-        IJobDetail stockJob = JobBuilder.Create<StockJob>()
-            .WithIdentity("stockJob", "group1")
+        #region Gemini Job
+        IJobDetail geminiJob = JobBuilder.Create<GeminiAnalysisJob>()
+            .WithIdentity("geminiJob", "group1")
             .Build();
 
-        ITrigger stockTrigger = TriggerBuilder.Create()
-            .WithIdentity("stockTrigger", "group1")
+        ITrigger geminiTrigger = TriggerBuilder.Create()
+            .WithIdentity("geminiTrigger", "group1")
             .StartNow()
             .WithSimpleSchedule(x => x
-                .WithIntervalInSeconds(1800) //30 minutes
+                .WithIntervalInSeconds(60) //2 minutes
                 .RepeatForever())
             .Build();
+
+        await scheduler.ScheduleJob(geminiJob, geminiTrigger);
         #endregion
     }
     public async Task StopAsync()

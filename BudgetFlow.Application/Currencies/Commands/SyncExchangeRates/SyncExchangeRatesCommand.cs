@@ -1,5 +1,5 @@
 ﻿using BudgetFlow.Application.Common.Results;
-using BudgetFlow.Application.Common.Services.Abstract;
+using BudgetFlow.Application.Common.Scrapers.Abstract;
 using MediatR;
 
 namespace BudgetFlow.Application.Currencies.Commands.SyncExchangeRates;

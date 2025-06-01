@@ -10,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Caching.Memory;
 using Quartz;
 using System.Reflection;
+using BudgetFlow.Application.Common.Scrapers.Abstract;
+using BudgetFlow.Application.Common.Scrapers.Concrete;
 
 namespace BudgetFlow.Application;
 
@@ -41,6 +43,7 @@ public static class ServiceRegistration
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IWalletAuthService, WalletAuthService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IGeminiService, GeminiService>();
 
         services.AddHttpClient<IExchangeRateScraper, ExchangeRateScraper>();
         services.AddHttpClient<IMetalScraper, MetalScraper>();
@@ -49,6 +52,7 @@ public static class ServiceRegistration
         services.AddScoped<CurrencyJob>();
         services.AddScoped<MetalJob>();
         services.AddScoped<StockJob>();
+        services.AddScoped<GeminiAnalysisJob>();
 
         #region Jobs
         services.AddQuartz(q =>
@@ -80,6 +84,18 @@ public static class ServiceRegistration
                 .WithIdentity("MetalJob-trigger")
                 .WithCronSchedule("0 */15 * * * ?")); // Every 15 minutes
         });
+
+        services.AddQuartz(q =>
+        {
+            var jobKey = new JobKey("GeminiAnalysisJob");
+            q.AddJob<GeminiAnalysisJob>(opts => opts.WithIdentity(jobKey));
+            q.AddTrigger(opts => opts
+                .ForJob(jobKey)
+                .WithIdentity("GeminiAnalysisJob-trigger")
+                .WithCronSchedule("0 */2 * * * ?")); // Every 2 minutes
+        });
+
+
         #endregion
 
         services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);

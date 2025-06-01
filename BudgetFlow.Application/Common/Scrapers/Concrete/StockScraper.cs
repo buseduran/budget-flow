@@ -1,12 +1,12 @@
 ﻿using BudgetFlow.Application.Common.Models;
-using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using System.Globalization;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
+using BudgetFlow.Application.Common.Scrapers.Abstract;
 
-namespace BudgetFlow.Application.Common.Services.Concrete
+namespace BudgetFlow.Application.Common.Scrapers.Concrete
 {
     public class StockScraper : IStockScraper
     {
