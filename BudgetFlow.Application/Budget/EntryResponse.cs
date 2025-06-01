@@ -1,5 +1,4 @@
 ﻿using BudgetFlow.Application.Categories;
-using BudgetFlow.Domain.Enums;
 
 namespace BudgetFlow.Application.Budget;
 public class EntryResponse
@@ -9,5 +8,6 @@ public class EntryResponse
     public decimal Amount { get; set; }
     public DateTime Date { get; set; }
     public CategoryResponse Category { get; set; }
+    public string UserName { get; set; }
     public int WalletID { get; set; }
 }

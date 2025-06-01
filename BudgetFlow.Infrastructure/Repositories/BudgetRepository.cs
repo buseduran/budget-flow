@@ -82,6 +82,7 @@ public class BudgetRepository : IBudgetRepository
                     Color = e.Category.Color,
                     Type = e.Category.Type
                 },
+                UserName= e.User.Name,
                 WalletID = walletID,
             })
             .ToListAsync();
