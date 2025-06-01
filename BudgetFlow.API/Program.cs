@@ -31,7 +31,11 @@ builder.Host.UseSerilog((context, loggerConfig) =>
 });
 
 // Controllers
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 
 // App + Infra
 builder.Services.AddApplication();
@@ -123,7 +127,7 @@ builder.Services.AddDbContext<BudgetContext>((sp, options) =>
     options.UseNpgsql(connectionString);
 });
 
-// Email Configuration
+
 
 // FluentValidation
 builder.Services.AddValidatorsFromAssembly(typeof(CreatePortfolioValidator).Assembly);

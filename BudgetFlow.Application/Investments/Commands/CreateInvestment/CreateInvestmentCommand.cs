@@ -82,10 +82,13 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
             {
                 if (walletAsset is not null)
                 {
+                    walletAsset.Balance =investment.Type== InvestmentType.Buy
+                        ? walletAsset.Balance + investment.CurrencyAmount
+                        : walletAsset.Balance - investment.CurrencyAmount;
+
                     if (investment.Type == InvestmentType.Buy)
                     {
                         walletAsset.Amount += investment.UnitAmount;
-                        walletAsset.Balance = walletAsset.Amount * asset.SellPrice;
 
                         var walletAssetUpdate = await _walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
                         var walletUpdate = await _walletRepository.UpdateWalletAsync(userID, -investment.CurrencyAmount, saveChanges: false);
@@ -96,7 +99,6 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                             return Result.Failure<bool>(WalletAssetErrors.NotEnoughAssetAmount);
 
                         walletAsset.Amount -= investment.UnitAmount;
-                        walletAsset.Balance = walletAsset.Amount * asset.BuyPrice;
 
                         var walletAssetUpdate = await _walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
                         var walletUpdate = await _walletRepository.UpdateWalletAsync(userID, investment.CurrencyAmount, saveChanges: false);

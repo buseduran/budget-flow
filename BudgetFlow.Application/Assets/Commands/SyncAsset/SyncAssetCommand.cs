@@ -33,31 +33,50 @@ public class SyncAssetCommand : IRequest<Result<bool>>
 
         public async Task<Result<bool>> Handle(SyncAssetCommand request, CancellationToken cancellationToken)
         {
+            #region Asset Senkronizasyonu
+            await _currencyJob.ExecuteAsync(); // usd, eur, gbp
+            await _stockJob.ExecuteAsync();    // midas
+            await _metalJob.ExecuteAsync();    // gold, silver
+            #endregion
 
-            await _currencyJob.ExecuteAsync(); //usd, eur, gbp
-            await _stockJob.ExecuteAsync(); // midas
-            await _metalJob.ExecuteAsync(); // gold, silver
 
-            // Update wallet assets and wallet balances
+            var allAssets = await _assetRepository.GetAllAsync();
+            var assetDict = allAssets.ToDictionary(a => a.ID, a => a);
+
             var walletAssets = await _walletAssetRepository.GetAllAsync();
+
+            var walletDeltaDict = new Dictionary<int, decimal>();
+
             foreach (var walletAsset in walletAssets)
             {
-                var asset = await _assetRepository.GetByIdAsync(walletAsset.AssetId);
-                if (asset != null)
+                if (assetDict.TryGetValue(walletAsset.AssetId, out var asset))
                 {
-                    walletAsset.Balance = asset.SellPrice * walletAsset.Amount;
+                    var oldBalance = walletAsset.Balance;
+                    var newBalance = asset.BuyPrice * walletAsset.Amount;
+
+                    var delta = newBalance - oldBalance;
+                    walletAsset.Balance = newBalance;
+
+                    if (!walletDeltaDict.ContainsKey(walletAsset.WalletId))
+                        walletDeltaDict[walletAsset.WalletId] = 0;
+
+                    walletDeltaDict[walletAsset.WalletId] += delta;
+
                     await _walletAssetRepository.UpdateAsync(walletAsset);
                 }
             }
 
-            // Update wallet balances
+            #region Cüzdanları getir ve bakiyelerini güncelle
             var wallets = await _walletRepository.GetAllAsync();
             foreach (var wallet in wallets)
             {
-                var walletAssetsForWallet = walletAssets.Where(wa => wa.WalletId == wallet.ID);
-                wallet.Balance = walletAssetsForWallet.Sum(wa => wa.Balance);
-                await _walletRepository.UpdateAsync(wallet);
+                if (walletDeltaDict.TryGetValue(wallet.ID, out var delta))
+                {
+                    wallet.Balance += delta;
+                    await _walletRepository.UpdateAsync(wallet);
+                }
             }
+            #endregion
 
 
             return Result.Success(true);

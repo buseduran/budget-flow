@@ -45,6 +45,7 @@ public class ExchangeRateScraper : IExchangeRateScraper
                     var code = x.Attribute("Kod")?.Value!;
                     return new CurrencyRate
                     {
+                        CurrencyType = Enum.Parse<CurrencyType>(code),
                         ForexBuying = decimal.TryParse(x.Element("ForexBuying")?.Value, out var buy) ? buy : 0,
                         ForexSelling = decimal.TryParse(x.Element("ForexSelling")?.Value, out var sell) ? sell : 0,
                         RetrievedAt = DateTime.UtcNow
@@ -77,14 +78,14 @@ public class ExchangeRateScraper : IExchangeRateScraper
                 #region Save to Asset Table
                 var asset = new Asset
                 {
-                    Name = "Döviz Kuru",
-                    Code = "FOREX",
-                    Symbol = "FOREX",
+                    Name = rate.CurrencyType.ToString(),
+                    Code = rate.CurrencyType.ToString(),
+                    Symbol = rate.CurrencyType.ToString(),
                     Unit = "TRY",
                     AssetType = AssetType.Exchange,
                     BuyPrice = rate.ForexBuying,
                     SellPrice = rate.ForexSelling,
-                    Description = "Döviz Kuru - TCMB",
+                    Description = $"{rate.CurrencyType.ToString()} Döviz Kuru - TCMB",
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };

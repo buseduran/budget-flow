@@ -4,7 +4,6 @@ using BudgetFlow.Application.Portfolios;
 using BudgetFlow.Application.Portfolios.Commands.CreatePortfolio;
 using BudgetFlow.Application.Portfolios.Commands.DeletePortfolio;
 using BudgetFlow.Application.Portfolios.Commands.UpdatePortfolio;
-using BudgetFlow.Application.Portfolios.Queries.GetPortfolio;
 using BudgetFlow.Application.Portfolios.Queries.GetPortfolioPagination;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -81,21 +80,6 @@ public class PortfolioController : ControllerBase
     public async Task<IResult> GetPortfoliosAsync([FromQuery] GetPortfolioPaginationQuery getPortfolioPaginationQuery)
     {
         var result = await _mediator.Send(getPortfolioPaginationQuery);
-        return result.IsSuccess
-                ? Results.Ok(result.Value)
-                : result.ToProblemDetails();
-    }
-
-    /// <summary>
-    /// Get Portfolio. 
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("{Name}")]
-    [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PortfolioResponse))]
-    public async Task<IResult> GetPortfolioAsync([FromRoute] string Name)
-    {
-        var result = await _mediator.Send(new GetPortfolioQuery(Name));
         return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();

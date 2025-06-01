@@ -60,11 +60,15 @@ public class UpdateEntryCommand : IRequest<Result<bool>>
             var difference = newAmount - existingEntry.Amount;
             #endregion
 
+            var wallet = await _userWalletRepository.GetByWalletIdAndUserIdAsync(existingEntry.WalletID, userID);
+            if (wallet == null)
+                return Result.Failure<bool>(EntryErrors.EntryNotFound);
+
             #region Wallet ve Entry Güncelle
             await _unitOfWork.BeginTransactionAsync();
             try
             {
-                await _walletRepository.UpdateWalletAsync(userID, difference, saveChanges: false);
+                await _walletRepository.UpdateWalletAsync(wallet.WalletID, difference, saveChanges: false);
 
                 mappedEntry.Amount = newAmount;
 

@@ -72,7 +72,6 @@ public class AssetController : ControllerBase
     /// <summary>
     /// Synchronize Assets. 
     /// </summary>
-    /// <param name="syncAssetCommand"></param>
     /// <returns></returns>
     [HttpPost("Sync")]
     [Produces(MediaTypeNames.Application.Json)]
