@@ -48,13 +48,13 @@ public class AssetRepository : IAssetRepository
         return true;
     }
 
-    public async Task<PaginatedList<AssetResponse>> GetAssetsAsync(int Page, int PageSize, string search = null, AssetType? assetType = null)
+    public async Task<PaginatedList<AssetResponse>> GetAssetsAsync(int page, int pageSize, string search = null, AssetType? assetType = null)
     {
         var query = context.Assets.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            query = query.Where(a => a.Name.Contains(search));
+            query = query.Where(a => EF.Functions.ILike(a.Name, $"%{search}%"));
         }
 
         if (assetType.HasValue)
@@ -62,10 +62,12 @@ public class AssetRepository : IAssetRepository
             query = query.Where(a => a.AssetType == assetType.Value);
         }
 
-        var assets = await query
+        var totalCount = await query.CountAsync();
+
+        var items = await query
             .OrderByDescending(c => c.CreatedAt)
-            .Skip((Page - 1) * PageSize)
-            .Take(PageSize)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(e => new AssetResponse
             {
                 ID = e.ID,
@@ -80,10 +82,9 @@ public class AssetRepository : IAssetRepository
             })
             .ToListAsync();
 
-        var count = await query.CountAsync();
-
-        return new PaginatedList<AssetResponse>(assets, count, Page, PageSize);
+        return new PaginatedList<AssetResponse>(items, totalCount, page, pageSize);
     }
+
 
     public async Task<AssetResponse> GetAssetAsync(int ID)
     {

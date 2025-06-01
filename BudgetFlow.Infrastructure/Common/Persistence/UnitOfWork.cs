@@ -1,6 +1,8 @@
 ﻿using BudgetFlow.Application.Common.Interfaces;
 using BudgetFlow.Infrastructure.Contexts;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using BudgetFlow.Domain.Entities;
 
 namespace BudgetFlow.Infrastructure.Common.Persistence;
 public class UnitOfWork : IUnitOfWork
@@ -39,4 +41,9 @@ public class UnitOfWork : IUnitOfWork
     }
 
     public async Task<int> SaveChangesAsync() => await context.SaveChangesAsync();
+
+    public DbContext GetDbContext() => context;
+
+    public DbSet<Asset> GetAssets() => context.Assets;
+
 }

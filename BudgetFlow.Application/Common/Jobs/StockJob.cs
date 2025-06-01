@@ -1,15 +1,14 @@
-﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+﻿using BudgetFlow.Application.Common.Interfaces;
 using BudgetFlow.Application.Common.Services.Abstract;
-using BudgetFlow.Domain.Enums;
-using Quartz;
-using BudgetFlow.Application.Common.Interfaces;
 using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
+using Quartz;
 
 namespace BudgetFlow.Application.Common.Jobs;
 public class StockJob : IJob
 {
     private readonly IStockScraper _stockScraper;
-    private readonly IAssetRepository _assetRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICacheService _cacheService;
     private const string CacheKey = "StockData";
@@ -17,12 +16,10 @@ public class StockJob : IJob
 
     public StockJob(
         IStockScraper stockScraper,
-        IAssetRepository assetRepository,
         IUnitOfWork unitOfWork,
         ICacheService cacheService)
     {
         _stockScraper = stockScraper;
-        _assetRepository = assetRepository;
         _unitOfWork = unitOfWork;
         _cacheService = cacheService;
     }
@@ -34,19 +31,17 @@ public class StockJob : IJob
 
     public async Task ExecuteAsync()
     {
-        // Try to get data from cache first
+        #region Check Cache Data
         if (_cacheService.TryGetValue<IEnumerable<Asset>>(CacheKey, out var cachedAssets))
         {
-            return; // Cache'de veri varsa hiçbir şey yapma
+            return;
         }
+        #endregion
 
-        // Cache'de veri yoksa yeni veri çek ve DB'ye kaydet
         var assetType = AssetType.Stock;
         var stocks = await _stockScraper.GetStocksAsync(assetType);
 
-        // Cache the new data
         _cacheService.Set(CacheKey, stocks, CacheDuration);
-
         await UpdateAssets(stocks);
     }
 
@@ -55,35 +50,41 @@ public class StockJob : IJob
         await _unitOfWork.BeginTransactionAsync();
         try
         {
+            var assetsDbSet = _unitOfWork.GetAssets();
+            var existingAssets = await assetsDbSet
+                .Where(a => a.AssetType == AssetType.Stock)
+                .ToDictionaryAsync(a => a.Code);
+
+            var now = DateTime.UtcNow;
+            var assetsToUpdate = new List<Asset>();
+            var assetsToInsert = new List<Asset>();
+
+            #region Prepare Stock Assets for Bulk Update/Insert 
             foreach (var asset in assets)
             {
-                var existingAsset = await _assetRepository.GetByCodeAsync(asset.Code);
-                if (existingAsset != null)
+                if (existingAssets.TryGetValue(asset.Code, out var existingAsset))
                 {
                     // Update existing asset
-                    var updatedAsset = new Asset
-                    {
-                        ID = existingAsset.ID,
-                        Name = existingAsset.Name,
-                        AssetType = existingAsset.AssetType,
-                        BuyPrice = asset.BuyPrice,
-                        SellPrice = asset.SellPrice,
-                        Description = existingAsset.Description,
-                        Symbol = existingAsset.Symbol,
-                        Code = existingAsset.Code,
-                        Unit = existingAsset.Unit,
-                        UpdatedAt = DateTime.UtcNow
-                    };
-                    await _assetRepository.UpdateAssetAsync(updatedAsset);
+                    existingAsset.BuyPrice = asset.BuyPrice;
+                    existingAsset.SellPrice = asset.SellPrice;
+                    existingAsset.Description = asset.Description;
+                    existingAsset.UpdatedAt = now;
+                    assetsToUpdate.Add(existingAsset);
                 }
                 else
                 {
-                    // Create new asset
-                    asset.CreatedAt = DateTime.UtcNow;
-                    asset.UpdatedAt = DateTime.UtcNow;
-                    await _assetRepository.CreateAssetAsync(asset);
+                    // Prepare new asset for insert
+                    asset.CreatedAt = now;
+                    asset.UpdatedAt = now;
+                    assetsToInsert.Add(asset);
                 }
             }
+            #endregion
+
+            #region Bulk Update/Insert Assets
+            if (assetsToUpdate.Any()) assetsDbSet.UpdateRange(assetsToUpdate);
+            if (assetsToInsert.Any()) await assetsDbSet.AddRangeAsync(assetsToInsert);
+            #endregion
 
             await _unitOfWork.SaveChangesAsync();
             await _unitOfWork.CommitAsync();
@@ -95,4 +96,3 @@ public class StockJob : IJob
         }
     }
 }
-

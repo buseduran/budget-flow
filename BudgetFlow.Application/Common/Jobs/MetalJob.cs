@@ -1,15 +1,14 @@
-﻿using BudgetFlow.Application.Common.Services.Abstract;
-using BudgetFlow.Application.Common.Interfaces.Repositories;
-using BudgetFlow.Domain.Enums;
-using Quartz;
-using BudgetFlow.Application.Common.Interfaces;
+﻿using BudgetFlow.Application.Common.Interfaces;
+using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Entities;
+using BudgetFlow.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
+using Quartz;
 
 namespace BudgetFlow.Application.Common.Jobs;
 public class MetalJob : IJob
 {
     private readonly IMetalScraper _metalScraper;
-    private readonly IAssetRepository _assetRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICacheService _cacheService;
     private const string CacheKey = "MetalData";
@@ -17,12 +16,10 @@ public class MetalJob : IJob
 
     public MetalJob(
         IMetalScraper metalScraper,
-        IAssetRepository assetRepository,
         IUnitOfWork unitOfWork,
         ICacheService cacheService)
     {
         _metalScraper = metalScraper;
-        _assetRepository = assetRepository;
         _unitOfWork = unitOfWork;
         _cacheService = cacheService;
     }
@@ -34,19 +31,17 @@ public class MetalJob : IJob
 
     public async Task ExecuteAsync()
     {
-        // Try to get data from cache first
+        #region Check Cache Data
         if (_cacheService.TryGetValue<IEnumerable<Asset>>(CacheKey, out var cachedAssets))
         {
-            return; // Cache'de veri varsa hiçbir şey yapma
+            return;
         }
+        #endregion
 
-        // Cache'de veri yoksa yeni veri çek ve DB'ye kaydet
         var assetType = AssetType.Metal;
         var metals = await _metalScraper.GetMetalsAsync(assetType);
 
-        // Cache the new data
         _cacheService.Set(CacheKey, metals, CacheDuration);
-
         await UpdateAssets(metals);
     }
 
@@ -55,35 +50,40 @@ public class MetalJob : IJob
         await _unitOfWork.BeginTransactionAsync();
         try
         {
+            var assetsDbSet = _unitOfWork.GetAssets();
+            var existingAssets = await assetsDbSet
+                .Where(a => a.AssetType == AssetType.Metal)
+                .ToDictionaryAsync(a => a.Code);
+
+            var now = DateTime.UtcNow;
+            var assetsToUpdate = new List<Asset>();
+            var assetsToInsert = new List<Asset>();
+
+            #region Prepare Metal Assets for Bulk Update/Insert 
             foreach (var asset in assets)
             {
-                var existingAsset = await _assetRepository.GetByCodeAsync(asset.Code);
-                if (existingAsset != null)
+                if (existingAssets.TryGetValue(asset.Code, out var existingAsset))
                 {
                     // Update existing asset
-                    var updatedAsset = new Asset
-                    {
-                        ID = existingAsset.ID,
-                        Name = existingAsset.Name,
-                        AssetType = existingAsset.AssetType,
-                        BuyPrice = asset.BuyPrice,
-                        SellPrice = asset.SellPrice,
-                        Description = existingAsset.Description,
-                        Symbol = existingAsset.Symbol,
-                        Code = existingAsset.Code,
-                        Unit = existingAsset.Unit,
-                        UpdatedAt = DateTime.UtcNow
-                    };
-                    await _assetRepository.UpdateAssetAsync(updatedAsset);
+                    existingAsset.BuyPrice = asset.BuyPrice;
+                    existingAsset.SellPrice = asset.SellPrice;
+                    existingAsset.UpdatedAt = now;
+                    assetsToUpdate.Add(existingAsset);
                 }
                 else
                 {
-                    // Create new asset
-                    asset.CreatedAt = DateTime.UtcNow;
-                    asset.UpdatedAt = DateTime.UtcNow;
-                    await _assetRepository.CreateAssetAsync(asset);
+                    // Prepare new asset for insert
+                    asset.CreatedAt = now;
+                    asset.UpdatedAt = now;
+                    assetsToInsert.Add(asset);
                 }
             }
+            #endregion
+
+            #region Bulk Update/Insert Assets
+            if (assetsToUpdate.Any()) assetsDbSet.UpdateRange(assetsToUpdate);
+            if (assetsToInsert.Any()) await assetsDbSet.AddRangeAsync(assetsToInsert);
+            #endregion
 
             await _unitOfWork.SaveChangesAsync();
             await _unitOfWork.CommitAsync();

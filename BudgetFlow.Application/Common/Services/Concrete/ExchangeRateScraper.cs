@@ -5,6 +5,7 @@ using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using BudgetFlow.Domain.Errors;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Xml.Linq;
 
@@ -71,37 +72,53 @@ public class ExchangeRateScraper : IExchangeRateScraper
         await _unitOfWork.BeginTransactionAsync();
         try
         {
+            await _currencyRateRepository.AddRatesAsync(latestRates, saveChanges: false);
+
+            var assetsDbSet = _unitOfWork.GetAssets();
+            var existingAssets = await assetsDbSet
+                .Where(a => a.AssetType == AssetType.Exchange)
+                .ToDictionaryAsync(a => a.Code);
+
+            var now = DateTime.UtcNow;
+            var assetsToUpdate = new List<Asset>();
+            var assetsToInsert = new List<Asset>();
+
+            #region Prepare Stock Assets for Bulk Update/Insert 
             foreach (var rate in latestRates)
             {
-                await _currencyRateRepository.AddRatesAsync(new[] { rate }, saveChanges: false);
-
-                #region Save to Asset Table
                 var asset = new Asset
                 {
                     Name = rate.CurrencyType.ToString(),
                     Code = rate.CurrencyType.ToString(),
                     Symbol = rate.CurrencyType.ToString(),
-                    Unit = "TRY",
+                    Unit = "adet",
                     AssetType = AssetType.Exchange,
                     BuyPrice = rate.ForexBuying,
                     SellPrice = rate.ForexSelling,
                     Description = $"{rate.CurrencyType.ToString()} Döviz Kuru - TCMB",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = now,
+                    UpdatedAt = now
                 };
 
-                var existingAsset = await _assetRepository.GetByCodeAsync(asset.Code);
-                if (existingAsset != null)
+                if (existingAssets.TryGetValue(asset.Code, out var existingAsset))
                 {
-                    asset.ID = existingAsset.ID;
-                    await _assetRepository.UpdateAssetAsync(asset, saveChanges: false);
+                    existingAsset.BuyPrice = asset.BuyPrice;
+                    existingAsset.SellPrice = asset.SellPrice;
+                    existingAsset.Description = asset.Description;
+                    existingAsset.UpdatedAt = now;
+                    assetsToUpdate.Add(existingAsset);
                 }
                 else
                 {
-                    await _assetRepository.CreateAssetAsync(asset, saveChanges: false);
+                    assetsToInsert.Add(asset);
                 }
-                #endregion
             }
+            #endregion
+
+            #region Bulk Update/Insert Assets
+            if (assetsToUpdate.Any()) assetsDbSet.UpdateRange(assetsToUpdate);
+            if (assetsToInsert.Any()) await assetsDbSet.AddRangeAsync(assetsToInsert);
+            #endregion
 
             await _unitOfWork.SaveChangesAsync();
             await _unitOfWork.CommitAsync();
