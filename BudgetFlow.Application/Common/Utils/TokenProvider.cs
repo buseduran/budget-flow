@@ -232,7 +232,7 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
             ValidAudience = configuration["Jwt:Audience"],
             IssuerSigningKey = key,
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
+            ClockSkew = TimeSpan.FromMinutes(5) // 5 dakika tolerans
         };
 
         Console.WriteLine($"SecretKey: {secretKey}");

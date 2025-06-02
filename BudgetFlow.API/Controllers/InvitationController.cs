@@ -37,7 +37,7 @@ public class InvitationController : ControllerBase
     /// <summary>  
     /// Join Wallet by Invitation Link.  
     /// </summary>  
-    /// <param name="joinWalletCommand">The command containing wallet join details.</param>  
+    /// <param name="token">The command containing wallet join details.</param>  
     /// <returns>A result indicating the success or failure of the operation.</returns>  
     [HttpGet("Join")]
     [Produces(MediaTypeNames.Application.Json)]
