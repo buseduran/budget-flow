@@ -199,7 +199,7 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
         Console.WriteLine($"Generated Token: {token}");
         return token;
     }
-    public async Task<(bool IsValid, int WalletID, string email)> VerifyWalletInvitationToken(string token)
+    public (bool IsValid, int WalletID, string email) VerifyWalletInvitationToken(string token)
     {
         Console.WriteLine("Token Verification Debug Info:");
         Console.WriteLine($"Input Token: {token}");

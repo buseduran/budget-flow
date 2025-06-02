@@ -10,5 +10,5 @@ public interface ITokenProvider
     string GenerateEmailConfirmationToken(User user);
     bool VerifyEmailConfirmationToken(int userId, string token);
     string GenerateWalletInvitationToken(string email, int walletId);
-    Task<(bool IsValid, int WalletID, string email)> VerifyWalletInvitationToken(string token);
+    (bool IsValid, int WalletID, string email) VerifyWalletInvitationToken(string token);
 }

@@ -46,11 +46,7 @@ public class GetSummaryReportQuery : IRequest<Result<SummaryReportResponse>>
                 if (userWallet == null)
                     return Result.Failure<SummaryReportResponse>(UserWalletErrors.UserWalletNotFound);
 
-                // Get budget data from repository
-                // TODO: Uncomment and implement the budget data retrieval logic
                 var budgetData = await _statisticsRepository.GetAnalysisEntriesAsync(userID, "1m", userWallet.WalletID);
-                //if (budgetData == null || !budgetData.Any())
-                //    return Result.Failure<SummaryReportResponse>(StatisticsErrors.NoBudgetDataFound);
 
                 // Create analysis request
                 var analysisRequest = new BudgetAnalysisRequest

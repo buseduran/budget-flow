@@ -44,7 +44,7 @@ public class JoinWalletCommand : IRequest<Result<bool>>
             if (invitation.Expiration < DateTime.UtcNow)
                 return Result.Failure<bool>(InvitationErrors.Expired);
 
-            var (isValid, walletId, email) = await _tokenProvider.VerifyWalletInvitationToken(request.Token);
+            var (isValid, walletId, email) =  _tokenProvider.VerifyWalletInvitationToken(request.Token);
             if (!isValid)
                 return Result.Failure<bool>(InvitationErrors.InvalidToken);
 
