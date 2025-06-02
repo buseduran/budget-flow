@@ -101,13 +101,7 @@ public class SendInvitationCommand : IRequest<Result<bool>>
                 };
 
                 var emailConfig = _configuration.GetSection("EmailConfiguration");
-
-                var uriBuilder = new UriBuilder(emailConfig["InvitationURI"])
-                {
-                    Query = string.Join("&", parameters.Select(p => $"{p.Key}={p.Value}"))
-                };
-
-                var invitationLink = uriBuilder.ToString();
+                var invitationLink = $"{emailConfig["InvitationURI"]}?token={token}";
 
                 // HTML şablonunu oku
                 var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Resources", "Templates", "InvitationTemplate.html");
