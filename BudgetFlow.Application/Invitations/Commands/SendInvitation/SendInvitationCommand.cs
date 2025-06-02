@@ -94,12 +94,6 @@ public class SendInvitationCommand : IRequest<Result<bool>>
 
                 await _invitationRepository.CreateAsync(invitation);
 
-                var parameters = new Dictionary<string, string>
-                {
-                    { "token", token },
-                    { "email", request.Email }
-                };
-
                 var emailConfig = _configuration.GetSection("EmailConfiguration");
                 var invitationLink = $"{emailConfig["InvitationURI"]}?token={token}";
 

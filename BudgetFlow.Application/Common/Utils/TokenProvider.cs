@@ -4,6 +4,7 @@ using BudgetFlow.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -22,10 +23,10 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
         var roles = await userRepository.GetUserRolesAsync(user.ID);
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.ID.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.Name, user.Name),
-            new Claim(JwtRegisteredClaimNames.Birthdate,user.CreatedAt.ToString()),
+            new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, user.ID.ToString()),
+            new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Name, user.Name),
+            new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Birthdate,user.CreatedAt.ToString()),
             new Claim("role",roles.FirstOrDefault())
         };
         #endregion
@@ -64,8 +65,8 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
         {
             Subject = new ClaimsIdentity(new[]
             {
-            new Claim(JwtRegisteredClaimNames.Sub, user.ID.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, user.ID.ToString()),
+            new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Email, user.Email),
             new Claim("purpose", "reset_password")
         }),
             Expires = DateTime.UtcNow.AddMinutes(expirationMinutes),
@@ -120,8 +121,8 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
         {
             Subject = new ClaimsIdentity(new[]
             {
-            new Claim(JwtRegisteredClaimNames.Sub, user.ID.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, user.ID.ToString()),
+            new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Email, user.Email),
             new Claim("purpose", "email_confirmation")
         }),
             Expires = DateTime.UtcNow.AddMinutes(expirationMinutes),
@@ -156,7 +157,7 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
 
         var claims = result.ClaimsIdentity.Claims.ToList();
 
-        var subClaim = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub);
+        var subClaim = claims.FirstOrDefault(c => c.Type == Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub);
         var purposeClaim = claims.FirstOrDefault(c => c.Type == "purpose");
 
         return subClaim?.Value == userId.ToString() && purposeClaim?.Value == "email_confirmation";
@@ -204,14 +205,12 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
         Console.WriteLine("Token Verification Debug Info:");
         Console.WriteLine($"Input Token: {token}");
 
-        // Remove Bearer prefix if exists
         if (token.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
         {
             token = token.Substring(7);
             Console.WriteLine($"Token after removing Bearer prefix: {token}");
         }
 
-        // URL decode the token
         try
         {
             token = Uri.UnescapeDataString(token);
@@ -223,7 +222,6 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
             return (false, 0, null);
         }
 
-        var handler = new JsonWebTokenHandler();
         var secretKey = configuration["Jwt:Secret"];
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var parameters = new TokenValidationParameters
@@ -243,16 +241,13 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
 
         try
         {
-            var result = handler.ValidateTokenAsync(token, parameters).Result;
-            Console.WriteLine($"Token Validation Result: {result.IsValid}");
+            var handler = new JwtSecurityTokenHandler();
+            handler.InboundClaimTypeMap.Clear(); // claim isimlerini değiştirmemesi için
 
-            if (!result.IsValid)
-            {
-                Console.WriteLine("Token validation failed");
-                return (false, 0, null);
-            }
+            SecurityToken validatedToken;
+            var principal = handler.ValidateToken(token, parameters, out validatedToken);
 
-            var claims = result.ClaimsIdentity.Claims.ToList();
+            var claims = principal.Claims.ToList();
             var walletIdClaim = claims.FirstOrDefault(c => c.Type == "walletId");
             var emailClaim = claims.FirstOrDefault(c => c.Type == "email");
             var purposeClaim = claims.FirstOrDefault(c => c.Type == "purpose");
@@ -267,10 +262,10 @@ public sealed class TokenProvider(IConfiguration configuration, IUserRepository 
                 return (false, 0, null);
             }
 
-            var success = int.TryParse(walletIdClaim.Value, out int walletId);
+            var success = int.TryParse(walletIdClaim?.Value, out int walletId);
             Console.WriteLine($"WalletId Parse Success: {success}, Value: {walletId}");
 
-            return (success, walletId, emailClaim.Value);
+            return (success, walletId, emailClaim?.Value);
         }
         catch (Exception ex)
         {
