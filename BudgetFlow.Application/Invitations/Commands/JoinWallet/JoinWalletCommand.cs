@@ -11,6 +11,10 @@ namespace BudgetFlow.Application.Invitations.Commands.JoinWallet;
 public class JoinWalletCommand : IRequest<Result<bool>>
 {
     public string Token { get; set; }
+    public JoinWalletCommand(string token)
+    {
+        Token = token;
+    }
 
     public class JoinWalletCommandHandler : IRequestHandler<JoinWalletCommand, Result<bool>>
     {

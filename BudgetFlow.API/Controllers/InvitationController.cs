@@ -42,9 +42,9 @@ public class InvitationController : ControllerBase
     [HttpGet("Join")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IResult> JoinWalletByInvitationAsync([FromQuery] JoinWalletCommand joinWalletCommand)
+    public async Task<IResult> JoinWalletByInvitationAsync([FromQuery] string token)
     {
-        var result = await _mediator.Send(joinWalletCommand);
+        var result = await _mediator.Send(new JoinWalletCommand(token));
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();
