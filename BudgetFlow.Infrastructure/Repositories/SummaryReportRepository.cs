@@ -33,27 +33,23 @@ public class SummaryReportRepository : ISummaryReportRepository
         {
             WalletID = report.WalletID,
             Analysis = report.Analysis,
-            AnalysisDate = DateTime.UtcNow
+            AnalysisDate = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc)
         };
 
         if (existingReport == null)
         {
-            report.CreatedAt = DateTime.UtcNow;
-            report.UpdatedAt = DateTime.UtcNow;
+            report.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+            report.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
             await _context.SummaryReports.AddAsync(report);
         }
         else
         {
-            //existingReport.Analysis = report.Analysis;
-            //existingReport.AnalysisDate = DateTime.UtcNow;
             summaryReport.Analysis = report.Analysis;
-            summaryReport.AnalysisDate = DateTime.UtcNow;
-
-
-
+            summaryReport.AnalysisDate = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
             _context.SummaryReports.Update(summaryReport);
         }
         await _context.SaveChangesAsync();
+
         return true;
     }
 }

@@ -42,12 +42,13 @@ public class GetSummaryReportQuery : IRequest<Result<SummaryReportResponse>>
             if (existingSummaryReport == null)
             {
                 var userID = _currentUserService.GetCurrentUserID();
-                var wallet = await _userWalletRepository.GetByWalletIdAndUserIdAsync(request.WalletID, userID);
-                if (wallet == null)
+                var userWallet = await _userWalletRepository.GetByWalletIdAndUserIdAsync(request.WalletID, userID);
+                if (userWallet == null)
                     return Result.Failure<SummaryReportResponse>(UserWalletErrors.UserWalletNotFound);
 
                 // Get budget data from repository
-                var budgetData = await _statisticsRepository.GetAnalysisEntriesAsync(userID, "1m", wallet.ID);
+                // TODO: Uncomment and implement the budget data retrieval logic
+                var budgetData = await _statisticsRepository.GetAnalysisEntriesAsync(userID, "1m", userWallet.WalletID);
                 //if (budgetData == null || !budgetData.Any())
                 //    return Result.Failure<SummaryReportResponse>(StatisticsErrors.NoBudgetDataFound);
 
@@ -56,8 +57,8 @@ public class GetSummaryReportQuery : IRequest<Result<SummaryReportResponse>>
                 {
                     BudgetData = budgetData,
                     AnalysisType = "daily",
-                    StartDate = DateTime.UtcNow.AddDays(-1),
-                    EndDate = DateTime.UtcNow
+                    StartDate = DateTime.SpecifyKind(DateTime.Now.AddDays(-1), DateTimeKind.Utc),
+                    EndDate = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                 };
 
                 // Generate analysis using Gemini
@@ -66,9 +67,9 @@ public class GetSummaryReportQuery : IRequest<Result<SummaryReportResponse>>
                 // Save analysis to database
                 var summaryReport = new SummaryReport
                 {
-                    WalletID = wallet.ID,
+                    WalletID = userWallet.WalletID,
                     Analysis = analysis,
-                    AnalysisDate = DateTime.UtcNow
+                    AnalysisDate = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc)
                 };
 
                 await _summaryReportRepository.CreateOrUpdateAsync(summaryReport);
