@@ -61,16 +61,6 @@ public class CreateWalletCommand : IRequest<Result<bool>>
             await _unitOfWork.BeginTransactionAsync();
             try
             {
-                // Kategori oluştur
-                var category = new Category
-                {
-                    Name = "Başlangıç Bakiyesi",
-                    Color = "#000000",
-                    Type = EntryType.OpeningBalance,
-                    UserID = userID
-                };
-                await _categoryRepository.CreateCategoryAsync(category, saveChanges: false);
-
                 // Cüzdan oluştur
                 var wallet = new Wallet
                 {
@@ -79,7 +69,20 @@ public class CreateWalletCommand : IRequest<Result<bool>>
                 };
                 await _walletRepository.CreateWalletAsync(wallet, saveChanges: false);
 
-                // İlk SaveChanges — Category ve Wallet ID'leri garanti altına alınır
+                // İlk SaveChanges — Wallet ID'si garanti altına alınır
+                await _unitOfWork.SaveChangesAsync();
+
+                // Kategori oluştur
+                var category = new Category
+                {
+                    Name = "Başlangıç Bakiyesi",
+                    Color = "#000000",
+                    Type = EntryType.OpeningBalance,
+                    WalletID = wallet.ID
+                };
+                await _categoryRepository.CreateCategoryAsync(category, saveChanges: false);
+
+                // İkinci SaveChanges — Category ID'si garanti altına alınır
                 await _unitOfWork.SaveChangesAsync();
 
                 // Kullanıcı-Cüzdan ilişkisi

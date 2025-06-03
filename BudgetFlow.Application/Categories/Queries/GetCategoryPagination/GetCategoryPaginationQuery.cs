@@ -10,19 +10,18 @@ public class GetCategoryPaginationQuery : IRequest<Result<PaginatedList<Category
 {
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 50;
+    public int WalletID { get; set; }
+
     public class GetCategoryPaginationQueryHandler : IRequestHandler<GetCategoryPaginationQuery, Result<PaginatedList<CategoryResponse>>>
     {
         private readonly ICategoryRepository _categoryRepository;
-        private readonly ICurrentUserService _currentUserService;
-        public GetCategoryPaginationQueryHandler(ICategoryRepository categoryRepository, ICurrentUserService currentUserService)
+        public GetCategoryPaginationQueryHandler(ICategoryRepository categoryRepository)
         {
             _categoryRepository = categoryRepository;
-            _currentUserService = currentUserService;
         }
         public async Task<Result<PaginatedList<CategoryResponse>>> Handle(GetCategoryPaginationQuery request, CancellationToken cancellationToken)
         {
-            var userID = _currentUserService.GetCurrentUserID();
-            var categories = await _categoryRepository.GetCategoriesAsync(request.Page, request.PageSize, userID);
+            var categories = await _categoryRepository.GetCategoriesAsync(request.Page, request.PageSize, request.WalletID);
             return categories != null
                 ? Result.Success(categories)
                 : Result.Failure<PaginatedList<CategoryResponse>>(CategoryErrors.CategoryNotFound);

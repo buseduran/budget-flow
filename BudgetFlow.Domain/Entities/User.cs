@@ -10,6 +10,5 @@ public class User : BaseEntity
 
     public List<Portfolio> Portfolios { get; set; }
     public List<UserWallet> UserWallets { get; set; }
-    public List<Category> Categories { get; set; }
     public List<Entry> Entries { get; set; }
 }

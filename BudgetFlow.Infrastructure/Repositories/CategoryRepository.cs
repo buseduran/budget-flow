@@ -25,10 +25,10 @@ public class CategoryRepository : ICategoryRepository
         return Category.ID;
     }
 
-    public async Task<PaginatedList<CategoryResponse>> GetCategoriesAsync(int Page, int PageSize, int userID)
+    public async Task<PaginatedList<CategoryResponse>> GetCategoriesAsync(int Page, int PageSize, int walletID)
     {
         var categories = await context.Categories
-            .Where(c => c.UserID == userID)
+            .Where(c => c.WalletID == walletID)
             .OrderByDescending(c => c.CreatedAt)
             .Skip((Page - 1) * PageSize)
             .Take(PageSize)
@@ -44,10 +44,10 @@ public class CategoryRepository : ICategoryRepository
         return new PaginatedList<CategoryResponse>(categories, count, Page, PageSize);
     }
 
-    public async Task<bool> UpdateCategoryAsync(int ID, string Color, int UserID)
+    public async Task<bool> UpdateCategoryAsync(int ID, string Color, int WalletID)
     {
         var category = await context.Categories
-            .Where(c => c.ID == ID && c.UserID == UserID)
+            .Where(c => c.ID == ID && c.WalletID == WalletID)
             .FirstOrDefaultAsync();
         if (category is null) return false;
 

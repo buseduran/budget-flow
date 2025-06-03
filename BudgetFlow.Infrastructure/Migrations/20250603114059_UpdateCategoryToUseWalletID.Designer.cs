@@ -3,6 +3,7 @@ using System;
 using BudgetFlow.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BudgetFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(BudgetContext))]
-    partial class BudgetContextModelSnapshot : ModelSnapshot
+    [Migration("20250603114059_UpdateCategoryToUseWalletID")]
+    partial class UpdateCategoryToUseWalletID
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -144,10 +147,15 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int?>("UserID")
+                        .HasColumnType("integer");
+
                     b.Property<int>("WalletID")
                         .HasColumnType("integer");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("UserID");
 
                     b.HasIndex("WalletID");
 
@@ -426,10 +434,15 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int?>("WalletID")
+                        .HasColumnType("integer");
+
                     b.HasKey("ID");
 
                     b.HasIndex("Email")
                         .IsUnique();
+
+                    b.HasIndex("WalletID");
 
                     b.ToTable("Users");
                 });
@@ -554,8 +567,12 @@ namespace BudgetFlow.Infrastructure.Migrations
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.Category", b =>
                 {
-                    b.HasOne("BudgetFlow.Domain.Entities.Wallet", "Wallet")
+                    b.HasOne("BudgetFlow.Domain.Entities.User", null)
                         .WithMany("Categories")
+                        .HasForeignKey("UserID");
+
+                    b.HasOne("BudgetFlow.Domain.Entities.Wallet", "Wallet")
+                        .WithMany()
                         .HasForeignKey("WalletID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -647,6 +664,13 @@ namespace BudgetFlow.Infrastructure.Migrations
                     b.Navigation("Wallet");
                 });
 
+            modelBuilder.Entity("BudgetFlow.Domain.Entities.User", b =>
+                {
+                    b.HasOne("BudgetFlow.Domain.Entities.Wallet", null)
+                        .WithMany("User")
+                        .HasForeignKey("WalletID");
+                });
+
             modelBuilder.Entity("BudgetFlow.Domain.Entities.UserRole", b =>
                 {
                     b.HasOne("BudgetFlow.Domain.Entities.Role", "Role")
@@ -721,6 +745,8 @@ namespace BudgetFlow.Infrastructure.Migrations
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.User", b =>
                 {
+                    b.Navigation("Categories");
+
                     b.Navigation("Entries");
 
                     b.Navigation("Portfolios");
@@ -730,7 +756,7 @@ namespace BudgetFlow.Infrastructure.Migrations
 
             modelBuilder.Entity("BudgetFlow.Domain.Entities.Wallet", b =>
                 {
-                    b.Navigation("Categories");
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

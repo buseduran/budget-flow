@@ -12,19 +12,17 @@ public class CreateCategoryCommand : IRequest<Result<int>>
     public string Name { get; set; }
     public string Color { get; set; }
     public EntryType Type { get; set; }
+    public int WalletID { get; set; }
 
     public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, Result<int>>
     {
         private readonly ICategoryRepository _categoryRepository;
-        private readonly ICurrentUserService _currentUserService;
-        public CreateCategoryCommandHandler(ICategoryRepository categoryRepository, ICurrentUserService currentUserService)
+        public CreateCategoryCommandHandler(ICategoryRepository categoryRepository)
         {
             _categoryRepository = categoryRepository;
-            _currentUserService = currentUserService;
         }
         public async Task<Result<int>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
         {
-            var userID = _currentUserService.GetCurrentUserID();
             if (string.IsNullOrEmpty(request.Name) || string.IsNullOrEmpty(request.Color))
                 return Result.Failure<int>(CategoryErrors.NameOrColorCannotBeEmpty);
 
@@ -32,7 +30,7 @@ public class CreateCategoryCommand : IRequest<Result<int>>
             {
                 Name = request.Name,
                 Color = request.Color,
-                UserID = userID,
+                WalletID = request.WalletID,
                 Type = request.Type
             };
             var response = await _categoryRepository.CreateCategoryAsync(categoryDto);

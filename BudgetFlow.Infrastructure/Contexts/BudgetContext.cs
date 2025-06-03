@@ -72,19 +72,13 @@ public class BudgetContext : DbContext
             .HasForeignKey(p => p.UserID)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<User>()
-            .HasMany(u => u.Categories)
-            .WithOne(c => c.User)
-            .HasForeignKey(c => c.UserID)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<User>()
-            .HasMany(u => u.Entries)
-            .WithOne(e => e.User)
-            .HasForeignKey(e => e.UserID)
-            .OnDelete(DeleteBehavior.Cascade);
-
         // Configure cascade delete for Category
+        modelBuilder.Entity<Category>()
+            .HasOne(c => c.Wallet)
+            .WithMany(w=>w.Categories)
+            .HasForeignKey(c => c.WalletID)
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<Category>()
             .HasMany(c => c.Entries)
             .WithOne(e => e.Category)
