@@ -1,7 +1,9 @@
 ﻿using BudgetFlow.Application.Common.Extensions;
-using BudgetFlow.Application.Investments;
+using BudgetFlow.Application.Wallets;
 using BudgetFlow.Application.Wallets.Commands.CreateWallet;
+using BudgetFlow.Application.Wallets.Queries.GetWalletAssets;
 using BudgetFlow.Application.Wallets.Queries.GetWalletPagination;
+using BudgetFlow.Application.Wallets.Queries.GetWalletUsers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -57,5 +59,37 @@ public class WalletController : ControllerBase
         return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Get wallet assets.
+    /// </summary>
+    /// <param name="getWalletAssets">The wallet ID to get assets for.</param>
+    /// <returns>List of assets in the wallet.</returns>
+    [HttpGet("Wallet/Assets")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<GetWalletAssetsResponse>))]
+    public async Task<IResult> GetWalletAssetsAsync([FromQuery] GetWalletAssetsQuery getWalletAssets)
+    {
+        var result = await _mediator.Send(getWalletAssets);
+        return result.IsSuccess
+               ? Results.Ok(result.Value)
+               : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Get wallet users.
+    /// </summary>
+    /// <param name="getWalletUsers">The wallet ID to get users for.</param>
+    /// <returns>List of users in the wallet.</returns>
+    [HttpGet("Wallet/Users")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<GetWalletUsersResponse>))]
+    public async Task<IResult> GetWalletUsersAsync([FromQuery] GetWalletUsersQuery getWalletUsers)
+    {
+        var result = await _mediator.Send(getWalletUsers);
+        return result.IsSuccess
+               ? Results.Ok(result.Value)
+               : result.ToProblemDetails();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using BudgetFlow.Application.Investments;
+using BudgetFlow.Application.Wallets;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 

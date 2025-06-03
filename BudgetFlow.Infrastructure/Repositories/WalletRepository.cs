@@ -1,6 +1,7 @@
 ﻿using BudgetFlow.Application.Assets;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Investments;
+using BudgetFlow.Application.Wallets;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using BudgetFlow.Infrastructure.Contexts;

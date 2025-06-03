@@ -10,7 +10,8 @@ public class GetInvestmentsQuery : IRequest<Result<PaginatedList<InvestmentPagin
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 50;
     public int PortfolioID { get; set; }
-    public int? AssetId { get; set; }
+    public int? AssetID { get; set; }
+    public int? UserID { get; set; }
     public class GetInvestmentsQueryHandler : IRequestHandler<GetInvestmentsQuery, Result<PaginatedList<InvestmentPaginationResponse>>>
     {
         private readonly IInvestmentRepository investmentRepository;
@@ -20,7 +21,7 @@ public class GetInvestmentsQuery : IRequest<Result<PaginatedList<InvestmentPagin
         }
         public async Task<Result<PaginatedList<InvestmentPaginationResponse>>> Handle(GetInvestmentsQuery request, CancellationToken cancellationToken)
         {
-            var investments = await investmentRepository.GetInvestmentsAsync(request.Page, request.PageSize, request.PortfolioID, request.AssetId);
+            var investments = await investmentRepository.GetInvestmentsAsync(request.Page, request.PageSize, request.PortfolioID, request.AssetID, request.UserID);
 
             return investments != null
                 ? Result.Success(investments)

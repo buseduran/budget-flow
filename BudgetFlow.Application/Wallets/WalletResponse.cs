@@ -1,6 +1,6 @@
 ﻿using BudgetFlow.Domain.Enums;
 
-namespace BudgetFlow.Application.Investments;
+namespace BudgetFlow.Application.Wallets;
 public class WalletResponse
 {
     public int ID { get; set; }

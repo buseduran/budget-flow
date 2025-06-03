@@ -5,17 +5,18 @@ using BudgetFlow.Application.Common.Services.Abstract;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using BudgetFlow.Domain.Errors;
+using BudgetFlow.Application.Categories;
 using MediatR;
 
 namespace BudgetFlow.Application.Investments.Commands.CreateInvestment;
 public class CreateInvestmentCommand : IRequest<Result<bool>>
 {
-    public int AssetId { get; set; }
+    public int AssetID { get; set; }
     public decimal UnitAmount { get; set; }
     public string Description { get; set; }
     public InvestmentType Type { get; set; }
     public DateTime Date { get; set; }
-    public int PortfolioId { get; set; }
+    public int PortfolioID { get; set; }
     public class CreateInvestmentCommandHandler : IRequestHandler<CreateInvestmentCommand, Result<bool>>
     {
         private readonly IInvestmentRepository _investmentRepository;
@@ -25,6 +26,8 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
         private readonly IPortfolioRepository _portfolioRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IBudgetRepository _budgetRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
         public CreateInvestmentCommandHandler(
             IInvestmentRepository investmentRepository,
@@ -33,7 +36,9 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
             IAssetRepository assetRepository,
             IPortfolioRepository portfolioRepository,
             ICurrentUserService currentUserService,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            IBudgetRepository budgetRepository,
+            ICategoryRepository categoryRepository)
         {
             _investmentRepository = investmentRepository;
             _walletRepository = walletRepository;
@@ -42,12 +47,14 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
             _portfolioRepository = portfolioRepository;
             _currentUserService = currentUserService;
             _unitOfWork = unitOfWork;
+            _budgetRepository = budgetRepository;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<Result<bool>> Handle(CreateInvestmentCommand request, CancellationToken cancellationToken)
         {
             var userID = _currentUserService.GetCurrentUserID();
-            var portfolio = await _portfolioRepository.GetPortfolioByIdAsync(request.PortfolioId);
+            var portfolio = await _portfolioRepository.GetPortfolioByIdAsync(request.PortfolioID);
             if (portfolio is null)
                 return Result.Failure<bool>(PortfolioErrors.PortfolioNotFound);
 
@@ -55,16 +62,16 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
             if (wallet is null)
                 return Result.Failure<bool>(WalletErrors.WalletNotFound);
 
-            var asset = await _assetRepository.GetAssetAsync(request.AssetId);
+            var asset = await _assetRepository.GetAssetAsync(request.AssetID);
 
             var investment = new Investment
             {
-                AssetId = request.AssetId,
+                AssetId = request.AssetID,
                 UserId = userID,
                 UnitAmount = request.UnitAmount,
                 Description = request.Description,
                 Date = DateTime.SpecifyKind(request.Date, DateTimeKind.Utc),
-                PortfolioId = request.PortfolioId,
+                PortfolioId = request.PortfolioID,
                 Type = request.Type
             };
 
@@ -80,6 +87,24 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
             await _unitOfWork.BeginTransactionAsync();
             try
             {
+                // Get or create investment category
+                var investmentCategory = await _categoryRepository.GetCategoriesAsync(1, 1, portfolio.WalletID);
+                var category = investmentCategory.Items.FirstOrDefault(c => c.Name == "Yatırım");
+
+                if (category == null)
+                {
+                    var newCategory = new Category
+                    {
+                        Name = "Yatırım",
+                        Color = "#4CAF50", // Green color for investment
+                        Type = EntryType.Expense, // Investment is treated as an expense
+                        WalletID = portfolio.WalletID
+                    };
+                    var categoryId = await _categoryRepository.CreateCategoryAsync(newCategory, saveChanges: true);
+                    await _unitOfWork.SaveChangesAsync();
+                    category = new CategoryResponse { ID = categoryId, Name = "Yatırım", Color = "#4CAF50", Type = EntryType.Expense };
+                }
+
                 if (walletAsset is not null)
                 {
                     if (investment.Type == InvestmentType.Buy)
@@ -89,6 +114,18 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
 
                         var walletAssetUpdate = await _walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
                         var walletUpdate = await _walletRepository.UpdateWalletAsync(portfolio.WalletID, -investment.CurrencyAmount, saveChanges: false);
+
+                        // Create entry for investment purchase
+                        var entry = new Entry
+                        {
+                            Name = $"{asset.Name} yatırımı",
+                            Amount = -investment.CurrencyAmount, // Negative because it's an expense
+                            Date = investment.Date,
+                            CategoryID = category.ID,
+                            WalletID = portfolio.WalletID,
+                            UserID = userID
+                        };
+                        await _budgetRepository.CreateEntryAsync(entry, saveChanges: false);
                     }
                     else
                     {
@@ -100,6 +137,18 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
 
                         var walletAssetUpdate = await _walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
                         var walletUpdate = await _walletRepository.UpdateWalletAsync(portfolio.WalletID, investment.CurrencyAmount, saveChanges: false);
+
+                        // Create entry for investment sale
+                        var entry = new Entry
+                        {
+                            Name = $"{asset.Name} satışı",
+                            Amount = investment.CurrencyAmount, // Positive because it's income from sale
+                            Date = investment.Date,
+                            CategoryID = category.ID,
+                            WalletID = portfolio.WalletID,
+                            UserID = userID
+                        };
+                        await _budgetRepository.CreateEntryAsync(entry, saveChanges: false);
                     }
                 }
                 else
@@ -115,6 +164,18 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                         }, saveChanges: false);
 
                         var walletUpdate = await _walletRepository.UpdateWalletAsync(portfolio.WalletID, -investment.CurrencyAmount, saveChanges: false);
+
+                        // Create entry for initial investment purchase
+                        var entry = new Entry
+                        {
+                            Name = $"{asset.Name} ilk yatırımı",
+                            Amount = -investment.CurrencyAmount, // Negative because it's an expense
+                            Date = investment.Date,
+                            CategoryID = category.ID,
+                            WalletID = portfolio.WalletID,
+                            UserID = userID
+                        };
+                        await _budgetRepository.CreateEntryAsync(entry, saveChanges: false);
                     }
                     else
                     {

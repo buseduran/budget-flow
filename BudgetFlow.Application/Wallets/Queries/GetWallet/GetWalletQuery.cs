@@ -1,7 +1,6 @@
 ﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Application.Common.Services.Abstract;
-using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Errors;
 using MediatR;
 

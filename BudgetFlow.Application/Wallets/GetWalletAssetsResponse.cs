@@ -1,4 +1,4 @@
-﻿namespace BudgetFlow.Application.Investments;
+﻿namespace BudgetFlow.Application.Wallets;
 public class GetWalletAssetsResponse
 {
     public int ID { get; set; }

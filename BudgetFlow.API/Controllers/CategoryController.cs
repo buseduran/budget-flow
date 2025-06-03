@@ -72,7 +72,7 @@ public class CategoryController : ControllerBase
     /// <summary>
     /// Deletes a Category. 
     /// </summary>
-    /// <param name="deleteEntdeleteCategoryCommandyCommand"></param>
+    /// <param name="ID"></param>
     /// <returns></returns>
     [HttpDelete("{ID}")]
     [Produces(MediaTypeNames.Application.Json)]

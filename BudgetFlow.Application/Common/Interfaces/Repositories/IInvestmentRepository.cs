@@ -10,6 +10,6 @@ public interface IInvestmentRepository
     Task<bool> CreateInvestmentAsync(Investment investment, bool saveChanges = true);
     Task<bool> DeleteInvestmentAsync(int ID);
     Task<bool> UpdateInvestmentAsync(int ID, InvestmentDto investment);
-    Task<PaginatedList<InvestmentPaginationResponse>> GetInvestmentsAsync(int Page, int PageSize, int PortfolioID, int? AssetId = null);
+    Task<PaginatedList<InvestmentPaginationResponse>> GetInvestmentsAsync(int Page, int PageSize, int PortfolioID, int? AssetId = null, int? UserId = null);
     Task<InvestmentResponse> GetInvestmentByIdAsync(int ID);
 }

@@ -87,7 +87,7 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
                     walletAsset.Amount += unitDifference;
                     walletAsset.Balance += balanceDifference;
 
-                    await _walletRepository.UpdateWalletAsync(userWallet.Wallet.ID, -balanceDifference,  saveChanges: false);
+                    await _walletRepository.UpdateWalletAsync(userWallet.Wallet.ID, -balanceDifference, saveChanges: false);
                 }
                 else
                 {
@@ -97,7 +97,7 @@ public class UpdateInvestmentCommand : IRequest<Result<bool>>
                     walletAsset.Amount -= unitDifference;
                     walletAsset.Balance -= balanceDifference;
 
-                    await _walletRepository.UpdateWalletAsync(userWallet.Wallet.ID, balanceDifference,saveChanges: false);
+                    await _walletRepository.UpdateWalletAsync(userWallet.Wallet.ID, balanceDifference, saveChanges: false);
                 }
 
                 await _walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);

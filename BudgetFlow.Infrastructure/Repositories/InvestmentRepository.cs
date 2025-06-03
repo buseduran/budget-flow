@@ -50,7 +50,7 @@ public class InvestmentRepository : IInvestmentRepository
         return await context.SaveChangesAsync() > 0;
     }
 
-    public async Task<PaginatedList<InvestmentPaginationResponse>> GetInvestmentsAsync(int Page, int PageSize, int PortfolioID, int? AssetId = null)
+    public async Task<PaginatedList<InvestmentPaginationResponse>> GetInvestmentsAsync(int Page, int PageSize, int PortfolioID, int? AssetId = null, int? UserId = null)
     {
         var query = context.Investments
             .Where(e => e.PortfolioId == PortfolioID);
@@ -58,6 +58,11 @@ public class InvestmentRepository : IInvestmentRepository
         if (AssetId.HasValue)
         {
             query = query.Where(e => e.AssetId == AssetId.Value);
+        }
+
+        if (UserId.HasValue)
+        {
+            query = query.Where(e => e.UserId == UserId.Value);
         }
 
         var investments = await query

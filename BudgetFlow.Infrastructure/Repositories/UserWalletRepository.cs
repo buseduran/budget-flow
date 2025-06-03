@@ -36,9 +36,13 @@ public class UserWalletRepository : IUserWalletRepository
         return userWallet;
     }
 
-    public Task<List<UserWallet>> GetUsersByWalletIdAsync(int walletID)
+    public async Task<List<UserWallet>> GetUsersByWalletIdAsync(int walletID)
     {
-        throw new NotImplementedException();
+        var userWallets = await context.UserWallets
+            .Include(uw => uw.User)
+            .Where(uw => uw.WalletID == walletID)
+            .ToListAsync();
+        return userWallets;
     }
 
     public Task<bool> RemoveUserFromWalletAsync(int walletID, int userID)

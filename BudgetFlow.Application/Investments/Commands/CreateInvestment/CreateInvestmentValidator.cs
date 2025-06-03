@@ -11,7 +11,7 @@ public class CreateInvestmentValidator : AbstractValidator<CreateInvestmentComma
 
         When(x => x != null, () =>
         {
-            RuleFor(x => x.AssetId)
+            RuleFor(x => x.AssetID)
                 .GreaterThan(0).WithMessage("Geçersiz varlık ID'si.");
 
             RuleFor(x => x.UnitAmount)
@@ -24,7 +24,7 @@ public class CreateInvestmentValidator : AbstractValidator<CreateInvestmentComma
                 .NotEmpty().WithMessage("Tarih boş olamaz.")
                 .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("Tarih bugünden sonra olamaz.");
 
-            RuleFor(x => x.PortfolioId)
+            RuleFor(x => x.PortfolioID)
                 .GreaterThan(0).WithMessage("Geçersiz portföy ID'si.");
 
             RuleFor(x => x.Type)

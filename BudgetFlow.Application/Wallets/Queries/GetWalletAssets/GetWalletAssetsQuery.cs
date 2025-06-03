@@ -2,7 +2,7 @@ using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Results;
 using MediatR;
 
-namespace BudgetFlow.Application.Investments.Queries.GetWalletAssets;
+namespace BudgetFlow.Application.Wallets.Queries.GetWalletAssets;
 public class GetWalletAssetsQuery : IRequest<Result<List<GetWalletAssetsResponse>>>
 {
     public int WalletID { get; set; }

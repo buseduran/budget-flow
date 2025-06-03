@@ -15,7 +15,6 @@ namespace BudgetFlow.Application.Users.Commands.Register;
 public class RegisterCommand : IRequest<Result<bool>>
 {
     public UserRegisterModel User { get; set; }
-    //public string ClientUri { get; set; }
     public class CreateUserCommandHandler : IRequestHandler<RegisterCommand, Result<bool>>
     {
         private readonly IUserRepository _userRepository;
