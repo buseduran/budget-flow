@@ -14,4 +14,5 @@ public interface IWalletRepository
     Task<List<WalletResponse>> GetWalletsAsync(int UserID);
     Task<IEnumerable<Wallet>> GetAllAsync();
     Task UpdateAsync(Wallet wallet);
+    Task<List<WalletAssetResponse>> GetWalletAssetsAsync(int WalletID);
 }

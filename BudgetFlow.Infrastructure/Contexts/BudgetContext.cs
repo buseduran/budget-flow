@@ -55,9 +55,9 @@ public class BudgetContext : DbContext
             .HasIndex(x => x.Email)
             .IsUnique();
 
-        modelBuilder.Entity<Portfolio>()
-            .HasIndex(x => x.Name)
-            .IsUnique();
+        //modelBuilder.Entity<Portfolio>()
+        //    .HasIndex(x => x.Name)
+        //    .IsUnique();
 
         // Configure cascade delete for User
         modelBuilder.Entity<User>()

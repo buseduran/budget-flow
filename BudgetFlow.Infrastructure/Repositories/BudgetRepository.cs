@@ -56,11 +56,10 @@ public class BudgetRepository : IBudgetRepository
     public async Task<PaginatedList<EntryResponse>> GetPaginatedAsync(
        int Page,
        int PageSize,
-       int UserID,
        int walletID)
     {
         var query = context.Entries
-            .Where(e => e.UserID == UserID && e.WalletID == walletID)
+            .Where(e => e.WalletID == walletID)
             .OrderByDescending(e => e.CreatedAt)
             .Include(e => e.Category);
 

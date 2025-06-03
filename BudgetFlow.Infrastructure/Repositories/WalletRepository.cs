@@ -1,4 +1,5 @@
-﻿using BudgetFlow.Application.Common.Interfaces.Repositories;
+﻿using BudgetFlow.Application.Assets;
+using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
@@ -56,52 +57,53 @@ public class WalletRepository : IWalletRepository
     public async Task<WalletAssetResponse> GetWalletAssetAsync(int WalletID, int AssetID)
     {
         var walletAsset = await context.WalletAssets
-            .Where(e => e.WalletId == WalletID && e.AssetId == AssetID)
-
-            .Select(e => new WalletAssetResponse
+            .Where(wa => wa.WalletId == WalletID && wa.AssetId == AssetID)
+            .Select(wa => new WalletAssetResponse
             {
-                ID = e.ID,
-                Amount = e.Amount,
-                Balance = e.Balance,
-                WalletId = e.WalletId,
-                AssetId = e.AssetId
+                ID = wa.ID,
+                Amount = wa.Amount,
+                Balance = wa.Balance,
+                WalletId = wa.WalletId,
+                AssetId = wa.AssetId
             })
             .FirstOrDefaultAsync();
+
         return walletAsset;
     }
 
     public async Task<bool> CreateWalletAssetAsync(WalletAsset walletAsset, bool saveChanges = true)
     {
-        walletAsset.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-        walletAsset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
         await context.WalletAssets.AddAsync(walletAsset);
         if (saveChanges)
             await context.SaveChangesAsync();
         return true;
     }
+
     public async Task<bool> UpdateWalletAssetAsync(int ID, decimal Amount, decimal Balance, bool saveChanges = true)
     {
-        var userAsset = await context.WalletAssets.FindAsync(ID);
-        userAsset.Amount = Amount;
-        userAsset.Balance = Balance;
-        userAsset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+        var walletAsset = await context.WalletAssets.FindAsync(ID);
+        if (walletAsset is null) return false;
+
+        walletAsset.Amount = Amount;
+        walletAsset.Balance = Balance;
+
         if (saveChanges)
             await context.SaveChangesAsync();
         return true;
     }
 
-    public async Task<List<WalletResponse>> GetWalletsAsync(int userID)
+    public async Task<List<WalletResponse>> GetWalletsAsync(int UserID)
     {
         var wallets = await context.UserWallets
-            .Where(uw => uw.UserID == userID)
-            .Include(uw => uw.Wallet)
+            .Where(uw => uw.UserID == UserID)
             .Select(uw => new WalletResponse
             {
                 ID = uw.Wallet.ID,
                 Name = uw.Wallet.Name,
                 Balance = uw.Wallet.Balance,
                 Role = uw.Role
-            }).ToListAsync();
+            })
+            .ToListAsync();
 
         return wallets;
     }
@@ -115,5 +117,28 @@ public class WalletRepository : IWalletRepository
     {
         context.Wallets.Update(wallet);
         await context.SaveChangesAsync();
+    }
+
+    public async Task<List<WalletAssetResponse>> GetWalletAssetsAsync(int WalletID)
+    {
+        var walletAssets = await context.WalletAssets
+            .Where(wa => wa.WalletId == WalletID)
+            .Include(wa => wa.Asset)
+            .Select(wa => new WalletAssetResponse
+            {
+                ID = wa.ID,
+                Amount = wa.Amount,
+                Balance = wa.Balance,
+                WalletId = wa.WalletId,
+                AssetId = wa.AssetId,
+                Asset = new AssetResponse
+                {
+                    ID = wa.Asset.ID,
+                    Name = wa.Asset.Name
+                }
+            })
+            .ToListAsync();
+
+        return walletAssets;
     }
 }

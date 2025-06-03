@@ -32,9 +32,9 @@ public class CreatePortfolioCommand : IRequest<Result<int>>
                 return Result.Failure<int>(UserWalletErrors.UserWalletNotFound);
 
             //check if the portfolio name exists
-            var existingPortfolio = await _portfolioRepository.GetPortfolioAsync(request.Portfolio.Name, userID);
-            if (existingPortfolio != null)
-                return Result.Failure<int>(PortfolioErrors.PortfolioAlreadyExists);
+            //var existingPortfolio = await _portfolioRepository.GetPortfolioAsync(request.Portfolio.Name, userID);
+            //if (existingPortfolio != null)
+            //    return Result.Failure<int>(PortfolioErrors.PortfolioAlreadyExists);
 
             Portfolio portfolio = new()
             {

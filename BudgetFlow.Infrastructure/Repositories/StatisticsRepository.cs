@@ -20,7 +20,6 @@ public class StatisticsRepository : IStatisticsRepository
     }
 
     public async Task<AnalysisEntriesResponse> GetAnalysisEntriesAsync(
-        int userID,
         string Range,
         int walletID)
     {
@@ -30,8 +29,7 @@ public class StatisticsRepository : IStatisticsRepository
         var previousEndDate = startDate.AddDays(-1);
 
         var groupedEntries = await _context.Entries
-            .Where(e => e.UserID == userID &&
-                        e.WalletID == walletID &&
+            .Where(e => e.WalletID == walletID &&
                        ((e.Date >= startDate && e.Date <= endDate) ||
                         (e.Date >= previousStartDate && e.Date <= previousEndDate)))
             .Select(e => new

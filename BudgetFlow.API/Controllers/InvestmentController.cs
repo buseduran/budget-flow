@@ -4,8 +4,8 @@ using BudgetFlow.Application.Investments;
 using BudgetFlow.Application.Investments.Commands.CreateInvestment;
 using BudgetFlow.Application.Investments.Commands.DeleteInvestment;
 using BudgetFlow.Application.Investments.Commands.UpdateInvestment;
-using BudgetFlow.Application.Investments.Queries;
 using BudgetFlow.Application.Investments.Queries.GetInvestments;
+using BudgetFlow.Application.Investments.Queries.GetWalletAssets;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -87,6 +87,22 @@ public class InvestmentController : ControllerBase
     public async Task<IResult> GetInvestmentsAsync([FromQuery] GetInvestmentsQuery GetInvestmentsQuery)
     {
         var result = await _mediator.Send(GetInvestmentsQuery);
+        return result.IsSuccess
+               ? Results.Ok(result.Value)
+               : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Get wallet asset IDs.
+    /// </summary>
+    /// <param name="getWalletAssets">The wallet ID to get asset IDs for.</param>
+    /// <returns>List of asset IDs in the wallet.</returns>
+    [HttpGet("Wallet/Assets")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<int>))]
+    public async Task<IResult> GetWalletAssetIdsAsync([FromQuery] GetWalletAssetsQuery getWalletAssets)
+    {
+        var result = await _mediator.Send(getWalletAssets);
         return result.IsSuccess
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();

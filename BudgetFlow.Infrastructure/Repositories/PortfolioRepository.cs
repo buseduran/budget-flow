@@ -101,23 +101,6 @@ public class PortfolioRepository : IPortfolioRepository
         return new PaginatedList<PortfolioResponse>(result, count, Page, PageSize);
     }
 
-    public async Task<PortfolioResponse> GetPortfolioAsync(string Name, int UserID)
-    {
-        var portfolio = await context.Portfolios
-             .Where(e => e.Name == Name && e.UserID == UserID)
-             .Include(e => e.Investments)
-             .Select(e => new PortfolioResponse
-             {
-                 ID = e.ID,
-                 Name = e.Name,
-                 Description = e.Description,
-                 TotalInvested = e.Investments.Sum(i => i.UnitAmount),
-                 WalletID = e.WalletID,
-             })
-             .FirstOrDefaultAsync();
-        return portfolio;
-    }
-
     public async Task<PortfolioResponse> GetPortfolioByIdAsync(int ID)
     {
         var portfolio = await context.Portfolios

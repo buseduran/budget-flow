@@ -50,10 +50,17 @@ public class InvestmentRepository : IInvestmentRepository
         return await context.SaveChangesAsync() > 0;
     }
 
-    public async Task<PaginatedList<InvestmentPaginationResponse>> GetInvestmentsAsync(int Page, int PageSize, int PortfolioID)
+    public async Task<PaginatedList<InvestmentPaginationResponse>> GetInvestmentsAsync(int Page, int PageSize, int PortfolioID, int? AssetId = null)
     {
-        var investments = await context.Investments
-            .Where(e => e.PortfolioId == PortfolioID)
+        var query = context.Investments
+            .Where(e => e.PortfolioId == PortfolioID);
+
+        if (AssetId.HasValue)
+        {
+            query = query.Where(e => e.AssetId == AssetId.Value);
+        }
+
+        var investments = await query
             .Include(e => e.Asset)
             .Include(e => e.User)
             .Select(i => new InvestmentPaginationResponse

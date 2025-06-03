@@ -1,4 +1,6 @@
-﻿namespace BudgetFlow.Application.Investments;
+﻿using BudgetFlow.Application.Assets;
+
+namespace BudgetFlow.Application.Investments;
 public class WalletAssetResponse
 {
     public int ID { get; set; }
@@ -6,4 +8,5 @@ public class WalletAssetResponse
     public decimal Balance { get; set; }
     public int WalletId { get; set; }
     public int AssetId { get; set; }
+    public AssetResponse Asset { get; set; }
 }

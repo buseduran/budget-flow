@@ -9,6 +9,5 @@ public interface IPortfolioRepository
     Task<bool> DeletePortfolioAsync(int ID, int UserID);
     Task<bool> UpdatePortfolioAsync(int ID, string Name, string Description, int UserID);
     Task<PaginatedList<PortfolioResponse>> GetPortfoliosAsync(int Page, int PageSize, int UserID, int WalletID);
-    Task<PortfolioResponse> GetPortfolioAsync(string Name, int UserID);
     Task<PortfolioResponse> GetPortfolioByIdAsync(int ID);
 }

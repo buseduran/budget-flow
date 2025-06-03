@@ -52,7 +52,7 @@ public class GeminiAnalysisJob : IJob
                     try
                     {
                         // Get budget data from repository
-                        var budgetData = await _statisticsRepository.GetAnalysisEntriesAsync(userID, "1m", wallet.ID);
+                        var budgetData = await _statisticsRepository.GetAnalysisEntriesAsync("1m", wallet.ID);
 
                         // Create analysis request
                         var request = new BudgetAnalysisRequest

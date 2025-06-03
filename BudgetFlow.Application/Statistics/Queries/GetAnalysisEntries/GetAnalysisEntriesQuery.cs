@@ -12,7 +12,6 @@ public record GetAnalysisEntriesQuery : IRequest<Result<AnalysisEntriesResponse>
 {
     public int WalletID { get; set; }
     public string Range { get; set; }
-    public bool ConvertToTRY { get; set; } = false;
 
     public class GetAnalysisEntriesQueryHandler : IRequestHandler<GetAnalysisEntriesQuery, Result<AnalysisEntriesResponse>>
     {
@@ -38,7 +37,6 @@ public record GetAnalysisEntriesQuery : IRequest<Result<AnalysisEntriesResponse>
 
 
             var entries = await _statisticsRepository.GetAnalysisEntriesAsync(
-                userID,
                 request.Range,
                 request.WalletID);
 
