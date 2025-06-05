@@ -66,7 +66,7 @@ public class WalletController : ControllerBase
     /// </summary>
     /// <param name="getWalletAssets">The wallet ID to get assets for.</param>
     /// <returns>List of assets in the wallet.</returns>
-    [HttpGet("Wallet/Assets")]
+    [HttpGet("Assets")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<GetWalletAssetsResponse>))]
     public async Task<IResult> GetWalletAssetsAsync([FromQuery] GetWalletAssetsQuery getWalletAssets)
@@ -82,7 +82,7 @@ public class WalletController : ControllerBase
     /// </summary>
     /// <param name="getWalletUsers">The wallet ID to get users for.</param>
     /// <returns>List of users in the wallet.</returns>
-    [HttpGet("Wallet/Users")]
+    [HttpGet("Users")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<GetWalletUsersResponse>))]
     public async Task<IResult> GetWalletUsersAsync([FromQuery] GetWalletUsersQuery getWalletUsers)
