@@ -17,7 +17,7 @@ public class GeminiService : IGeminiService
         _httpClient = httpClient;
         _apiUrl = config["Gemini:ApiUrl"];
         _basePrompt = @"
-            Aşağıdaki gelir/gider verilerini profesyonelce analiz et. 
+            Aşağıdaki gelir/gider verilerini profesyonelce analiz et. Yalnızca son kullanıcının görüntüleyebileceği JSON verisi hakkında herhangi bir bilgi verme ve teknik açıklamalar yapma.
             Gelir ve gider dağılımlarını değerlendir, tasarruf oranına dair çıkarım yap ve 1-2 kısa öneri ver. 
             Maksimum 5-6 cümlelik kısa ama net bir yorum yap. Emojilerle destekle.
             Veriler:

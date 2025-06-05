@@ -42,7 +42,7 @@ public class CategoryController : ControllerBase
     /// Get Categories. 
     /// </summary>
     /// <returns></returns>
-    [HttpGet("Wallet")]
+    [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedList<CategoryResponse>))]
     public async Task<IResult> GetCategoriesAsync([FromQuery] GetCategoryPaginationQuery getCategoryPaginationQuery)
