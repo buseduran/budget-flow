@@ -289,34 +289,21 @@ public class StatisticsRepository : IStatisticsRepository
             .Select(w => new { w.Balance })
             .FirstOrDefaultAsync();
 
-
         foreach (var userWallet in userWallets)
         {
             var userEntries = await _context.Entries
-                .Include(e => e.Category)
                 .Where(e => e.WalletID == walletId && e.UserID == userWallet.UserID)
-                .OrderByDescending(e => e.CreatedAt)
                 .ToListAsync();
 
             var userContribution = new WalletContributionResponse
             {
                 UserID = userWallet.UserID,
                 UserName = userWallet.User.Name,
-                Details = userEntries.Select(e => new ContributionDetail
-                {
-                    Date = e.CreatedAt,
-                    Amount = e.Amount,
-                    Description = e.Name,
-                    Type = e.Category.Type
-                }).ToList()
+                TotalContribution = userEntries.Sum(e => e.Amount)
             };
 
-            // Calculate total contribution (since expenses are already negative)
-            userContribution.TotalContribution = userContribution.Details.Sum(d => d.Amount);
-
             // Calculate percentage based on total wallet balance
-            var contributionAmount = userContribution.TotalContribution;
-            userContribution.Percentage = wallet.Balance > 0 ? contributionAmount / wallet.Balance * 100 : 0;
+            userContribution.Percentage = wallet.Balance > 0 ? userContribution.TotalContribution / wallet.Balance * 100 : 0;
 
             contributions.Add(userContribution);
         }

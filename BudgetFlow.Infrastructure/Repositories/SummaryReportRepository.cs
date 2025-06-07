@@ -28,13 +28,8 @@ public class SummaryReportRepository : ISummaryReportRepository
 
     public async Task<bool> CreateOrUpdateAsync(SummaryReport report)
     {
-        var existingReport = await GetByWalletIdAsync(report.WalletID);
-        SummaryReport summaryReport = new SummaryReport
-        {
-            WalletID = report.WalletID,
-            Analysis = report.Analysis,
-            AnalysisDate = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc)
-        };
+        var existingReport = await _context.SummaryReports
+            .FirstOrDefaultAsync(r => r.WalletID == report.WalletID);
 
         if (existingReport == null)
         {
@@ -44,12 +39,13 @@ public class SummaryReportRepository : ISummaryReportRepository
         }
         else
         {
-            summaryReport.Analysis = report.Analysis;
-            summaryReport.AnalysisDate = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-            _context.SummaryReports.Update(summaryReport);
+            existingReport.Analysis = report.Analysis;
+            existingReport.AnalysisDate = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+            existingReport.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+            _context.SummaryReports.Update(existingReport);
         }
-        await _context.SaveChangesAsync();
 
+        await _context.SaveChangesAsync();
         return true;
     }
 }

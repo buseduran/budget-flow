@@ -17,6 +17,7 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
     public InvestmentType Type { get; set; }
     public DateTime Date { get; set; }
     public int PortfolioID { get; set; }
+    public bool TrackOnly { get; set; } = false;
     public class CreateInvestmentCommandHandler : IRequestHandler<CreateInvestmentCommand, Result<bool>>
     {
         private readonly IInvestmentRepository _investmentRepository;
@@ -72,7 +73,8 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                 Description = request.Description,
                 Date = DateTime.SpecifyKind(request.Date, DateTimeKind.Utc),
                 PortfolioId = request.PortfolioID,
-                Type = request.Type
+                Type = request.Type,
+                TrackOnly = request.TrackOnly
             };
 
             investment.CurrencyAmount = investment.Type == InvestmentType.Buy
@@ -113,19 +115,28 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                         walletAsset.Balance += investment.UnitAmount * asset.BuyPrice;
 
                         var walletAssetUpdate = await _walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
-                        var walletUpdate = await _walletRepository.UpdateWalletAsync(portfolio.WalletID, -investment.CurrencyAmount, saveChanges: false);
 
-                        // Create entry for investment purchase
-                        var entry = new Entry
+                        if (!investment.TrackOnly)
                         {
-                            Name = $"{asset.Name} yatırımı",
-                            Amount = -investment.CurrencyAmount, // Negative because it's an expense
-                            Date = investment.Date,
-                            CategoryID = category.ID,
-                            WalletID = portfolio.WalletID,
-                            UserID = userID
-                        };
-                        await _budgetRepository.CreateEntryAsync(entry, saveChanges: false);
+                            var walletUpdate = await _walletRepository.UpdateWalletAsync(portfolio.WalletID, -investment.CurrencyAmount, saveChanges: false);
+
+                            // Create entry for investment purchase
+                            var entry = new Entry
+                            {
+                                Name = $"{asset.Name} yatırımı",
+                                Amount = -investment.CurrencyAmount, // Negative because it's an expense
+                                Date = investment.Date,
+                                CategoryID = category.ID,
+                                WalletID = portfolio.WalletID,
+                                UserID = userID
+                            };
+                            await _budgetRepository.CreateEntryAsync(entry, saveChanges: false);
+                        }
+                        else
+                        {
+                            // For TrackOnly investments, increase wallet balance as it's a savings
+                            var walletUpdate = await _walletRepository.UpdateWalletAsync(portfolio.WalletID, investment.UnitAmount * asset.BuyPrice, saveChanges: false);
+                        }
                     }
                     else
                     {
@@ -136,19 +147,28 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                         walletAsset.Balance -= investment.UnitAmount * asset.BuyPrice;
 
                         var walletAssetUpdate = await _walletRepository.UpdateWalletAssetAsync(walletAsset.ID, walletAsset.Amount, walletAsset.Balance, saveChanges: false);
-                        var walletUpdate = await _walletRepository.UpdateWalletAsync(portfolio.WalletID, investment.CurrencyAmount, saveChanges: false);
 
-                        // Create entry for investment sale
-                        var entry = new Entry
+                        if (!investment.TrackOnly)
                         {
-                            Name = $"{asset.Name} satışı",
-                            Amount = investment.CurrencyAmount, // Positive because it's income from sale
-                            Date = investment.Date,
-                            CategoryID = category.ID,
-                            WalletID = portfolio.WalletID,
-                            UserID = userID
-                        };
-                        await _budgetRepository.CreateEntryAsync(entry, saveChanges: false);
+                            var walletUpdate = await _walletRepository.UpdateWalletAsync(portfolio.WalletID, investment.CurrencyAmount, saveChanges: false);
+
+                            // Create entry for investment sale
+                            var entry = new Entry
+                            {
+                                Name = $"{asset.Name} satışı",
+                                Amount = investment.CurrencyAmount, // Positive because it's income from sale
+                                Date = investment.Date,
+                                CategoryID = category.ID,
+                                WalletID = portfolio.WalletID,
+                                UserID = userID
+                            };
+                            await _budgetRepository.CreateEntryAsync(entry, saveChanges: false);
+                        }
+                        else
+                        {
+                            // For TrackOnly investments, decrease wallet balance as it's a withdrawal from savings
+                            var walletUpdate = await _walletRepository.UpdateWalletAsync(portfolio.WalletID, -investment.UnitAmount * asset.SellPrice, saveChanges: false);
+                        }
                     }
                 }
                 else
@@ -163,19 +183,27 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
                             Balance = investment.UnitAmount * asset.BuyPrice
                         }, saveChanges: false);
 
-                        var walletUpdate = await _walletRepository.UpdateWalletAsync(portfolio.WalletID, -investment.CurrencyAmount, saveChanges: false);
-
-                        // Create entry for initial investment purchase
-                        var entry = new Entry
+                        if (!investment.TrackOnly)
                         {
-                            Name = $"{asset.Name} ilk yatırımı",
-                            Amount = -investment.CurrencyAmount, // Negative because it's an expense
-                            Date = investment.Date,
-                            CategoryID = category.ID,
-                            WalletID = portfolio.WalletID,
-                            UserID = userID
-                        };
-                        await _budgetRepository.CreateEntryAsync(entry, saveChanges: false);
+                            var walletUpdate = await _walletRepository.UpdateWalletAsync(portfolio.WalletID, -investment.CurrencyAmount, saveChanges: false);
+
+                            // Create entry for initial investment purchase
+                            var entry = new Entry
+                            {
+                                Name = $"{asset.Name} ilk yatırımı",
+                                Amount = -investment.CurrencyAmount, // Negative because it's an expense
+                                Date = investment.Date,
+                                CategoryID = category.ID,
+                                WalletID = portfolio.WalletID,
+                                UserID = userID
+                            };
+                            await _budgetRepository.CreateEntryAsync(entry, saveChanges: false);
+                        }
+                        else
+                        {
+                            // For TrackOnly investments, increase wallet balance as it's a savings
+                            var walletUpdate = await _walletRepository.UpdateWalletAsync(portfolio.WalletID, investment.UnitAmount * asset.BuyPrice, saveChanges: false);
+                        }
                     }
                     else
                     {

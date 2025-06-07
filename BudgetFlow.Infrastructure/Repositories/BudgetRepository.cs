@@ -56,10 +56,18 @@ public class BudgetRepository : IBudgetRepository
     public async Task<PaginatedList<EntryResponse>> GetPaginatedAsync(
        int Page,
        int PageSize,
-       int walletID)
+       int walletID,
+       int? userID = null)
     {
         var query = context.Entries
-            .Where(e => e.WalletID == walletID)
+            .Where(e => e.WalletID == walletID);
+
+        if (userID.HasValue)
+        {
+            query = query.Where(e => e.UserID == userID.Value);
+        }
+
+        query = query
             .OrderByDescending(e => e.CreatedAt)
             .Include(e => e.Category);
 
@@ -81,7 +89,7 @@ public class BudgetRepository : IBudgetRepository
                     Color = e.Category.Color,
                     Type = e.Category.Type
                 },
-                UserName= e.User.Name,
+                UserName = e.User.Name,
                 WalletID = walletID,
             })
             .ToListAsync();

@@ -16,4 +16,5 @@ public class Investment : BaseEntity
     public Asset Asset { get; set; }
     public int UserId { get; set; }
     public User User { get; set; }
+    public bool TrackOnly { get; set; } = false;
 }

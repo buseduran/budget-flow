@@ -11,4 +11,5 @@ public class InvestmentDto
     public InvestmentType Type { get; set; }
     public DateTime Date { get; set; }
     public int PortfolioId { get; set; }
+    public bool TrackOnly { get; set; } = false;
 }
