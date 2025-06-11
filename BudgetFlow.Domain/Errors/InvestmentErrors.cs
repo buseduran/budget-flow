@@ -10,5 +10,7 @@ public static class InvestmentErrors
     public static Error InvalidInvestmentId => new("Investment.InvalidId", "Geçersiz yatırım ID'si.");
     public static Error NoBalanceForAsset => new("Investment.NoBalanceForAsset", "Bu varlık için bakiye bulunmamaktadır.");
     public static Error InvalidInvestmentType => new("Investment.InvalidType", "Geçersiz yatırım türü.");
+    public static Error InvalidStockAmount => new("Investment.InvalidStockAmount", "Borsa İstanbul'da hisse senedi alım ve satımı yalnızca tam adetler şeklinde yapılabilir.");
+
 }
 

@@ -65,6 +65,11 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
 
             var asset = await _assetRepository.GetAssetAsync(request.AssetID);
 
+            if (asset.AssetType == AssetType.Stock && request.UnitAmount != Math.Floor(request.UnitAmount))
+            {
+                return Result.Failure<bool>(InvestmentErrors.InvalidStockAmount);
+            }
+
             var investment = new Investment
             {
                 AssetId = request.AssetID,

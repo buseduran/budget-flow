@@ -3,6 +3,8 @@ using BudgetFlow.Application.Common.Results;
 using BudgetFlow.Domain.Enums;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using MediatR;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BudgetFlow.Application.Assets.Commands.SyncAsset;
 public class SyncAssetCommand : IRequest<Result<bool>>
@@ -80,6 +82,24 @@ public class SyncAssetCommand : IRequest<Result<bool>>
 
 
             return Result.Success(true);
+        }
+
+        private static MetalType? GetMetalType(string name)
+        {
+            name = name.ToLowerInvariant();
+
+            var metalTypes = new Dictionary<string, MetalType>
+            {
+                ["çeyrek altın"] = MetalType.GoldQuarter,
+                ["yarım altın"] = MetalType.GoldHalf,
+                ["tam altın"] = MetalType.GoldFull,
+                ["altin (tl/gr)"] = MetalType.GoldGram,
+                ["altın (ons)"] = MetalType.GoldOunce,
+                ["gümüş (tl/gr)"] = MetalType.SilverGram,
+                ["gümüş ($/ons)"] = MetalType.SilverOunce
+            };
+
+            return metalTypes.FirstOrDefault(x => name.Contains(x.Key)).Value;
         }
     }
 }

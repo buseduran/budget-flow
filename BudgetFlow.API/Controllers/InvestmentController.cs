@@ -44,37 +44,37 @@ public class InvestmentController : ControllerBase
                : result.ToProblemDetails();
     }
 
-    /// <summary>
-    /// Deletes an Investment. 
-    /// </summary>
-    /// <param name="ID"></param>
-    /// <returns></returns>
-    [HttpDelete("{ID}")]
-    [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IResult> DeleteInvestmentAsync([FromRoute] int ID)
-    {
-        var result = await _mediator.Send(new DeleteInvestmentCommand(ID));
-        return result.IsSuccess
-               ? Results.Ok(result.Value)
-               : result.ToProblemDetails();
-    }
+    //[HttpDelete("{ID}")]
+    //[Produces(MediaTypeNames.Application.Json)]
+    //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    ///// <summary>
+    ///// Deletes an Investment. 
+    ///// </summary>
+    ///// <param name="ID"></param>
+    ///// <returns></returns>
+    //public async Task<IResult> DeleteInvestmentAsync([FromRoute] int ID)
+    //{
+    //    var result = await _mediator.Send(new DeleteInvestmentCommand(ID));
+    //    return result.IsSuccess
+    //           ? Results.Ok(result.Value)
+    //           : result.ToProblemDetails();
+    //}
 
-    /// <summary>
-    /// Updates an Investment. 
-    /// </summary>
-    /// <param name="updateInvestmentCommand"></param>
-    /// <returns></returns>
-    [HttpPut]
-    [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IResult> UpdateInvestmentAsync([FromBody] UpdateInvestmentCommand updateInvestmentCommand)
-    {
-        var result = await _mediator.Send(updateInvestmentCommand);
-        return result.IsSuccess
-               ? Results.Ok(result.Value)
-               : result.ToProblemDetails();
-    }
+    //[HttpPut]
+    //[Produces(MediaTypeNames.Application.Json)]
+    //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    ///// <summary>
+    ///// Updates an Investment. 
+    ///// </summary>
+    ///// <param name="updateInvestmentCommand"></param>
+    ///// <returns></returns>
+    //public async Task<IResult> UpdateInvestmentAsync([FromBody] UpdateInvestmentCommand updateInvestmentCommand)
+    //{
+    //    var result = await _mediator.Send(updateInvestmentCommand);
+    //    return result.IsSuccess
+    //           ? Results.Ok(result.Value)
+    //           : result.ToProblemDetails();
+    //}
 
     /// <summary>
     /// Get Investments. 
@@ -90,5 +90,4 @@ public class InvestmentController : ControllerBase
                ? Results.Ok(result.Value)
                : result.ToProblemDetails();
     }
-
 }

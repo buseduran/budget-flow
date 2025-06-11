@@ -105,7 +105,7 @@ public class MetalScraper : IMetalScraper
             return MetalType.GoldHalf;
         if (name.Contains("tam altın"))
             return MetalType.GoldFull;
-        if (name.Contains("altın (tl/gr)"))
+        if (name.Contains("altin (tl/gr)"))
             return MetalType.GoldGram;
         if (name.Contains("altın (ons)"))
             return MetalType.GoldOunce;

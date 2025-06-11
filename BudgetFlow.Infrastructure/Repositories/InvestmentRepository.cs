@@ -66,6 +66,7 @@ public class InvestmentRepository : IInvestmentRepository
         }
 
         var investments = await query
+            .OrderByDescending(e => e.Date)
             .Include(e => e.Asset)
             .Include(e => e.User)
             .Select(i => new InvestmentPaginationResponse
