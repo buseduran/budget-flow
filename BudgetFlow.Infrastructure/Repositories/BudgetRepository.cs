@@ -17,27 +17,27 @@ public class BudgetRepository : IBudgetRepository
         this.context = context;
         this.mapper = mapper;
     }
-    public async Task<bool> CreateEntryAsync(Entry Entry, bool saveChanges = true)
+    public async Task<bool> CreateEntryAsync(Entry entry, bool saveChanges = true)
     {
-        Entry.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-        Entry.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-        Entry.Date = DateTime.SpecifyKind(Entry.Date, DateTimeKind.Utc);
+        entry.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+        entry.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+        entry.Date = DateTime.SpecifyKind(entry.Date, DateTimeKind.Utc);
 
-        await context.Entries.AddAsync(Entry);
+        await context.Entries.AddAsync(entry);
         if (saveChanges)
             await context.SaveChangesAsync();
         return true;
     }
-    public async Task<bool> UpdateEntryAsync(int ID, Entry Entry, bool saveChanges = true)
+    public async Task<bool> UpdateEntryAsync(int ID, Entry entry, bool saveChanges = true)
     {
-        var entry = await context.Entries.FindAsync(ID);
+        var existingEntry = await context.Entries.FindAsync(ID);
         if (entry is null) return false;
 
-        entry.Name = Entry.Name;
-        entry.Amount = Entry.Amount;
-        entry.Date = DateTime.SpecifyKind(Entry.Date, DateTimeKind.Utc);
-        entry.CategoryID = Entry.CategoryID;
-        entry.WalletID = Entry.WalletID;
+        entry.Name = entry.Name;
+        entry.Amount = entry.Amount;
+        entry.Date = DateTime.SpecifyKind(existingEntry.Date, DateTimeKind.Utc);
+        entry.CategoryID = entry.CategoryID;
+        entry.WalletID = entry.WalletID;
         entry.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
         return await context.SaveChangesAsync() > 0;
@@ -98,10 +98,10 @@ public class BudgetRepository : IBudgetRepository
     }
 
 
-    public async Task<bool> CheckEntryByCategoryAsync(int CategoryID, int UserID)
+    public async Task<bool> CheckEntryByCategoryAsync(int categoryID, int userID)
     {
         return await context.Entries
-            .AnyAsync(e => e.CategoryID == CategoryID && e.UserID == UserID);
+            .AnyAsync(e => e.CategoryID == categoryID && e.UserID == userID);
     }
 
     public async Task<EntryResponse> GetEntryByIdAsync(int ID)

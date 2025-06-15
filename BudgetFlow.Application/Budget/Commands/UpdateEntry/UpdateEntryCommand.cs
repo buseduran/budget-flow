@@ -46,7 +46,7 @@ public class UpdateEntryCommand : IRequest<Result<bool>>
             var mappedEntry = _mapper.Map<Entry>(request.Entry);
             mappedEntry.UserID = userID;
 
-            var category = await _categoryRepository.GetCategoryByIdAsync(mappedEntry.CategoryID);
+            var category = await _categoryRepository.GetCategoryByIDAsync(mappedEntry.CategoryID);
 
             #region Eski Tutar Üzerinden Farkı Hesapla ve Normalize Et
             var existingEntry = await _budgetRepository.GetEntryByIdAsync(request.ID);

@@ -71,7 +71,7 @@ public class CreateEntryCommand : IRequest<Result<bool>>
             var mappedEntry = _mapper.Map<Entry>(entry);
             mappedEntry.UserID = userID;
 
-            var category = await _categoryRepository.GetCategoryByIdAsync(mappedEntry.CategoryID);
+            var category = await _categoryRepository.GetCategoryByIDAsync(mappedEntry.CategoryID);
             if (category is null)
                 return Result.Failure<bool>(CategoryErrors.CategoryNotFound);
 

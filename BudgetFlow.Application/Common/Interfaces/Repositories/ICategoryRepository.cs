@@ -5,9 +5,9 @@ using BudgetFlow.Domain.Entities;
 namespace BudgetFlow.Application.Common.Interfaces.Repositories;
 public interface ICategoryRepository
 {
-    Task<int> CreateCategoryAsync(Category categoryDto, bool saveChanges = true);
-    Task<PaginatedList<CategoryResponse>> GetCategoriesAsync(int Page, int PageSize, int walletID);
-    Task<CategoryResponse> GetCategoryByIdAsync(int ID);
-    Task<bool> UpdateCategoryAsync(int ID, string Color, int WalletID);
+    Task<int> CreateCategoryAsync(Category category, bool saveChanges = true);
+    Task<PaginatedList<CategoryResponse>> GetCategoriesAsync(int page, int pageSize, int walletID);
+    Task<CategoryResponse> GetCategoryByIDAsync(int ID);
+    Task<bool> UpdateCategoryAsync(int ID, string color, int walletID);
     Task<bool> DeleteCategoryAsync(int ID);
 }

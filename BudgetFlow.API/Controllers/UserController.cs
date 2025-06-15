@@ -82,7 +82,6 @@ public class UserController : ControllerBase
     /// <summary>
     /// User logout  
     /// </summary>
-    /// <param name="logoutCommand"></param>
     /// <returns></returns>
     [HttpPost("Logout")]
     [Produces(MediaTypeNames.Application.Json)]

@@ -61,7 +61,7 @@ public class CategoryController : ControllerBase
     [HttpPut]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IResult> UpdateEntryAsync([FromBody] UpdateCategoryCommand updateCategoryCommand)
+    public async Task<IResult> UpdateCategoryAsync([FromBody] UpdateCategoryCommand updateCategoryCommand)
     {
         var result = await _mediator.Send(updateCategoryCommand);
         return result.IsSuccess
@@ -77,7 +77,7 @@ public class CategoryController : ControllerBase
     [HttpDelete("{ID}")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-    public async Task<IResult> DeleteEntryAsync([FromRoute] int ID)
+    public async Task<IResult> DeleteCategoryAsync([FromRoute] int ID)
     {
         var result = await _mediator.Send(new DeleteCategoryCommand(ID));
         return result.IsSuccess

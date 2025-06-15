@@ -2,7 +2,6 @@
 using BudgetFlow.Application.Assets.Commands.SyncAsset;
 using BudgetFlow.Application.Assets.Commands.UpdateAsset;
 using BudgetFlow.Application.Assets.Queries.GetAssetPagination;
-using BudgetFlow.Application.Assets.Queries.GetAssetRate;
 using BudgetFlow.Application.Common.Extensions;
 using BudgetFlow.Application.Common.Utils;
 using MediatR;
@@ -56,21 +55,6 @@ public class AssetController : ControllerBase
     public async Task<IResult> GetAssetsPaginationAsync([FromQuery] GetAssetPaginationQuery getAssetPaginationQuery)
     {
         var result = await _mediator.Send(getAssetPaginationQuery);
-        return result.IsSuccess
-            ? Results.Ok(result.Value)
-            : result.ToProblemDetails();
-    }
-
-    /// <summary>
-    /// Get Asset Rate. 
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("Rate/{ID}")]
-    [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AssetRateResponse))]
-    public async Task<IResult> GetAssetRateAsync([FromRoute] int ID)
-    {
-        var result = await _mediator.Send(new GetAssetRateQuery(ID));
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemDetails();

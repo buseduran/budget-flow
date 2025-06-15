@@ -14,24 +14,24 @@ public class CategoryRepository : ICategoryRepository
         this.context = context;
     }
 
-    public async Task<int> CreateCategoryAsync(Category Category, bool saveChanges = true)
+    public async Task<int> CreateCategoryAsync(Category category, bool saveChanges = true)
     {
-        Category.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-        Category.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+        category.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+        category.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
-        await context.Categories.AddAsync(Category);
+        await context.Categories.AddAsync(category);
         if (saveChanges)
             await context.SaveChangesAsync();
-        return Category.ID;
+        return category.ID;
     }
 
-    public async Task<PaginatedList<CategoryResponse>> GetCategoriesAsync(int Page, int PageSize, int walletID)
+    public async Task<PaginatedList<CategoryResponse>> GetCategoriesAsync(int page, int pageSize, int walletID)
     {
         var categories = await context.Categories
             .Where(c => c.WalletID == walletID)
             .OrderByDescending(c => c.CreatedAt)
-            .Skip((Page - 1) * PageSize)
-            .Take(PageSize)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(c => new CategoryResponse
             {
                 ID = c.ID,
@@ -41,18 +41,18 @@ public class CategoryRepository : ICategoryRepository
             })
             .ToListAsync();
         var count = await context.Categories.CountAsync();
-        return new PaginatedList<CategoryResponse>(categories, count, Page, PageSize);
+        return new PaginatedList<CategoryResponse>(categories, count, page, pageSize);
     }
 
-    public async Task<bool> UpdateCategoryAsync(int ID, string Color, int WalletID)
+    public async Task<bool> UpdateCategoryAsync(int ID, string color, int walletID)
     {
         var category = await context.Categories
-            .Where(c => c.ID == ID && c.WalletID == WalletID)
+            .Where(c => c.ID == ID && c.WalletID == walletID)
             .FirstOrDefaultAsync();
         if (category is null) return false;
 
         category.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-        category.Color = Color;
+        category.Color = color;
 
         return await context.SaveChangesAsync() > 0;
     }
@@ -67,7 +67,7 @@ public class CategoryRepository : ICategoryRepository
         return true;
     }
 
-    public async Task<CategoryResponse> GetCategoryByIdAsync(int ID)
+    public async Task<CategoryResponse> GetCategoryByIDAsync(int ID)
     {
         return await context.Categories
             .Where(c => c.ID == ID)

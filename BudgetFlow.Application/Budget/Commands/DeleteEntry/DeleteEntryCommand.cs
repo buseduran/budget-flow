@@ -48,7 +48,7 @@ public class DeleteEntryCommand : IRequest<Result<bool>>
             if (existingEntry == null)
                 return Result.Failure<bool>(EntryErrors.EntryNotFound);
 
-            var category = await _categoryRepository.GetCategoryByIdAsync(existingEntry.Category.ID);
+            var category = await _categoryRepository.GetCategoryByIDAsync(existingEntry.Category.ID);
             if (category == null)
                 return Result.Failure<bool>(CategoryErrors.CategoryNotFound);
 

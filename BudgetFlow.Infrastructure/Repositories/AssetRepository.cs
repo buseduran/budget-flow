@@ -2,7 +2,6 @@
 using BudgetFlow.Application.Assets;
 using BudgetFlow.Application.Common.Interfaces.Repositories;
 using BudgetFlow.Application.Common.Utils;
-using BudgetFlow.Application.Investments;
 using BudgetFlow.Domain.Entities;
 using BudgetFlow.Domain.Enums;
 using BudgetFlow.Infrastructure.Contexts;
@@ -18,34 +17,16 @@ public class AssetRepository : IAssetRepository
         this.context = context;
         this.mapper = mapper;
     }
-    public async Task<bool> CreateAssetAsync(Asset Asset, bool saveChanges = true)
-    {
-        Asset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-        Asset.CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
-        await context.Assets.AddAsync(Asset);
-        if (saveChanges)
-            await context.SaveChangesAsync();
-        return true;
-    }
-    public async Task<bool> UpdateAssetAsync(Asset Asset, bool saveChanges = true)
+    public async Task<bool> UpdateAssetAsync(Asset asset, bool saveChanges = true)
     {
-        var asset = await context.Assets.FindAsync(Asset.ID);
+        var existAsset = await context.Assets.FindAsync(asset.ID);
         if (asset is null) return false;
 
-        mapper.Map(Asset, asset);
-        asset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+        mapper.Map(asset, existAsset);
+        existAsset.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
         return saveChanges ? await context.SaveChangesAsync() > 0 : true;
-    }
-    public async Task<bool> DeleteAssetAsync(int ID)
-    {
-        var asset = await context.Assets.FindAsync(ID);
-        if (asset is null) return false;
-
-        context.Assets.Remove(asset);
-        await context.SaveChangesAsync();
-        return true;
     }
 
     public async Task<PaginatedList<AssetResponse>> GetAssetsAsync(int page, int pageSize, string search = null, AssetType? assetType = null)
@@ -85,44 +66,10 @@ public class AssetRepository : IAssetRepository
         return new PaginatedList<AssetResponse>(items, totalCount, page, pageSize);
     }
 
-
     public async Task<AssetResponse> GetAssetAsync(int ID)
     {
         var asset = await context.Assets.FindAsync(ID);
         return mapper.Map<AssetResponse>(asset);
-    }
-
-    public async Task<AssetRateResponse> GetAssetRateAsync(int ID)
-    {
-        var rate = await context.Assets
-              .Where(e => e.ID == ID)
-              .Select(e => new AssetRateResponse
-              {
-                  BuyPrice = e.BuyPrice,
-                  SellPrice = e.SellPrice
-              })
-              .FirstOrDefaultAsync();
-        return rate;
-    }
-
-    public Task<AssetResponse> GetByCodeAsync(string AssetCode)
-    {
-        var asset = context.Assets
-            .Where(e => e.Code == AssetCode)
-            .Select(e => new AssetResponse
-            {
-                ID = e.ID,
-                Name = e.Name,
-                AssetType = e.AssetType,
-                BuyPrice = e.BuyPrice,
-                SellPrice = e.SellPrice,
-                Description = e.Description,
-                Symbol = e.Symbol,
-                Code = e.Code,
-                Unit = e.Unit
-            })
-            .FirstOrDefaultAsync();
-        return asset;
     }
 
     public async Task<IEnumerable<Asset>> GetAllAsync()
@@ -130,14 +77,14 @@ public class AssetRepository : IAssetRepository
         return await context.Assets.ToListAsync();
     }
 
-    public async Task<Asset> GetByIdAsync(int id)
+    public async Task<Asset> GetByIDAsync(int ID)
     {
-        return await context.Assets.FindAsync(id);
+        return await context.Assets.FindAsync(ID);
     }
 
-    public async Task<decimal> GetCurrentValueAsync(int id)
+    public async Task<decimal> GetCurrentValueAsync(int ID)
     {
-        var asset = await context.Assets.FindAsync(id);
+        var asset = await context.Assets.FindAsync(ID);
         return asset?.SellPrice ?? 0;
     }
 
