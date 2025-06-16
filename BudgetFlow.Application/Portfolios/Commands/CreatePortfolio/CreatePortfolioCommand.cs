@@ -42,7 +42,6 @@ public class CreatePortfolioCommand : IRequest<Result<int>>
                 Description = request.Portfolio.Description,
                 WalletID = request.Portfolio.WalletID,
             };
-            portfolio.UserID = userID;
 
             var result = await _portfolioRepository.CreatePortfolioAsync(portfolio);
             return result == 0

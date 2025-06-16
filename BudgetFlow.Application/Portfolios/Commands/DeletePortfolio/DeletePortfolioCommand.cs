@@ -24,8 +24,7 @@ public class DeletePortfolioCommand : IRequest<Result<bool>>
 
         public async Task<Result<bool>> Handle(DeletePortfolioCommand request, CancellationToken cancellationToken)
         {
-            var userID = _currentUserService.GetCurrentUserID();
-            var result = await _portfolioRepository.DeletePortfolioAsync(request.ID, userID);
+            var result = await _portfolioRepository.DeletePortfolioAsync(request.ID);
             if (!result)
             {
                 var portfolio = await _portfolioRepository.GetPortfolioByIdAsync(request.ID);

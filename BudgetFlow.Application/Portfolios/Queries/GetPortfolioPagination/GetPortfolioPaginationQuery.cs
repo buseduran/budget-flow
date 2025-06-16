@@ -32,7 +32,7 @@ public class GetPortfolioPaginationQuery : IRequest<Result<PaginatedList<Portfol
             if (userWallet == null)
                 return Result.Failure<PaginatedList<PortfolioResponse>>(UserWalletErrors.UserWalletNotFound);
 
-            var result = await _portfolioRepository.GetPortfoliosAsync(request.Page, request.PageSize, userID, request.WalletID);
+            var result = await _portfolioRepository.GetPortfoliosAsync(request.Page, request.PageSize, request.WalletID);
             return result != null
                 ? Result.Success(result)
                 : Result.Failure<PaginatedList<PortfolioResponse>>(PortfolioErrors.PortfolioNotFound);

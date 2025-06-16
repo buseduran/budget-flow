@@ -22,8 +22,7 @@ public class UpdatePortfolioCommand : IRequest<Result<bool>>
 
         public async Task<Result<bool>> Handle(UpdatePortfolioCommand request, CancellationToken cancellationToken)
         {
-            var userID = _currentUserService.GetCurrentUserID();
-            var result = await _portfolioRepository.UpdatePortfolioAsync(request.ID, request.Name, request.Description, userID);
+            var result = await _portfolioRepository.UpdatePortfolioAsync(request.ID, request.Name, request.Description);
             return result
                 ? Result.Success(true)
                 : Result.Failure<bool>(PortfolioErrors.PortfolioUpdateFailed);

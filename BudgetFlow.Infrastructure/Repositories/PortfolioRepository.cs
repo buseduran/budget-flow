@@ -28,10 +28,10 @@ public class PortfolioRepository : IPortfolioRepository
         if (result > 0) return Portfolio.ID;
         return 0;
     }
-    public async Task<bool> DeletePortfolioAsync(int ID, int UserID)
+    public async Task<bool> DeletePortfolioAsync(int ID)
     {
         var portfolio = await context.Portfolios
-            .Where(p => p.ID == ID && p.UserID == UserID)
+            .Where(p => p.ID == ID)
             .Include(p => p.Investments)
             .FirstOrDefaultAsync();
         if (portfolio is null) return false;
@@ -44,10 +44,10 @@ public class PortfolioRepository : IPortfolioRepository
         return true;
     }
 
-    public async Task<bool> UpdatePortfolioAsync(int ID, string Name, string Description, int UserID)
+    public async Task<bool> UpdatePortfolioAsync(int ID, string Name, string Description)
     {
         var portfolio = await context.Portfolios
-            .Where(p => p.ID == ID && p.UserID == UserID)
+            .Where(p => p.ID == ID)
             .FirstOrDefaultAsync();
         if (portfolio is null) return false;
 
@@ -58,14 +58,14 @@ public class PortfolioRepository : IPortfolioRepository
         return await context.SaveChangesAsync() > 0;
     }
 
-    public async Task<PaginatedList<PortfolioResponse>> GetPortfoliosAsync(int Page, int PageSize, int userID, int WalletID)
+    public async Task<PaginatedList<PortfolioResponse>> GetPortfoliosAsync(int Page, int PageSize, int WalletID)
     {
         var walletAssets = await context.WalletAssets
             .Where(u => u.WalletId == WalletID)
             .ToListAsync();
 
         var portfolios = await context.Portfolios
-            .Where(p => p.UserID == userID && p.WalletID == WalletID)
+            .Where(p => p.WalletID == WalletID)
             .Include(p => p.Investments)
             .ThenInclude(i => i.Asset)
             .OrderByDescending(p => p.UpdatedAt)
@@ -94,9 +94,10 @@ public class PortfolioRepository : IPortfolioRepository
                     Name = p.Name,
                     Description = p.Description,
                     TotalInvested = totalInvested,
+                    WalletID = p.WalletID
                 };
             }).ToList();
-        var count = await context.Portfolios.CountAsync(p => p.UserID == userID);
+        var count = await context.Portfolios.CountAsync(p => p.WalletID == WalletID);
 
         return new PaginatedList<PortfolioResponse>(result, count, Page, PageSize);
     }

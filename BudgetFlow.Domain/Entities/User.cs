@@ -8,7 +8,6 @@ public class User : BaseEntity
     public string PasswordHash { get; set; }
     public bool IsEmailConfirmed { get; set; } = false;
 
-    public List<Portfolio> Portfolios { get; set; }
     public List<UserWallet> UserWallets { get; set; }
     public List<Entry> Entries { get; set; }
 }
