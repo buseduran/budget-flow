@@ -94,22 +94,29 @@ public class CreateInvestmentCommand : IRequest<Result<bool>>
             await _unitOfWork.BeginTransactionAsync();
             try
             {
-                // Get or create investment category
+                // Get or create investment categories
                 var investmentCategory = await _categoryRepository.GetCategoriesAsync(1, 1, portfolio.WalletID);
-                var category = investmentCategory.Items.FirstOrDefault(c => c.Name == "Yatırım");
+                var categoryName = request.Type == InvestmentType.Buy ? "Yatırım Alış" : "Yatırım Satış";
+                var category = investmentCategory.Items.FirstOrDefault(c => c.Name == categoryName);
 
                 if (category == null)
                 {
                     var newCategory = new Category
                     {
-                        Name = "Yatırım",
-                        Color = "#4CAF50", // Green color for investment
-                        Type = EntryType.Expense, // Investment is treated as an expense
+                        Name = categoryName,
+                        Color = request.Type == InvestmentType.Buy ? "#F44336" : "#4CAF50", // Red for buy (expense), Green for sell (income)
+                        Type = request.Type == InvestmentType.Buy ? EntryType.Expense : EntryType.Income,
                         WalletID = portfolio.WalletID
                     };
                     var categoryId = await _categoryRepository.CreateCategoryAsync(newCategory, saveChanges: true);
                     await _unitOfWork.SaveChangesAsync();
-                    category = new CategoryResponse { ID = categoryId, Name = "Yatırım", Color = "#4CAF50", Type = EntryType.Expense };
+                    category = new CategoryResponse
+                    {
+                        ID = categoryId,
+                        Name = categoryName,
+                        Color = request.Type == InvestmentType.Buy ? "#F44336" : "#4CAF50",
+                        Type = request.Type == InvestmentType.Buy ? EntryType.Expense : EntryType.Income
+                    };
                 }
 
                 if (walletAsset is not null)
